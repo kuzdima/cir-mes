@@ -48,18 +48,6 @@ function showPanel(id) {
   }
 }
 
-// function handleAddBtn() {
-//   openAddForm();
-// }
-
-// function handleAddBtn() {
-//   var activePanel = document.querySelector('.panel.active');
-//   if (activePanel && activePanel.id === 'panel-production') {
-//     openProdForm();
-//   } else {
-//     openAddForm();
-//   }
-// }
 
 function handleAddBtn() {
   var activePanel = document.querySelector('.panel.active');

@@ -215,10 +215,6 @@ tbody tr:hover td{background:var(--bg3);}
 .combo-dd{position:absolute;top:100%;left:0;right:0;background:#1e2535;border:1px solid #3a4560;border-radius:6px;z-index:9999;max-height:200px;overflow-y:auto;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
 .combo-dd.show{display:block}
 
-/* .combo-wrap{position:relative;z-index:1}
-.combo-wrap{position:relative;z-index:10}
-#arc-tbody .combo-wrap{z-index:20}
-#arc-tbody .combo-dd{z-index:9999} */
 
 /* ====================== ЛИЧНЫЙ КАБИНЕТ ====================== */
 #personal-cabinet {
