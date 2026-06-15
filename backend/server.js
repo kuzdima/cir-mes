@@ -807,7 +807,7 @@ app.post('/api/production/fact', auth, async (req, res) => {
     if (deltaReady > maxAdd) {
       return res.status(400).json({
         ok: false,
-        error: 'Можно добавить максимум ' + maxAdd + ' годных. Уже отмечено ' + oldReady + ' из ' + quantity + '.'
+        error: 'Можно добавить максимум ' + maxAdd + ' годных. Попробуйте ещё раз.'
       });
     }
     var upd = await pool.query(
