@@ -947,7 +947,6 @@ function prodSelectRow(rowEl) {
   // Снимаем выделение со всех
   document.querySelectorAll('#prod-ops-tbody tr').forEach(function(tr) {
     tr.style.outline = '';
-    tr.style.background = '';
   });
 
   // Выделяем все строки этого наряда
