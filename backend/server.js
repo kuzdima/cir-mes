@@ -175,7 +175,6 @@ app.get('/api/tech-ops', auth, async (req, res) => {
     }
     var where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
     params.push(limit + 1, offset);
-    // var sql = 'SELECT * FROM tech_operations_archive ' + where + ' ORDER BY id LIMIT $' + pi + ' OFFSET $' + (pi + 1);
     var sql = 'SELECT * FROM tech_operations_archive ' + where + ' ORDER BY classifier_code, operation_number LIMIT $' + pi + ' OFFSET $' + (pi + 1);
     console.log('SQL:', sql, params);
     var rows = await pool.query(sql, params);
@@ -293,7 +292,6 @@ app.post('/api/tech-ops', auth, async (req, res) => {
 });
 
 // Archive
-
 app.get('/api/archive', auth, async (req, res) => {
   try {
     var { q, assembly_id } = req.query;
@@ -501,19 +499,81 @@ app.get('/api/production', auth, async (req, res) => {
     limit = parseInt(limit) || 50;
     page = parseInt(page) || 1;
     var offset = (page - 1) * limit;
-    var conds = [], params = [], pi = 1;
-    if (q) { conds.push('(narad_number ILIKE $'+pi+' OR product_name ILIKE $'+pi+' OR classifier_code ILIKE $'+pi+')'); params.push('%'+q+'%'); pi++; }
-    if (status) { conds.push('status = $'+pi); params.push(status); pi++; }
-    var where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+
+    var params = [], pi = 1;
+
+    // Общие условия (поиск по тексту)
+    var conds = [];
+    if (q) {
+      conds.push('(narad_number ILIKE $'+pi+' OR product_name ILIKE $'+pi+' OR classifier_code ILIKE $'+pi+')');
+      params.push('%'+q+'%');
+      pi++;
+    }
+
+    // Условие статуса — РАЗНОЕ для двух view:
+    //  • operations: смотрим на ОДНУ строку (это конкретная операция)
+    //  • projects:   смотрим на агрегат всех операций наряда (agg.done_parts = MIN(ready))
+    var s = status ? String(status).replace(/^[^\wА-Яа-я]+/, '').trim() : '';
+    var statusOps = '', statusProj = '';
+    if (s === 'Новый') {
+      statusOps  = 'started_at IS NULL';
+      statusProj = 'p.started_at IS NULL';
+    } else if (s === 'Готово') {
+      statusOps  = 'COALESCE(ready,0) >= COALESCE(quantity,0) AND COALESCE(quantity,0) > 0';
+      statusProj = 'COALESCE(agg.done_parts,0) >= COALESCE(p.quantity,0) AND COALESCE(p.quantity,0) > 0';
+    } else if (s === 'В работе') {
+      statusOps  = 'started_at IS NOT NULL AND (COALESCE(ready,0) < COALESCE(quantity,0) OR COALESCE(quantity,0) = 0)';
+      statusProj = 'p.started_at IS NOT NULL AND (COALESCE(agg.done_parts,0) < COALESCE(p.quantity,0) OR COALESCE(p.quantity,0) = 0)';
+    } else if (s === 'Пауза') {
+      statusOps  = 'paused_at IS NOT NULL AND NOT (COALESCE(ready,0) >= COALESCE(quantity,0) AND COALESCE(quantity,0) > 0)';
+      // В проектном плане Пауза не выделяется — фильтр там просто игнорируется
+    }
 
     if (view === 'projects') {
-      var sql = 'SELECT DISTINCT ON (narad_number, classifier_code) * FROM production_orders ' + where + ' ORDER BY narad_number, classifier_code, id LIMIT $'+pi+' OFFSET $'+(pi+1);
+      // WHERE для projects: общие conds (с префиксом p.) + статус по агрегату
+      var pCond = conds.map(function(c){
+        return c.replace(/narad_number/g,'p.narad_number')
+                .replace(/product_name/g,'p.product_name')
+                .replace(/classifier_code/g,'p.classifier_code');
+      });
+      if (statusProj) pCond.push(statusProj);
+      var where = pCond.length ? 'WHERE ' + pCond.join(' AND ') : '';
+
       params.push(limit, offset);
+      var sql = 'SELECT DISTINCT ON (p.narad_number, p.classifier_code) p.*, ' +
+          'agg.total_ops, agg.done_ops, ' +
+          'COALESCE(agg.done_parts, 0) AS ready_parts, ' +
+          'CASE WHEN agg.total_ops > 0 THEN agg.done_ops::numeric / agg.total_ops ELSE 0 END AS progress_pct, ' +
+          'CASE WHEN p.started_at IS NULL THEN \'Новый\' ' +
+               'WHEN COALESCE(agg.done_parts,0) >= COALESCE(p.quantity,0) AND COALESCE(p.quantity,0) > 0 THEN \'Готово\' ' +
+               'ELSE \'В работе\' END AS status, ' +
+          'GREATEST(COALESCE(p.quantity,0) - COALESCE(agg.done_parts,0), 0) AS not_ready ' +
+        'FROM production_orders p ' +
+        'LEFT JOIN (' +
+          'SELECT narad_number, classifier_code, ' +
+            'COUNT(*) AS total_ops, ' +
+            'COUNT(*) FILTER (WHERE COALESCE(ready,0) >= COALESCE(quantity,0) AND COALESCE(quantity,0) > 0) AS done_ops, ' +
+            'MIN(ready) AS done_parts ' +
+          'FROM production_orders GROUP BY narad_number, classifier_code' +
+        ') agg ON p.narad_number = agg.narad_number AND p.classifier_code = agg.classifier_code ' +
+        where +
+        ' ORDER BY p.narad_number, p.classifier_code, p.id LIMIT $'+pi+' OFFSET $'+(pi+1);
       var rows = await pool.query(sql, params);
       res.json({ ok: true, rows: rows.rows });
     } else {
+      // WHERE для operations: общие conds + статус по конкретной строке
+      if (statusOps) conds.push(statusOps);
+      var where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+
       params.push(limit + 1, offset);
-      var sql = 'SELECT * FROM production_orders ' + where + ' ORDER BY narad_number, classifier_code, operation_number LIMIT $'+pi+' OFFSET $'+(pi+1);
+      var sql = 'SELECT *, ' +
+        'CASE WHEN started_at IS NULL THEN \'Новый\' ' +
+             'WHEN COALESCE(ready,0) >= COALESCE(quantity,0) AND COALESCE(quantity,0) > 0 THEN \'Готово\' ' +
+             'WHEN paused_at IS NOT NULL THEN \'Пауза\' ' +
+             'ELSE \'В работе\' END AS status, ' +
+        'GREATEST(COALESCE(quantity,0) - COALESCE(ready,0), 0) AS not_ready ' +
+        'FROM production_orders ' + where +
+        ' ORDER BY narad_number, classifier_code, operation_number LIMIT $'+pi+' OFFSET $'+(pi+1);
       var rows = await pool.query(sql, params);
       var hasMore = rows.rows.length > limit;
       if (hasMore) rows.rows.pop();
@@ -702,7 +762,9 @@ app.get('/api/archive/assemblies', auth, async (req, res) => {
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
-// Submit factory fact (master's report)
+
+
+// Submit factory fact (master's report) - updated version with better status handling and not_ready calculation
 app.post('/api/production/fact', auth, async (req, res) => {
   try {
     var b = req.body;
@@ -710,43 +772,103 @@ app.post('/api/production/fact', auth, async (req, res) => {
       return res.status(400).json({ ok: false, error: 'naradNumber and operationNumber required' });
     }
 
-    // Обновляем конкретную операцию
-    await pool.query(
-      'UPDATE production_orders SET ready=$1, fact_minutes=COALESCE(fact_minutes,0)+$2, defects=$3, workshop_area=$4, operation_comment=$5, status=$6, updated_at=NOW() WHERE narad_number=$7 AND operation_number=$8',
-      [b.ready||0, b.factMinutes||0, b.defects||0, b.workshopArea||null, b.comment||null, b.status||'🔄 В работе', b.naradNumber, b.operationNumber]
-    );
+    var deltaReady   = parseInt(b.ready)   || 0;
+    var deltaDefects = parseInt(b.defects) || 0;
 
-    // Проверяем все операции наряда — если все "Готово" → наряд "Готово"
-    var allOps = await pool.query(
-      'SELECT status FROM production_orders WHERE narad_number = $1',
-      [b.naradNumber]
-    );
-    var allDone = allOps.rows.every(function(r) { return r.status === '✅ Готово'; });
-    var anyWork = allOps.rows.some(function(r) { return r.status === '🔄 В работе'; });
-    
-    var naradStatus = b.status;
-    if (allDone) {
-      naradStatus = '✅ Готово';
-      await pool.query('UPDATE production_orders SET status=$1 WHERE narad_number=$2', ['✅ Готово', b.naradNumber]);
-    } else if (anyWork) {
-      // Не меняем остальные операции, только текущую уже обновлена
-      naradStatus = '🔄 В работе';
+    if (deltaReady < 0 || deltaDefects < 0) {
+      return res.status(400).json({ ok: false, error: 'Количества не могут быть отрицательными' });
     }
 
-    // Рассчитываем % выполнения
-    var totalOps = allOps.rows.length;
-    var doneOps = allOps.rows.filter(function(r) { return r.status === '✅ Готово'; }).length;
-    var pct = totalOps > 0 ? (doneOps / totalOps) : 0;
+    // Чистим статус от эмодзи и решаем, что делать
+    var clean = String(b.status||'').replace(/^[^\wА-Яа-я]+/, '').trim();
+    var markPause    = (clean === 'Пауза');
+
+    // Текущее состояние операции
+    var cur = await pool.query(
+      'SELECT quantity, ready FROM production_orders WHERE narad_number=$1 AND operation_number=$2 LIMIT 1',
+      [b.naradNumber, b.operationNumber]
+    );
+    if (!cur.rows.length) {
+      return res.status(404).json({ ok: false, error: 'Операция не найдена' });
+    }
+    var quantity = parseInt(cur.rows[0].quantity) || 0;
+    var oldReady = parseInt(cur.rows[0].ready)    || 0;
+
+    // Первый ввод факта = выдаём наряд в производство
     await pool.query(
-      'UPDATE production_orders SET progress_pct=$1 WHERE narad_number=$2',
-      [pct, b.naradNumber]
+      'UPDATE production_orders SET started_at=NOW() WHERE narad_number=$1 AND started_at IS NULL',
+      [b.naradNumber]
     );
 
-    console.log('Факт:', b.naradNumber, 'оп.', b.operationNumber, '→', b.status, '| готово:', doneOps + '/' + totalOps);
-    res.json({ ok: true, naradStatus: naradStatus, progress: Math.round(pct * 100) + '%' });
+    var upd;
+
+    // Накапливаем ready и defects с капом по quantity
+    var maxAdd = Math.max(0, quantity - oldReady);
+    if (deltaReady > maxAdd) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Можно добавить максимум ' + maxAdd + ' годных. Уже отмечено ' + oldReady + ' из ' + quantity + '.'
+      });
+    }
+    var upd = await pool.query(
+      'UPDATE production_orders SET ' +
+        'ready    = COALESCE(ready,0)        + $1, ' +
+        'defects  = COALESCE(defects,0)      + $2, ' +
+        'fact_minutes = COALESCE(fact_minutes,0) + $3, ' +
+        'workshop_area     = $4, ' +
+        'operation_comment = $5, ' +
+        'updated_at = NOW() ' +
+      'WHERE narad_number=$6 AND operation_number=$7 ' +
+      'RETURNING quantity, ready, defects',
+      [deltaReady, deltaDefects, b.factMinutes||0, b.workshopArea||null, b.comment||null, b.naradNumber, b.operationNumber]
+    );
+
+    // Обновляем флаг паузы (отдельным UPDATE, чтобы не плодить ветки)
+    if (markPause) {
+      await pool.query(
+        'UPDATE production_orders SET paused_at=NOW() WHERE narad_number=$1 AND operation_number=$2',
+        [b.naradNumber, b.operationNumber]
+      );
+    } else {
+      // Любое другое действие = работа возобновлена
+      await pool.query(
+        'UPDATE production_orders SET paused_at=NULL WHERE narad_number=$1 AND operation_number=$2',
+        [b.naradNumber, b.operationNumber]
+      );
+    }
+    // Сводка по наряду для ответа клиенту
+    var summary = await pool.query(
+      'SELECT COUNT(*) AS total_ops, ' +
+      'COUNT(*) FILTER (WHERE COALESCE(ready,0) >= COALESCE(quantity,0) AND COALESCE(quantity,0) > 0) AS done_ops ' +
+      'FROM production_orders WHERE narad_number=$1',
+      [b.naradNumber]
+    );
+    var totalOps = parseInt(summary.rows[0].total_ops) || 0;
+    var doneOps  = parseInt(summary.rows[0].done_ops)  || 0;
+    var pct      = totalOps > 0 ? (doneOps / totalOps) : 0;
+    var allDone  = totalOps > 0 && doneOps === totalOps;
+
+    var newReady = upd.rows[0].ready;
+    var qty      = upd.rows[0].quantity;
+    var naradStatus = allDone ? 'Готово' : (doneOps > 0 || newReady > 0 ? 'В работе' : 'Новый');
+
+    console.log('Факт:', b.naradNumber, 'оп.', b.operationNumber,
+                '|', '+годных:'+deltaReady,
+                '→', newReady, '/', qty,
+                '| +брак:', deltaDefects, '→', upd.rows[0].defects);
+
+    res.json({
+      ok: true,
+      naradStatus: naradStatus,
+      progress: Math.round(pct * 100) + '%',
+      ready: newReady,
+      quantity: qty,
+      defects: upd.rows[0].defects,
+      notReady: Math.max(0, qty - newReady)
+    });
   } catch(e) {
     console.log('fact error:', e.message);
-    res.status(500).json({ ok: false, error: e.message });
+    res.status(500).json({ ok: false, error: e.message });  
   }
 });
 
@@ -755,8 +877,33 @@ app.post('/api/production/status', auth, async (req, res) => {
   try {
     var { naradNumber, status } = req.body;
     if (!naradNumber) return res.status(400).json({ ok: false, error: 'naradNumber required' });
-    await pool.query('UPDATE production_orders SET status=$1, updated_at=NOW() WHERE narad_number=$2', [status, naradNumber]);
-    console.log('Статус наряда', naradNumber, '→', status);
+
+    // Чистим эмодзи и пробелы — статус теперь чистый
+    var s = String(status||'').replace(/^[^\wА-Яа-я]+/, '').trim();
+
+    if (s === 'В работе') {
+      // Выдача в производство: ставим started_at, ready не трогаем
+      await pool.query(
+        'UPDATE production_orders SET started_at=COALESCE(started_at,NOW()), updated_at=NOW() WHERE narad_number=$1',
+        [naradNumber]
+      );
+    } else if (s === 'Готово') {
+      // Ручная отметка наряда готовым: ready=quantity по всем операциям
+      await pool.query(
+        'UPDATE production_orders SET started_at=COALESCE(started_at,NOW()), ready=quantity, updated_at=NOW() WHERE narad_number=$1',
+        [naradNumber]
+      );
+    } else if (s === 'Новый') {
+      // Сброс наряда обратно в "Новый"
+      await pool.query(
+        'UPDATE production_orders SET started_at=NULL, ready=0, defects=0, fact_minutes=0, updated_at=NOW() WHERE narad_number=$1',
+        [naradNumber]
+      );
+    } else {
+      return res.status(400).json({ ok: false, error: 'Неизвестный статус: ' + status });
+    }
+
+    console.log('Статус наряда', naradNumber, '→', s);
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });

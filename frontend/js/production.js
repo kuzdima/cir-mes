@@ -40,14 +40,20 @@ function loadProdOps() {
     if (pageInfo) pageInfo.textContent = 'Стр. ' + PROD_PAGE;
 
     function c(v) { return (v===null||v===undefined||v===''||v==='null')?'':String(v); }
+
+
     function badge(s) {
-      var colors = {'Новый':'b-gray','В работе':'b-blue','✅ Готово':'b-green','🔄 В работе':'b-blue','⏸ Пауза':'b-amber','❌ Отменён':'b-gray'};
-      return '<span class="badge ' + (colors[s]||'b-gray') + '" style="font-size:9px">' + c(s) + '</span>';
+      var icons  = {'Новый':'',   'В работе':'🔄 ', 'Готово':'✅ ', 'Пауза':'⏸ '};
+      var colors = {'Новый':'b-gray','В работе':'b-blue','Готово':'b-green','Пауза':'b-amber'};
+      var label = (icons[s] || '') + c(s);
+      return '<span class="badge ' + (colors[s]||'b-gray') + '" style="font-size:9px">' + label + '</span>';
     }
+
 
     tb.innerHTML = res.rows.map(function(r) {
       var safeNarad = c(r.narad_number).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-      return '<tr data-narad="' + safeNarad + '" onclick="prodSelectRow(this)" style="cursor:pointer">'
+      var rowBg = r.status === 'Готово' ? ';background:rgba(16,185,129,0.3)' : '';
+      return '<tr data-narad="' + safeNarad + '" onclick="prodSelectRow(this)" style="cursor:pointer' + rowBg + '">'
         + '<td style="font-weight:600;color:var(--accent);white-space:nowrap">' + c(r.narad_number) + '</td>'
         + '<td>' + badge(r.status) + '</td>'
         + '<td style="font-size:10px">' + c(r.order_number) + '</td>'
@@ -106,7 +112,8 @@ function loadProdProjects() {
       var pct = r.progress_pct ? (parseFloat(r.progress_pct) * 100).toFixed(0) : '0';
       var pctColor = pct >= 100 ? 'var(--green-text)' : pct > 50 ? 'var(--amber-text)' : 'var(--text2)';
       var safeNarad = c(r.narad_number).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-      return '<tr data-narad="' + safeNarad + '" onclick="showNaradDetail(this.dataset.narad)" style="cursor:pointer">'
+      var rowBg = r.status === 'Готово' ? ';background:rgba(16,185,129,0.3)' : '';
+      return '<tr data-narad="' + safeNarad + '" onclick="showNaradDetail(this.dataset.narad)" style="cursor:pointer' + rowBg + '">'
         + '<td style="font-weight:600;color:var(--accent);white-space:nowrap">' + c(r.narad_number) + '</td>'
         + '<td>' + c(r.status) + '</td>'
         + '<td style="font-size:10px">' + c(r.order_number) + '</td>'
@@ -117,7 +124,8 @@ function loadProdProjects() {
         + '<td style="text-align:center">' + (r.material_ready ? '<span class="badge b-green" style="font-size:9px">✅</span>' : '<span class="badge b-gray" style="font-size:9px">—</span>') + '</td>'
         + '<td class="mono" style="text-align:right">' + c(r.quantity) + '</td>'
         + '<td style="font-size:10px">' + fmtDate(r.deadline) + '</td>'
-        + '<td class="mono" style="text-align:center">' + c(r.ready) + '/' + c(r.quantity) + '</td>'
+        // + '<td class="mono" style="text-align:center">' + c(r.ready) + '/' + c(r.quantity) + '</td>'
+        + '<td class="mono" style="text-align:center">' + c(r.ready_parts) + '/' + c(r.quantity) + '</td>'
         + '<td class="mono" style="text-align:center;color:' + pctColor + ';font-weight:700">' + pct + '%</td>'
         + '<td style="font-size:10px">' + c(r.executor) + '</td>'
         + '<td style="font-size:10px;color:var(--text3)">' + c(r.assembly_id) + '</td>'
@@ -127,26 +135,29 @@ function loadProdProjects() {
   });
 }
 
-//печать маршрутного листа
+
+
 function prodPrintRoute() {
   if (!prodSelectedNarad) return;
-// Получаем все операции наряда
-  api('GET', '/api/production?q=' + encodeURIComponent(prodSelectedNarad) + '&view=operations&limit=200').then(function(res) {
-    if (!res.ok || !res.rows || !res.rows.length) {
-      showToast('Наряд не найден');
-      return;
-    }
-    var rows = res.rows;
-    // Меняем статус на "В работе" при печати маршрутного листа
-    api('POST', '/api/production/status', {
-      naradNumber: prodSelectedNarad,
-      status: '🔄 В работе'
-    }).then(function() { loadProdOps(); });
 
+  api('GET', '/api/production?q=' + encodeURIComponent(prodSelectedNarad) + '&view=operations&limit=200').then(function(res) {
+    if (!res.ok || !res.rows || !res.rows.length) { showToast('Наряд не найден'); return; }
+    var rows = res.rows;
     var r = rows[0];
+
+    // Меняем статус на "В работе"
+    api('POST', '/api/production/status', { naradNumber: prodSelectedNarad, status: 'В работе' }).then(function() { loadProdOps(); });
 
     var normTotal = 0;
     rows.forEach(function(o) { normTotal += parseFloat(o.norm_time_hours || 0) * 60; });
+
+
+    // QR код — локальная генерация (без внешних запросов)
+    var factUrl = window.location.origin + '/fact.html?narad=' + encodeURIComponent(prodSelectedNarad);
+    var qr = qrcode(0, 'M');                  // type=0 автоподбор размера, M = ~15% коррекция
+    qr.addData(factUrl);
+    qr.make();
+    var qrDataUrl = qr.createDataURL(4, 2);   // cellSize=4px, margin=2 → ~136×136px GIF data URL
 
     var opsHtml = rows.map(function(o) {
       var normMin = o.norm_time_hours ? Math.round(parseFloat(o.norm_time_hours) * 60) : '';
@@ -154,13 +165,8 @@ function prodPrintRoute() {
         + '<td>' + (o.operation_number || '') + '</td>'
         + '<td>' + (o.operation_name || '') + '</td>'
         + '<td>' + (o.machine_resource || '') + '</td>'
-        + '<td></td>'
-        + '<td></td>'
-        + '<td></td>'
-        + '<td></td>'
-        + '<td></td>'
-        + '<td>' + normMin + '</td>'
-        + '</tr>';
+        + '<td></td><td></td><td></td><td></td><td></td>'
+        + '<td>' + normMin + '</td></tr>';
     }).join('');
 
     var deadline = r.deadline ? new Date(r.deadline).toLocaleDateString('ru-RU') : '';
@@ -178,57 +184,60 @@ function prodPrintRoute() {
       + '.critical{background:#f8d7da}'
       + '.ops td{text-align:center;height:28px}'
       + '.ops td:nth-child(2),.ops td:nth-child(3){text-align:left}'
-      + '.footer{margin-top:15px;font-size:10px}'
-      + '@media print{body{margin:5mm}}'
+      + '.qr{position:absolute;top:10mm;right:10mm;text-align:center}'
+      + '.qr img{width:120px;height:120px}'
+      + '.qr div{font-size:8px;color:#666;margin-top:2px}'
+      + '@media print{body{margin:5mm}.qr{top:5mm;right:5mm}}'
       + '</style></head><body>'
+
+      + '<div class="qr"><img src="' + qrDataUrl + '" alt="QR"><div>Сканируйте для<br>отметки выполнения</div></div>'
 
       + '<div class="note">*При передаче детали на следующую операцию после проведения контроля первой детали обязательно наличие клейма ОТК в графе "Комментарии"</div>'
 
       + '<table class="header"><tbody>'
-      + '<tr><td style="width:20%"><b>Наряд:</b></td><td style="width:30%">' + (r.narad_number||'') + '</td>'
-      + '<td style="width:20%"><b>Номер заказа:</b></td><td style="width:30%">' + (r.order_number||'') + '</td></tr>'
+      + '<tr><td style="width:15%"><b>Наряд:</b></td><td style="width:20%"><b>' + (r.narad_number||'') + '</b></td>'
+      + '<td style="width:5%"></td>'
+      + '<td style="width:25%"><b>' + (r.order_number||'') + '</b></td>'
+      + '<td style="width:15%"><b>Номер заказа</b></td>'
+      + '<td style="width:10%"><b>Партия, шт:</b></td><td style="width:10%">' + (r.quantity||1) + '</td></tr>'
 
-      + '<tr class="critical"><td><b>ВНИМАНИЕ:</b></td><td colspan="3" style="font-size:10px;color:#c00">Строка, выделенная цветом, указывает о наличии критичной операции, требующей особого внимания</td></tr>'
+      + '<tr class="critical"><td><b>ВНИМАНИЕ:</b></td><td colspan="6" style="font-size:10px;color:#c00">Строка, выделенная цветом, указывает о наличии критичной операции, требующей особого внимания</td></tr>'
 
-      + '<tr><td><b>Изделие:</b></td><td><b>' + (r.product_name||'') + '</b></td>'
-      + '<td><b>Материал/Заготовка:</b></td><td>' + (r.material_grade||'') + '</td></tr>'
+      + '<tr><td><b>Изделие:</b></td><td colspan="3"><b>' + (r.product_name||'') + '</b></td>'
+      + '<td><b>Материал:</b></td><td colspan="2">' + (r.material_grade||'') + '</td></tr>'
 
-      + '<tr><td><b>Чертеж:</b></td><td><b>' + (r.classifier_code||'') + '</b></td>'
-      + '<td><b>Сортамент:</b></td><td>' + (r.assortment||'') + '</td></tr>'
+      + '<tr><td><b>Чертеж:</b></td><td colspan="3"><b>' + (r.classifier_code||'') + '</b></td>'
+      + '<td><b>Сортамент:</b></td><td colspan="2">' + (r.assortment||'') + '</td></tr>'
 
-      + '<tr><td><b>Старт/Срок:</b></td><td>' + startDate + '</td>'
+      + '<tr><td><b>Старт/Срок:</b></td><td>' + startDate + '</td><td></td>'
       + '<td style="background:#f8d7da"><b>' + deadline + '</b></td>'
-      + '<td><b>Кол-во, шт:</b> ' + (r.quantity||1) + '</td></tr>'
+      + '<td><b>Кол-во, шт:</b></td><td colspan="2">' + (r.quantity||1) + '</td></tr>'
 
-      + '<tr><td></td><td></td>'
-      + '<td><b>Размер заг.:</b></td><td>' + (r.material_amount||'') + '</td></tr>'
+      + '<tr><td></td><td colspan="3"></td>'
+      + '<td><b>Размер заг.:</b></td><td colspan="2">' + (r.material_amount||'') + '</td></tr>'
 
-      + '<tr><td></td><td></td>'
-      + '<td><b>Ед. изм:</b></td><td>' + (r.unit_of_measure||'') + '</td></tr>'
+      + '<tr><td></td><td colspan="3"></td>'
+      + '<td><b>Ед. изм:</b></td><td colspan="2">' + (r.unit_of_measure||'') + '</td></tr>'
       + '</tbody></table>'
 
-      + '<table class="ops">'
-      + '<thead><tr>'
-      + '<th style="width:8%">Номер<br>опер.</th>'
-      + '<th style="width:14%">Операция</th>'
-      + '<th style="width:22%">Рабочий центр</th>'
+      + '<table class="ops"><thead><tr>'
+      + '<th style="width:7%">Номер<br>опер.</th>'
+      + '<th style="width:13%">Операция</th>'
+      + '<th style="width:20%">Рабочий центр</th>'
       + '<th style="width:14%">Комментарии</th>'
       + '<th style="width:10%">ФИО</th>'
       + '<th style="width:8%">Подпись</th>'
       + '<th style="width:8%">Годных</th>'
-      + '<th style="width:8%">Несоответ-<br>ствующих</th>'
-      + '<th style="width:8%">Норма<br>времени<br>(минут)</th>'
-      + '</tr></thead>'
-      + '<tbody>' + opsHtml
+      + '<th style="width:10%">Несоответ-<br>ствующих</th>'
+      + '<th style="width:10%">Норма<br>времени<br>(минут)</th>'
+      + '</tr></thead><tbody>' + opsHtml
 
       + '<tr><td colspan="4" style="text-align:left;font-size:10px"><i>Перечень для Сборочной единицы</i></td>'
       + '<td colspan="5"></td></tr>'
-
-      + '<tr style="height:40px"><td colspan="9"></td></tr>'
       + '<tr style="height:40px"><td colspan="9"></td></tr>'
       + '</tbody></table>'
 
-      + '<div class="footer">'
+      + '<div style="margin-top:10px;font-size:10px">'
       + '<b>Головное изделие:</b> ' + (r.assembly_id||'—')
       + ' | <b>Заказчик:</b> ' + (r.customer||'—')
       + ' | <b>Общая норма:</b> ' + Math.round(normTotal) + ' мин'
@@ -239,10 +248,10 @@ function prodPrintRoute() {
     var win = window.open('', '_blank');
     win.document.write(html);
     win.document.close();
-    win.print();
+    setTimeout(function() { win.print(); }, 50);
+
   });
 }
-
 
 // ══════════════════════════════════════════════════════════
 // МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ НАРЯДА
@@ -350,7 +359,7 @@ function showNaradDetail(naradNumber) {
       + res.rows.map(function(op) { return '<option value="' + (op.operation_number||'') + '">' + (op.operation_number||'') + ' — ' + (op.operation_name||'') + '</option>'; }).join('')
       + '</select></div>'
       + '<div><label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Количество годных *</label>'
-      + '<input type="number" id="nd-fact-qty" value="' + (r.quantity||1) + '" min="0" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px"></div>'
+      + '<input type="number" id="nd-fact-qty" value="0" min="0" placeholder="Сколько добавить" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px"></div>'
       + '<div><label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Затраченное время (мин)</label>'
       + '<input type="number" id="nd-fact-time" value="" min="0" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px"></div>'
       + '<div><label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Несоответствующих</label>'
@@ -375,9 +384,9 @@ function showNaradDetail(naradNumber) {
       + '<input type="text" id="nd-fact-comment" placeholder="Примечание мастера" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px"></div>'
       + '</div>'
       + '<div style="display:flex;gap:8px">'
-      + '<button onclick="submitFact(\'' + c(r.narad_number).replace(/'/g,"\\'") + '\',\'✅ Готово\')" style="padding:8px 20px;background:#10b981;color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600">✅ Готово</button>'
-      + '<button onclick="submitFact(\'' + c(r.narad_number).replace(/'/g,"\\'") + '\',\'⏸ Пауза\')" style="padding:8px 20px;background:#f59e0b;color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600">⏸ Пауза</button>'
-      + '<button onclick="submitFact(\'' + c(r.narad_number).replace(/'/g,"\\'") + '\',\'🔄 В работе\')" style="padding:8px 20px;background:#3b82f6;color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600">🔄 В работе</button>'
+      + '<button onclick="submitFact(\'' + c(r.narad_number).replace(/'/g,"\\'") + '\',\'Готово\')" style="padding:8px 20px;background:#10b981;color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600">✅ Готово</button>'
+      + '<button onclick="submitFact(\'' + c(r.narad_number).replace(/'/g,"\\'") + '\',\'Пауза\')" style="padding:8px 20px;background:#f59e0b;color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600">⏸ На паузе</button>'
+      + '<button onclick="submitFact(\'' + c(r.narad_number).replace(/'/g,"\\'") + '\',\'В работе\')" style="padding:8px 20px;background:#3b82f6;color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600">🔄 В работе</button>'
       + '</div>'
       + '<div class="msg msg-ok" id="nd-fact-ok" style="margin-top:8px"></div>'
       + '<div class="msg msg-err" id="nd-fact-err" style="margin-top:8px"></div>'
@@ -699,7 +708,6 @@ function pfProductSearch() {
 // ══════════════════════════════════════════════════════════
 // АВТОЗАГРУЗКА ОПЕРАЦИЙ
 // ══════════════════════════════════════════════════════════
-
 function pfAutoLoadOps() {
   var assembly = document.getElementById('pf-assembly').value.trim();
   if (!assembly) return;

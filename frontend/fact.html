@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Факт цеха</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f1420;color:#e2e8f0;min-height:100vh;padding:12px}
+h1{font-size:18px;color:#3b82f6;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+h2{font-size:13px;color:#94a3b8;font-weight:400;margin-bottom:16px}
+.card{background:#1e2535;border:1px solid #2d3748;border-radius:12px;padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;color:#3b82f6;margin-bottom:12px;border-bottom:1px solid #2d3748;padding-bottom:8px}
+label{display:block;font-size:12px;color:#94a3b8;margin-bottom:4px;margin-top:12px}
+label:first-child{margin-top:0}
+select,input[type="text"],input[type="number"],input[type="email"],input[type="password"]{
+  width:100%;padding:12px;font-size:16px;background:#0f1420;border:1px solid #3a4560;
+  border-radius:8px;color:#e2e8f0;-webkit-appearance:none;appearance:none;outline:none
+}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+input:focus,select:focus{border-color:#3b82f6}
+.btn-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:20px}
+.btn{padding:14px 8px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:#fff;transition:opacity 0.15s}
+.btn:active{opacity:0.7}
+.btn-green{background:#10b981}
+.btn-amber{background:#f59e0b}
+.btn-blue{background:#3b82f6}
+.msg{padding:12px;border-radius:8px;font-size:13px;margin-top:12px;display:none}
+.msg-ok{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+.msg-err{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.msg.show{display:block}
+.info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #2d3748;font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:#94a3b8}
+.info-val{color:#e2e8f0;font-weight:500;text-align:right;max-width:60%}
+.loading{text-align:center;padding:40px;color:#94a3b8;font-size:14px}
+.op-status{font-size:10px;margin-left:4px}
+.logout-btn{background:none;border:1px solid #3a4560;color:#94a3b8;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;float:right}
+.divider{height:1px;background:#2d3748;margin:12px 0}
+</style>
+</head>
+<body>
+
+<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px">
+  <h1>📋 Факт цеха</h1>
+  <button class="logout-btn" onclick="doLogout()">Выход</button>
+</div>
+<h2 id="narad-label">Наряд: —</h2>
+
+<div id="content">
+  <div class="loading">Загрузка...</div>
+</div>
+
+<script>
+// Получаем номер наряда из URL
+var params = new URLSearchParams(window.location.search);
+var NARAD = params.get('narad') || '';
+var TOKEN = localStorage.getItem('cir_fact_token') || '';
+var USER = null;
+
+document.getElementById('narad-label').innerHTML = 'Наряд: <b style="color:#3b82f6">' + NARAD + '</b>';
+
+// ── HTTP ──────────────────────────────────────────────
+function api(method, url, data) {
+  return new Promise(function(resolve) {
+    var xhr = new XMLHttpRequest();
+    xhr.open(method, url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    if (TOKEN) xhr.setRequestHeader('Authorization', 'Bearer ' + TOKEN);
+    xhr.onload = function() {
+      try { resolve(JSON.parse(xhr.responseText)); }
+      catch(e) { resolve({ok:false, error: xhr.responseText.slice(0,80)}); }
+    };
+    xhr.onerror = function() { resolve({ok:false, error:'Нет связи с сервером'}); };
+    xhr.send(data ? JSON.stringify(data) : null);
+  });
+}
+
+// ── АВТОРИЗАЦИЯ ───────────────────────────────────────
+function init() {
+  if (TOKEN) { loadNarad(); return; }
+  showLogin();
+}
+
+function showLogin() {
+  document.getElementById('content').innerHTML =
+    '<div class="card">'
+    + '<div class="card-title">Авторизация</div>'
+    + '<label>Email</label>'
+    + '<input type="email" id="auth-email" placeholder="email@cir.ru" autocomplete="email">'
+    + '<label>Пароль</label>'
+    + '<input type="password" id="auth-pass" placeholder="Пароль" autocomplete="current-password">'
+    + '<div class="btn-row" style="grid-template-columns:1fr;margin-top:16px">'
+    + '<button class="btn btn-blue" onclick="doLogin()">Войти</button>'
+    + '</div>'
+    + '<div class="msg msg-err" id="auth-err"></div>'
+    + '</div>';
+
+  // Enter для отправки
+  setTimeout(function() {
+    var pass = document.getElementById('auth-pass');
+    if (pass) pass.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+  }, 100);
+}
+
+function doLogin() {
+  var email = document.getElementById('auth-email').value.trim();
+  var pass = document.getElementById('auth-pass').value;
+  var errEl = document.getElementById('auth-err');
+  errEl.classList.remove('show');
+
+  if (!email || !pass) { errEl.textContent = 'Заполните email и пароль'; errEl.classList.add('show'); return; }
+
+  api('POST', '/api/auth/login', {email: email, password: pass}).then(function(r) {
+    if (r.ok) {
+      TOKEN = r.token;
+      USER = r.user;
+      localStorage.setItem('cir_fact_token', TOKEN);
+      localStorage.setItem('cir_fact_user', JSON.stringify(USER));
+      loadNarad();
+    } else {
+      errEl.textContent = r.error || 'Неверный email или пароль';
+      errEl.classList.add('show');
+    }
+  });
+}
+
+function doLogout() {
+  TOKEN = '';
+  USER = null;
+  localStorage.removeItem('cir_fact_token');
+  localStorage.removeItem('cir_fact_user');
+  showLogin();
+}
+
+// ── ЗАГРУЗКА НАРЯДА ───────────────────────────────────
+function loadNarad() {
+  if (!NARAD) {
+    document.getElementById('content').innerHTML = '<div class="card" style="text-align:center;color:#ef4444">Не указан номер наряда в URL</div>';
+    return;
+  }
+
+  try { USER = JSON.parse(localStorage.getItem('cir_fact_user') || 'null'); } catch(e) {}
+
+  document.getElementById('content').innerHTML = '<div class="loading">Загрузка наряда ' + NARAD + '...</div>';
+
+  api('GET', '/api/production?q=' + encodeURIComponent(NARAD) + '&view=operations&limit=200').then(function(res) {
+    if (!res.ok || !res.rows || !res.rows.length) {
+      if (res.error && res.error.indexOf('Токен') !== -1) {
+        TOKEN = '';
+        localStorage.removeItem('cir_fact_token');
+        showLogin();
+        return;
+      }
+      document.getElementById('content').innerHTML = '<div class="card" style="text-align:center;color:#ef4444;padding:20px">Наряд ' + NARAD + ' не найден</div>';
+      return;
+    }
+
+    var rows = res.rows;
+    var r = rows[0];
+    var userName = USER ? USER.name : '';
+
+    // Информация о наряде
+    var html = '<div class="card">'
+      + '<div class="card-title">Информация о наряде</div>'
+      + '<div class="info-row"><span class="info-label">Изделие</span><span class="info-val">' + (r.product_name || '—') + '</span></div>'
+      + '<div class="info-row"><span class="info-label">Чертёж</span><span class="info-val">' + (r.classifier_code || '—') + '</span></div>'
+      + '<div class="info-row"><span class="info-label">Заказ</span><span class="info-val">' + (r.order_number || '—') + '</span></div>'
+      + '<div class="info-row"><span class="info-label">Заказчик</span><span class="info-val">' + (r.customer || '—') + '</span></div>'
+      + '<div class="info-row"><span class="info-label">Кол-во</span><span class="info-val">' + (r.quantity || 1) + ' шт.</span></div>'
+      + '<div class="info-row"><span class="info-label">Статус</span><span class="info-val">' + (r.status || 'Новый') + '</span></div>'
+      + (userName ? '<div class="info-row"><span class="info-label">Мастер</span><span class="info-val">' + userName + '</span></div>' : '')
+      + '</div>';
+
+    // Список операций с прогрессом
+    html += '<div class="card">'
+      + '<div class="card-title">Операции (' + rows.length + ')</div>';
+
+    rows.forEach(function(op) {
+      var isDone = op.status === '✅ Готово';
+      var statusIcon = isDone ? '✅' : (op.status === '🔄 В работе' ? '🔄' : '⬜');
+      var bg = isDone ? 'rgba(16,185,129,0.08)' : '';
+      html += '<div style="padding:6px 0;border-bottom:1px solid #2d3748;font-size:12px;background:' + bg + ';padding:6px;border-radius:4px;margin-bottom:2px">'
+        + '<span style="color:#f59e0b;font-weight:700;font-family:monospace">' + (op.operation_number || '') + '</span> '
+        + '<span style="color:#34d399">' + (op.operation_name || '') + '</span> '
+        + '<span class="op-status">' + statusIcon + '</span>'
+        + (op.ready > 0 ? ' <span style="color:#94a3b8;font-size:10px">(' + op.ready + '/' + (op.quantity||1) + ')</span>' : '')
+        + '</div>';
+    });
+    html += '</div>';
+
+    // Форма отметки
+    html += '<div class="card" style="border-color:#f59e0b">'
+      + '<div class="card-title" style="color:#f59e0b">📝 Отметка выполнения</div>';
+
+    html += '<label>Операция *</label><select id="f-op">';
+    rows.forEach(function(op) {
+      var done = op.status === '✅ Готово' ? ' ✅' : '';
+      html += '<option value="' + (op.operation_number || '') + '">' + (op.operation_number || '') + ' — ' + (op.operation_name || '') + done + '</option>';
+    });
+    html += '</select>';
+    html += '<label>Готовых за смену (шт.) *</label>'
+      + '<input type="number" id="f-qty" value="0" min="0" inputmode="numeric" placeholder="Сколько сделали в эту смену">';
+
+    html += '<label>Затраченное время (мин)</label>'
+      + '<input type="number" id="f-time" value="" min="0" inputmode="numeric" placeholder="Необязательно">';
+
+    html += '<label>Несоответствующих за смену (шт.)</label>'
+      + '<input type="number" id="f-defect" value="0" min="0" inputmode="numeric">';
+
+    html += '<label>Участок *</label><select id="f-area">'
+      + '<option value="">— Выберите участок —</option>';
+    var areas = [
+      "Заготовительный участок","Испытательный центр",
+      "Отдел технического контроля","Сварочный участок",
+      "Слесарно-сборочный участок","Участок комплектации",
+      "Участок обработки отверстий","Участок подготовки поверхности",
+      "Участок термообработки","Участок токарной обработки",
+      "Участок фрезерной обработки","Участок фрезерных станков с ЧПУ",
+      "Участок электроэрозионной обработки","Аутсорсинг/Кооперация",
+      "Участок токарной обработки ЦВМ","Участок фрезерной обработки ЦВМ",
+      "Участок фрезерных станков с ЧПУ ЦВМ","Участок шлифовки ЦВМ",
+      "Участок зубообработки ЦВМ"
+    ];
+    areas.forEach(function(a) { html += '<option>' + a + '</option>'; });
+    html += '</select>';
+
+    html += '<label>Комментарий</label>'
+      + '<input type="text" id="f-comment" placeholder="Примечание мастера">';
+
+    html += '<div class="btn-row">'
+      + '<button class="btn btn-green" onclick="send(\'Готово\')">✅ Готово</button>'
+      + '<button class="btn btn-amber" onclick="send(\'Пауза\')">⏸ На паузе</button>'
+      + '<button class="btn btn-blue" onclick="send(\'В работе\')">🔄 В работе</button>'
+      + '</div>';
+
+    html += '<div class="msg msg-ok" id="f-ok"></div>'
+      + '<div class="msg msg-err" id="f-err"></div>';
+    html += '</div>';
+
+    document.getElementById('content').innerHTML = html;
+  });
+}
+
+// ── ОТПРАВКА ФАКТА ────────────────────────────────────
+function send(status) {
+  var op = document.getElementById('f-op').value;
+  var qty = document.getElementById('f-qty').value;
+  var time = document.getElementById('f-time').value;
+  var defects = document.getElementById('f-defect').value;
+  var area = document.getElementById('f-area').value;
+  var comment = document.getElementById('f-comment').value;
+
+  var errEl = document.getElementById('f-err');
+  var okEl = document.getElementById('f-ok');
+  errEl.classList.remove('show');
+  okEl.classList.remove('show');
+
+  if (!op) { errEl.textContent = 'Выберите операцию'; errEl.classList.add('show'); return; }
+  if (!area) { errEl.textContent = 'Выберите участок'; errEl.classList.add('show'); return; }
+
+  api('POST', '/api/production/fact', {
+    naradNumber: NARAD,
+    operationNumber: op,
+    ready: parseInt(qty) || 0,
+    factMinutes: parseFloat(time) || 0,
+    defects: parseInt(defects) || 0,
+    workshopArea: area,
+    comment: comment,
+    status: status
+  }).then(function(r) {
+    if (r.ok) {
+      okEl.textContent = '✅ Операция ' + op + ' → ' + status + ' (' + r.progress + ')';
+      okEl.classList.add('show');
+      // Перезагружаем данные через 1.5 сек
+      setTimeout(loadNarad, 1500);
+    } else {
+      errEl.textContent = 'Ошибка: ' + (r.error || 'неизвестная');
+      errEl.classList.add('show');
+    }
+  });
+}
+
+// ── СТАРТ ─────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
