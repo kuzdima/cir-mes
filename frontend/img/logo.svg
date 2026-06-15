@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 314 117" preserveAspectRatio="xMidYMid meet">
+  <!-- Иконка: белый скруглённый квадрат -->
+  <rect x="18" y="26.5" width="64" height="64" rx="11" fill="#ffffff"/>
+
+  <!-- График внутри иконки: ось + линия с точками -->
+  <g stroke="#1e2435" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Левая и нижняя оси -->
+    <path d="M33 44 L33 76 L74 76"/>
+    <!-- Линия графика -->
+    <path d="M38 68 L48 60 L56 64 L68 51"/>
+  </g>
+  <!-- Точки на изломах графика -->
+  <g fill="#1e2435">
+    <circle cx="38" cy="68" r="2.1"/>
+    <circle cx="48" cy="60" r="2.1"/>
+    <circle cx="56" cy="64" r="2.1"/>
+    <circle cx="68" cy="51" r="2.1"/>
+  </g>
+
+  <!-- "РосТек" -->
+  <text x="102" y="68"
+        font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif"
+        font-size="38" font-weight="700" fill="#ffffff" letter-spacing="-0.5">РосТек</text>
+
+  <!-- Подзаголовок -->
+  <text x="103" y="89"
+        font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif"
+        font-size="13" font-weight="500" fill="#a3adc0" letter-spacing="0.2">Технология Роста</text>
+</svg>
