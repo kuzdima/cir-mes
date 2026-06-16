@@ -84,7 +84,7 @@ function catRenderArchive(filter, id) {
   if (countEl) countEl.textContent = catArcDB.length;
 
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:24px;font-size:12px;">'
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:24px;font-size:12px;">'
       + (filter ? 'Ничего не найдено' : 'Архив пуст.') + '</td></tr>';
     return;
   }
@@ -126,6 +126,7 @@ function catRenderArchive(filter, id) {
       + '<td class="mono" style="font-size:10px;color:var(--text3)">' + (r.parent_id || r.parentId || '—') + '</td>'
       + '<td style="text-align:right;font-family:monospace">' + laborDisplay + '</td>'
       + '<td class="mono" style="text-align:center;color:var(--amber-text);font-weight:700">' + serial + '</td>'
+      + '<td style="font-size:10px;color:var(--text3)">' + (r.creator_name || '') + '</td>'
       + '</tr>';
   }).join('');
 }
