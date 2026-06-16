@@ -7,7 +7,7 @@ function loadTechOps() {
   var tp = document.getElementById('ops-type') ? document.getElementById('ops-type').value : '';
   var tb = document.getElementById('ops-tbody');
   if (!tb) return;
-  tb.innerHTML = '<tr><td colspan="29" style="text-align:center;color:var(--text3);padding:20px">Загрузка...</td></tr>';
+  tb.innerHTML = '<tr><td colspan="30" style="text-align:center;color:var(--text3);padding:20px">Загрузка...</td></tr>';
 
   var url = '/api/tech-ops?limit=50&page=' + OPS_PAGE;
   if (q)  url += '&classifier=' + encodeURIComponent(q);
@@ -15,7 +15,7 @@ function loadTechOps() {
 
   api('GET', url).then(function(res) {
     if (!res.ok || !res.rows || !res.rows.length) {
-      tb.innerHTML = '<tr><td colspan="29" style="text-align:center;color:var(--text3);padding:20px">Нет данных</td></tr>';
+      tb.innerHTML = '<tr><td colspan="30" style="text-align:center;color:var(--text3);padding:20px">Нет данных</td></tr>';
       return;
     }
 
@@ -75,6 +75,7 @@ function loadTechOps() {
         + '<td style="font-family:monospace;text-align:right">' + c(r.load_per_unit_hours) + '</td>'
         + '<td style="font-size:10px;color:var(--text3)">' + c(r.product_comment) + '</td>'
         + '<td style="font-family:monospace;text-align:right">' + c(r.serial_number) + '</td>'
+        + '<td style="font-size:10px;color:var(--text3)">' + c(r.creator_name) + '</td>'
         + '</tr>';
     }).join('');
   });

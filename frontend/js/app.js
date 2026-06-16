@@ -42,6 +42,8 @@ function showPanel(id) {
     document.getElementById('profile-email').textContent = USER.email || '—';
     var rm = {admin:'Администратор',dispatcher:'Диспетчер',master:'Мастер',technologist:'Технолог'};
     document.getElementById('profile-role').textContent = rm[USER.role] || USER.role;
+    if (typeof loadProfileData === 'function') loadProfileData();
+    if (typeof loadMyRecords === 'function') loadMyRecords();
   }
   if (id === 'users' && typeof loadAllUsers === 'function') {
     loadAllUsers();
@@ -128,6 +130,9 @@ function openAddForm() {
   var ok  = document.getElementById('tf-ok');
   if (err) err.classList.remove('show');
   if (ok)  ok.classList.remove('show');
+  // Автозаполняем ФИО из профиля текущего пользователя
+  var fnEl = document.getElementById('tf-fullName');
+  if (fnEl && typeof USER !== 'undefined' && USER) fnEl.value = USER.name || '';
   // Добавляем пустую строку операции
   tfAddOp();
   // Показываем модалку

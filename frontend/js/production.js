@@ -21,7 +21,7 @@ function loadProdOps() {
   var st  = document.getElementById('prod-ops-status') ? document.getElementById('prod-ops-status').value : '';
   var tb  = document.getElementById('prod-ops-tbody');
   if (!tb) return;
-  tb.innerHTML = '<tr><td colspan="20" style="text-align:center;color:var(--text3);padding:20px">Загрузка...</td></tr>';
+  tb.innerHTML = '<tr><td colspan="22" style="text-align:center;color:var(--text3);padding:20px">Загрузка...</td></tr>';
 
   var url = '/api/production?view=operations&limit=50&page=' + PROD_PAGE;
   if (q)  url += '&q=' + encodeURIComponent(q);
@@ -29,7 +29,7 @@ function loadProdOps() {
 
   api('GET', url).then(function(res) {
     if (!res.ok || !res.rows || !res.rows.length) {
-      tb.innerHTML = '<tr><td colspan="20" style="text-align:center;color:var(--text3);padding:20px">Нет данных. Добавьте наряды через форму.</td></tr>';
+      tb.innerHTML = '<tr><td colspan="22" style="text-align:center;color:var(--text3);padding:20px">Нет данных. Добавьте наряды через форму.</td></tr>';
       return;
     }
     var total = res.total || res.rows.length;
@@ -75,6 +75,7 @@ function loadProdOps() {
         + '<td class="mono" style="text-align:center">' + c(r.defects) + '</td>'
         + '<td style="font-size:10px">' + c(r.executor) + '</td>'
         + '<td style="font-size:10px;color:var(--text3)">' + c(r.assembly_id) + '</td>'
+        + '<td style="font-size:10px;color:var(--text3)">' + c(r.creator_name) + '</td>'
         + '</tr>';
     }).join('');
   });
@@ -91,7 +92,7 @@ function loadProdProjects() {
   var st = document.getElementById('prod-proj-status') ? document.getElementById('prod-proj-status').value : '';
   var tb = document.getElementById('prod-proj-tbody');
   if (!tb) return;
-  tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--text3);padding:20px">Загрузка...</td></tr>';
+  tb.innerHTML = '<tr><td colspan="16" style="text-align:center;color:var(--text3);padding:20px">Загрузка...</td></tr>';
 
   var url = '/api/production?view=projects&limit=50&page=' + PROD_PROJ_PAGE;
   if (q)  url += '&q=' + encodeURIComponent(q);
@@ -99,7 +100,7 @@ function loadProdProjects() {
 
   api('GET', url).then(function(res) {
     if (!res.ok || !res.rows || !res.rows.length) {
-      tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--text3);padding:20px">Нет данных</td></tr>';
+      tb.innerHTML = '<tr><td colspan="16" style="text-align:center;color:var(--text3);padding:20px">Нет данных</td></tr>';
       return;
     }
     // var total = res.total || res.rows.length;
@@ -129,6 +130,7 @@ function loadProdProjects() {
         + '<td class="mono" style="text-align:center;color:' + pctColor + ';font-weight:700">' + pct + '%</td>'
         + '<td style="font-size:10px">' + c(r.executor) + '</td>'
         + '<td style="font-size:10px;color:var(--text3)">' + c(r.assembly_id) + '</td>'
+        + '<td style="font-size:10px;color:var(--text3)">' + c(r.creator_name) + '</td>'
         + '<td style="font-size:10px;color:var(--text3);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c(r.product_comment) + '</td>'
         + '</tr>';
     }).join('');

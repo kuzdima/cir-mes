@@ -181,7 +181,7 @@
             <thead style="position:sticky;top:0;z-index:10;">
               <tr>
                 <th colspan="15" style="background:#1a2540;color:#60a5fa;padding:5px 8px;text-align:center;border-bottom:1px solid var(--border);border-right:2px solid rgba(59,130,246,0.5);font-size:9px;font-weight:700;letter-spacing:.06em;">ДАННЫЕ ИЗДЕЛИЯ</th>
-                <th colspan="14" style="background:#162030;color:#34d399;padding:5px 8px;text-align:center;border-bottom:1px solid var(--border);font-size:9px;font-weight:700;letter-spacing:.06em;">ТЕХНОЛОГИЧЕСКИЕ ОПЕРАЦИИ</th>
+                <th colspan="15" style="background:#162030;color:#34d399;padding:5px 8px;text-align:center;border-bottom:1px solid var(--border);font-size:9px;font-weight:700;letter-spacing:.06em;">ТЕХНОЛОГИЧЕСКИЕ ОПЕРАЦИИ</th>
               </tr>
               <tr style="background:var(--bg3);">
                 <th style="min-width:200px;padding:5px 7px;text-align:left;font-size:9px;font-weight:700;color:#60a5fa;border-bottom:1px solid var(--border);white-space:nowrap;">Обозначение</th>
@@ -213,10 +213,11 @@
                 <th style="min-width:65px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Загрузка (ч)</th>
                 <th style="min-width:130px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Коммент. к изделию</th>
                 <th style="min-width:60px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">№ изгот.</th>
+                <th style="min-width:90px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Создал</th>
               </tr>
             </thead>
             <tbody id="ops-tbody">
-              <tr><td colspan="29" style="text-align:center;color:var(--text3);padding:30px;">Нажмите «Обновить»</td></tr>
+              <tr><td colspan="30" style="text-align:center;color:var(--text3);padding:30px;">Нажмите «Обновить»</td></tr>
             </tbody>
           </table>
         </div>
@@ -302,9 +303,10 @@
                     <th>Родит. ID</th>
                     <th>Трудоёмк.</th>
                     <th>№ п/п</th>
+                    <th>Создал</th>
                   </tr></thead>
                   <tbody id="arc-archive-tbody">
-                    <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">Архив пуст.</td></tr>
+                    <tr><td colspan="11" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">Архив пуст.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -384,10 +386,11 @@
                   <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Брак</th>
                   <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Исполн.</th>
                   <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Головное</th>
+                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Создал</th>
                 </tr>
               </thead>
               <tbody id="prod-ops-tbody">
-                <tr><td colspan="21" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td></tr>
+                <tr><td colspan="22" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td></tr>
               </tbody>
             </table>
           </div>
@@ -430,11 +433,12 @@
                   <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">%</th>
                   <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Исполн.</th>
                   <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Головное</th>
+                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Создал</th>
                   <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Коммент.</th>
                 </tr>
               </thead>
               <tbody id="prod-proj-tbody">
-                <tr><td colspan="15" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td></tr>
+                <tr><td colspan="16" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td></tr>
               </tbody>
             </table>
           </div>
@@ -522,28 +526,152 @@
             </button>
           </div>
         </div>
+
+        <!-- Мои записи -->
+        <div style="max-width:920px; margin:32px auto 40px; display:flex; flex-direction:column; gap:20px;" id="my-records-section">
+          <h3 style="margin:0; font-size:18px; color:var(--accent);">Мои записи</h3>
+
+          <!-- Технологические операции -->
+          <div class="card">
+            <div class="card-hd">Технологические операции (<span id="mr-ops-count">0</span>)</div>
+            <div style="overflow-x:auto;">
+              <table class="arc-tbl" style="min-width:600px; font-size:11px;">
+                <thead><tr>
+                  <th>Обозначение</th>
+                  <th>Название изделия</th>
+                  <th>№ опер.</th>
+                  <th>Операция</th>
+                  <th>Дата</th>
+                </tr></thead>
+                <tbody id="mr-ops-tbody">
+                  <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Структуры изделий -->
+          <div class="card">
+            <div class="card-hd">Структуры изделий (<span id="mr-arc-count">0</span>)</div>
+            <div style="overflow-x:auto;">
+              <table class="arc-tbl" style="min-width:600px; font-size:11px;">
+                <thead><tr>
+                  <th>Головное изделие</th>
+                  <th>Название</th>
+                  <th>Обозначение</th>
+                  <th>Тип</th>
+                  <th>Дата</th>
+                </tr></thead>
+                <tbody id="mr-arc-tbody">
+                  <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Производственные наряды -->
+          <div class="card">
+            <div class="card-hd">Производственные наряды (<span id="mr-prod-count">0</span>)</div>
+            <div style="overflow-x:auto;">
+              <table class="arc-tbl" style="min-width:500px; font-size:11px;">
+                <thead><tr>
+                  <th>№ наряда</th>
+                  <th>Изделие</th>
+                  <th>Статус</th>
+                  <th>Дата</th>
+                </tr></thead>
+                <tbody id="mr-prod-tbody">
+                  <tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ═══ УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (только для ADMIN) ═══ -->
       <div class="panel" id="panel-users">
-        <div class="arc-tbl-scroller" style="max-height:calc(100vh - 160px);">
-          <table class="arc-tbl" style="min-width:1100px;">
-            <thead>
-              <thead>
-                <tr>
-                  <th>ФИО</th>
-                  <th>Email (Логин)</th>
-                  <th>Роль</th>
-                  <th>Статус</th>
-                  <th>Пароль (хэш)</th>
-                  <th>Последний вход</th>
-                  <th>Дата регистрации</th>
-                </tr>
-              </thead>
-            </thead>
+
+        <!-- Модал: Добавить / Редактировать пользователя -->
+        <div id="admin-user-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:100001;align-items:center;justify-content:center;">
+          <div style="background:#161b27;border:1px solid #3b82f6;border-radius:12px;padding:32px;width:100%;max-width:500px;">
+            <h3 id="admin-user-modal-title" style="margin:0 0 20px 0;">Добавить пользователя</h3>
+            <input type="hidden" id="admin-edit-id">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Имя *</label>
+                <input type="text" id="admin-edit-firstname" class="auth-inp" style="width:100%;">
+              </div>
+              <div>
+                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Фамилия</label>
+                <input type="text" id="admin-edit-lastname" class="auth-inp" style="width:100%;">
+              </div>
+            </div>
+            <label style="display:block;margin:12px 0 4px;font-size:12px;color:var(--text3);">Email (логин) *</label>
+            <input type="email" id="admin-edit-email" class="auth-inp" style="width:100%;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+              <div>
+                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Роль *</label>
+                <select id="admin-edit-role" class="auth-inp" style="width:100%;">
+                  <option value="admin">Администратор</option>
+                  <option value="technologist">Технолог</option>
+                  <option value="master">Мастер</option>
+                  <option value="dispatcher">Диспетчер</option>
+                </select>
+              </div>
+              <div>
+                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Статус</label>
+                <select id="admin-edit-active" class="auth-inp" style="width:100%;">
+                  <option value="true">Активен</option>
+                  <option value="false">Заблокирован</option>
+                </select>
+              </div>
+            </div>
+            <div id="admin-edit-pass-wrap">
+              <label style="display:block;margin:12px 0 4px;font-size:12px;color:var(--text3);">Пароль *</label>
+              <input type="password" id="admin-edit-password" class="auth-inp" placeholder="Минимум 6 символов" style="width:100%;">
+            </div>
+            <div id="admin-user-modal-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none;"></div>
+            <div style="margin-top:20px;display:flex;gap:12px;">
+              <button onclick="adminSaveUser()" style="flex:1;padding:12px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Сохранить</button>
+              <button onclick="adminCloseUserModal()" style="flex:1;padding:12px;background:#334155;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Отмена</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Модал: Смена пароля -->
+        <div id="admin-pass-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:100001;align-items:center;justify-content:center;">
+          <div style="background:#161b27;border:1px solid #3b82f6;border-radius:12px;padding:32px;width:100%;max-width:380px;">
+            <h3 style="margin:0 0 8px 0;">🔑 Смена пароля</h3>
+            <p id="admin-pass-user-name" style="color:var(--text3);margin:0 0 16px;font-size:13px;"></p>
+            <input type="hidden" id="admin-pass-uid">
+            <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Новый пароль *</label>
+            <input type="password" id="admin-new-pass" class="auth-inp" placeholder="Минимум 6 символов" style="width:100%;">
+            <div id="admin-pass-modal-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none;"></div>
+            <div style="margin-top:20px;display:flex;gap:12px;">
+              <button onclick="adminSavePassword()" style="flex:1;padding:12px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Сохранить</button>
+              <button onclick="adminClosePassModal()" style="flex:1;padding:12px;background:#334155;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Отмена</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:12px 0 10px;display:flex;align-items:center;gap:12px;">
+          <button onclick="adminOpenAddUser()" style="padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">+ Добавить пользователя</button>
+          <span id="users-count" style="font-size:12px;color:var(--text3);"></span>
+        </div>
+        <div class="arc-tbl-scroller" style="max-height:calc(100vh - 200px);">
+          <table class="arc-tbl" style="min-width:900px;">
+            <thead><tr>
+              <th>ФИО</th>
+              <th>Email (Логин)</th>
+              <th>Роль</th>
+              <th>Статус</th>
+              <th>Последний вход</th>
+              <th>Дата регистрации</th>
+              <th style="min-width:220px;">Действия</th>
+            </tr></thead>
             <tbody id="users-tbody"></tbody>
           </table>
-        </div>
         </div>
       </div>
 
@@ -751,7 +879,7 @@
                 <label class="form-lbl">Номер извещения</label>
                 <input class="form-inp" id="tf-noticeNumber">
               </div>
-              <div class="form-field">
+              <div class="form-field" style="display:none">
                 <label class="form-lbl">ФИО исполнителя</label>
                 <input class="form-inp" id="tf-fullName" placeholder="Иванов И.И.">
               </div>
