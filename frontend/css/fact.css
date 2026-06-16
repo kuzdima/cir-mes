@@ -1,0 +1,32 @@
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f1420;color:#e2e8f0;min-height:100vh;padding:12px}
+h1{font-size:18px;color:#3b82f6;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+h2{font-size:13px;color:#94a3b8;font-weight:400;margin-bottom:16px}
+.card{background:#1e2535;border:1px solid #2d3748;border-radius:12px;padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;color:#3b82f6;margin-bottom:12px;border-bottom:1px solid #2d3748;padding-bottom:8px}
+label{display:block;font-size:12px;color:#94a3b8;margin-bottom:4px;margin-top:12px}
+label:first-child{margin-top:0}
+select,input[type="text"],input[type="number"],input[type="email"],input[type="password"]{
+  width:100%;padding:12px;font-size:16px;background:#0f1420;border:1px solid #3a4560;
+  border-radius:8px;color:#e2e8f0;-webkit-appearance:none;appearance:none;outline:none
+}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+input:focus,select:focus{border-color:#3b82f6}
+.btn-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:20px}
+.btn{padding:14px 8px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:#fff;transition:opacity 0.15s}
+.btn:active{opacity:0.7}
+.btn-green{background:#10b981}
+.btn-amber{background:#f59e0b}
+.btn-blue{background:#3b82f6}
+.msg{padding:12px;border-radius:8px;font-size:13px;margin-top:12px;display:none}
+.msg-ok{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+.msg-err{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.msg.show{display:block}
+.info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #2d3748;font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:#94a3b8}
+.info-val{color:#e2e8f0;font-weight:500;text-align:right;max-width:60%}
+.loading{text-align:center;padding:40px;color:#94a3b8;font-size:14px}
+.op-status{font-size:10px;margin-left:4px}
+.logout-btn{background:none;border:1px solid #3a4560;color:#94a3b8;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;float:right}
+.divider{height:1px;background:#2d3748;margin:12px 0}
