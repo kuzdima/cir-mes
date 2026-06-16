@@ -176,7 +176,7 @@
             <button onclick="clearSelection()" style="padding:5px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg3);color:var(--text3);font-size:12px;cursor:pointer;">✕</button>
           </div>
         </div>
-        <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto;">
+        <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 270px);overflow-y:auto;">
           <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:2400px;">
             <thead style="position:sticky;top:0;z-index:10;">
               <tr>
@@ -340,9 +340,6 @@
             <input class="form-inp" id="prod-ops-q" placeholder="Поиск по наряду, изделию..." style="width:280px;font-size:12px" oninput="clearTimeout(PROD_SEARCH_T);PROD_SEARCH_T=setTimeout(loadProdOps,400)">
             <select class="form-inp" id="prod-ops-status" style="width:140px;font-size:12px" onchange="loadProdOps()">
               <option value="">Все статусы</option>
-              <!-- <option value="Новый">Новый</option>
-              <option value="🔄 В работе">В работе</option>
-              <option value="✅ Готово">Готово</option> -->
               <option value="Новый">Новый</option>
               <option value="В работе">В работе</option>
               <option value="Готово">Готово</option>
@@ -361,7 +358,7 @@
               <button onclick="prodClearSelection()" style="padding:5px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg3);color:var(--text3);font-size:12px;cursor:pointer">✕</button>
             </div>
           </div>
-          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto">
+          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 235px);overflow-y:auto">
             <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1800px">
               <thead style="position:sticky;top:0;z-index:5">
                 <tr style="background:var(--bg3)">
@@ -415,7 +412,7 @@
             </select>
             <button class="arc-btn" onclick="loadProdProjects()">Обновить</button>
           </div>
-          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto">
+          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 235px);overflow-y:auto">
             <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px">
               <thead style="position:sticky;top:0;z-index:5">
                 <tr style="background:var(--bg3)">
