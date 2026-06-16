@@ -61,26 +61,6 @@ function handleAddBtn() {
 }
 
 
-function selRole(el, role) {
-  // Убираем выделение у всех
-  document.querySelectorAll('.auth-role-btn').forEach(btn => {
-    btn.classList.remove('sel');
-    btn.style.opacity = '0.85';
-  });
-
-  // Выделяем текущую
-  el.classList.add('sel');
-  el.style.opacity = '1';
-
-  document.getElementById('reg-role').value = role;
-}
-
-function quickLogin(email, pass) {
-  document.getElementById('login-email').value = email;
-  document.getElementById('login-pass').value  = pass;
-  doLogin();
-}
-
 function opsPage(dir) {
   OPS_PAGE += dir;
   if (OPS_PAGE < 1) OPS_PAGE = 1;

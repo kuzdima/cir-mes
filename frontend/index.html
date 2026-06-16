@@ -20,51 +20,14 @@
         <img src="img/logo.svg" alt="РосТек" style="width:280px;max-width:90%;height:auto;border-radius:10px;">
       </div>
     <div class="auth-card">
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')"   >Вход</button>
-        <button class="auth-tab"        id="tab-register" onclick="switchAuthTab('register')">Регистрация</button>
-      </div>
-
       <!-- LOGIN -->
       <div class="auth-form active" id="form-login">
         <div class="auth-err" id="login-err"></div>
         <label class="auth-lbl">Email</label>
-        <input class="auth-inp" id="login-email" type="email" placeholder="admin@cir.ru">
+        <input class="auth-inp" id="login-email" type="email" placeholder="login">
         <label class="auth-lbl">Пароль</label>
-        <input class="auth-inp" id="login-pass" onkeydown="if(event.key==='Enter')doLogin()" type="password" placeholder="••••••••"
-               >
+        <input class="auth-inp" id="login-pass" onkeydown="if(event.key==='Enter')doLogin()" type="password" placeholder="password">
         <button class="auth-btn" id="login-btn" onclick="doLogin()">Войти в систему</button>
-        <div style="margin-top:14px;">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">Быстрый вход:</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="quick-btn" onclick="quickLogin('admin@cir.ru','Admin123')"           style="flex:1;padding:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:var(--radius);font-size:10px;cursor:pointer;">Администратор</button>
-            <button class="quick-btn" onclick="quickLogin('dispatcher@cir.ru','Dispatch123')"   style="flex:1;padding:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:var(--radius);font-size:10px;cursor:pointer;">Диспетчер</button>
-            <button class="quick-btn" onclick="quickLogin('master@cir.ru','Master123')"         style="flex:1;padding:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:var(--radius);font-size:10px;cursor:pointer;">Мастер</button>
-            <button class="quick-btn" onclick="quickLogin('technolog@cir.ru','Tech123')"        style="flex:1;padding:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:var(--radius);font-size:10px;cursor:pointer;">Технолог</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- REGISTER -->
-      <div class="auth-form" id="form-register">
-        <div class="auth-err" id="reg-err"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div><label class="auth-lbl">Имя</label><input class="auth-inp" id="reg-fname" placeholder="Иван"></div>
-          <div><label class="auth-lbl">Фамилия</label><input class="auth-inp" id="reg-lname" placeholder="Иванов"></div>
-        </div>
-        <label class="auth-lbl">Email</label>
-        <input class="auth-inp" id="reg-email" type="email" placeholder="ivan@cir.ru">
-        <label class="auth-lbl">Роль</label>
-        <div class="auth-role-grid">
-          <div class="auth-role-btn sel" class="role-btn sel" onclick="selRole(this,'dispatcher')"><div class="auth-role-name">📋 Диспетчер</div></div>
-          <div class="auth-role-btn"     class="role-btn" onclick="selRole(this,'master')"><div class="auth-role-name">🔧 Мастер</div></div>
-          <div class="auth-role-btn"     class="role-btn" onclick="selRole(this,'technologist')"><div class="auth-role-name">📐 Технолог</div></div>
-          <!-- <div class="auth-role-btn"     class="role-btn" onclick="selRole(this,'admin')"><div class="auth-role-name">🛡️ Администратор</div></div> -->
-        </div>
-        <input type="hidden" id="reg-role" value="dispatcher">
-        <label class="auth-lbl">Пароль (мин. 8 символов)</label>
-        <input class="auth-inp" id="reg-pass" type="password" placeholder="••••••••">
-        <button class="auth-btn" id="reg-btn" onclick="doRegister()">Зарегистрироваться</button>
       </div>
     </div>
     <div class="auth-footer">РосТек · Технология Роста · Только для авторизованных сотрудников</div>
@@ -176,7 +139,7 @@
             <button onclick="clearSelection()" style="padding:5px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg3);color:var(--text3);font-size:12px;cursor:pointer;">✕</button>
           </div>
         </div>
-        <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 270px);overflow-y:auto;">
+        <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto;">
           <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:2400px;">
             <thead style="position:sticky;top:0;z-index:10;">
               <tr>
@@ -340,6 +303,9 @@
             <input class="form-inp" id="prod-ops-q" placeholder="Поиск по наряду, изделию..." style="width:280px;font-size:12px" oninput="clearTimeout(PROD_SEARCH_T);PROD_SEARCH_T=setTimeout(loadProdOps,400)">
             <select class="form-inp" id="prod-ops-status" style="width:140px;font-size:12px" onchange="loadProdOps()">
               <option value="">Все статусы</option>
+              <!-- <option value="Новый">Новый</option>
+              <option value="🔄 В работе">В работе</option>
+              <option value="✅ Готово">Готово</option> -->
               <option value="Новый">Новый</option>
               <option value="В работе">В работе</option>
               <option value="Готово">Готово</option>
@@ -358,7 +324,7 @@
               <button onclick="prodClearSelection()" style="padding:5px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg3);color:var(--text3);font-size:12px;cursor:pointer">✕</button>
             </div>
           </div>
-          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 235px);overflow-y:auto">
+          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto">
             <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1800px">
               <thead style="position:sticky;top:0;z-index:5">
                 <tr style="background:var(--bg3)">
@@ -412,7 +378,7 @@
             </select>
             <button class="arc-btn" onclick="loadProdProjects()">Обновить</button>
           </div>
-          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 235px);overflow-y:auto">
+          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto">
             <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px">
               <thead style="position:sticky;top:0;z-index:5">
                 <tr style="background:var(--bg3)">

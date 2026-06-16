@@ -491,6 +491,10 @@ app.delete('/api/users/:id', auth, async (req, res) => {
   try {
     if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Доступ запрещён' });
     if (parseInt(req.params.id) === req.user.id) return res.status(400).json({ ok: false, error: 'Нельзя удалить свой аккаунт' });
+    // Обнуляем created_by во всех связанных таблицах перед удалением
+    await pool.query('UPDATE tech_operations_archive SET created_by=NULL WHERE created_by=$1', [req.params.id]);
+    await pool.query('UPDATE products_archive SET created_by=NULL WHERE created_by=$1', [req.params.id]);
+    await pool.query('UPDATE production_orders SET created_by=NULL WHERE created_by=$1', [req.params.id]);
     await pool.query('DELETE FROM users WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
