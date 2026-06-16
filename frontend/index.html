@@ -205,8 +205,7 @@
 
         <div class="two-col">
           <!-- FORM -->
-          <div>
-            <div class="card">
+          <div class="card">
               <div class="card-hd">Структура изделия</div>
               <div class="arc-actions">
                 <button class="arc-btn" id="arc-add-row" onclick="arcAddRow()">+ Добавить элемент</button>
@@ -214,7 +213,7 @@
                 <button class="arc-btn" onclick="arcLoadFromDBPrompt()" style="border-color:var(--accent);color:var(--accent);">📥 Загрузить из базы</button>
                 <button class="arc-btn danger" id="arc-clear-table" onclick="arcClearTable()">Очистить</button>
               </div>
-              <div class="arc-tbl-scroller" style="max-height:600px;overflow-y:auto;overflow-x:auto;">
+              <div class="arc-tbl-scroller">
                 <table class="arc-tbl">
                   <thead><tr>
                     <th style="width:65px">ID *</th>
@@ -240,20 +239,16 @@
                   </tbody>
                 </table>
               </div>
-              <div class="arc-actions" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+              <div class="arc-actions" style="flex-shrink:0;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
                 <button class="arc-btn primary" onclick="arcSubmit()">✓ Добавить в архив</button>
-                <button class="arc-btn">↺ Сбросить</button>
+                <button class="arc-btn" onclick="arcClearForm()">↺ Сбросить</button>
               </div>
-            </div>
           </div>
           <!-- ARCHIVE VIEW -->
-          <div>
-            <div class="card">
+          <div class="card">
               <div class="card-hd">База архив изделий</div>
-              <input class="form-inp" id="arc-search" oninput="arcFilterArchive(this.value)" placeholder="Поиск по Assembly_ID или названию..."
-                     style="margin-bottom:10px;font-size:12px;"
-                     id="arc-search" oninput="arcFilterArchive(this.value)">
-              <div class="arc-tbl-scroller" style="max-height:600px;overflow-y:auto;overflow-x:auto;">
+              <input class="form-inp" id="arc-search" oninput="arcFilterArchive(this.value)" placeholder="Поиск по Assembly_ID или названию..." style="flex-shrink:0;margin-bottom:10px;font-size:12px;">
+              <div class="arc-tbl-scroller">
                 <table class="arc-tbl">
                   <thead><tr>
                     <th>Головное изделие</th>
@@ -273,11 +268,10 @@
                   </tbody>
                 </table>
               </div>
-              <div style="margin-top:8px;display:flex;gap:8px;">
-                <button class="arc-btn danger" style="font-size:11px;padding:4px 10px;">Очистить архив</button>
-                <button class="arc-btn" id="arc-export" onclick="arcExportCSV()" style="font-size:11px;padding:4px 10px;">Экспорт CSV</button>
+              <div style="flex-shrink:0;margin-top:8px;display:flex;gap:8px;">
+                <button class="arc-btn danger" onclick="arcClearArchive()">Очистить архив</button>
+                <button class="arc-btn" id="arc-export" onclick="arcExportCSV()">Экспорт CSV</button>
               </div>
-            </div>
           </div>
         </div>
       </div>
@@ -303,6 +297,9 @@
             <input class="form-inp" id="prod-ops-q" placeholder="Поиск по наряду, изделию..." style="width:280px;font-size:12px" oninput="clearTimeout(PROD_SEARCH_T);PROD_SEARCH_T=setTimeout(loadProdOps,400)">
             <select class="form-inp" id="prod-ops-status" style="width:140px;font-size:12px" onchange="loadProdOps()">
               <option value="">Все статусы</option>
+              <!-- <option value="Новый">Новый</option>
+              <option value="🔄 В работе">В работе</option>
+              <option value="✅ Готово">Готово</option> -->
               <option value="Новый">Новый</option>
               <option value="В работе">В работе</option>
               <option value="Готово">Готово</option>
@@ -973,7 +970,7 @@
 <div id="arc-load-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:100001;align-items:center;justify-content:center;">
   <div style="background:#161b27;border:1px solid #3b82f6;border-radius:12px;padding:32px;width:100%;max-width:440px;margin:0 16px;">
     <h3 style="margin:0 0 6px 0;color:#e2e8f0;font-size:16px;">📥 Загрузить из базы</h3>
-    <p style="margin:0 0 20px 0;font-size:12px;color:#64748b;">Введите обозначение головного изделия.</p>
+    <p style="margin:0 0 20px 0;font-size:12px;color:#64748b;">Введите обозначение головного изделия (Assembly_ID)</p>
     <input type="text" id="arc-load-modal-input" class="auth-inp" style="width:100%;" placeholder="Например: 08-0006С6 Оснастка" onkeydown="if(event.key==='Enter')arcLoadModalConfirm()">
     <div id="arc-load-modal-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none;"></div>
     <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
