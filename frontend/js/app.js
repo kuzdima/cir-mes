@@ -129,8 +129,11 @@ function switchNomTab(tab) {
   document.getElementById('nom-tab-arc').classList.toggle('active', tab === 'archive');
   document.getElementById('nom-content-ops').style.display = tab === 'techops' ? '' : 'none';
   document.getElementById('nom-content-arc').style.display = tab === 'archive' ? '' : 'none';
+  document.getElementById('nom-tab-cat').classList.toggle('active', tab === 'catalogue');
+  document.getElementById('nom-content-cat').style.display = tab === 'catalogue' ? '' : 'none';
   if (tab === 'techops') loadTechOps();
   if (tab === 'archive' && typeof arcLoadFromDB === 'function') arcLoadFromDB();
+  if (tab === 'catalogue' && typeof catLoadFromDB === 'function') catLoadFromDB();
 }
 
 

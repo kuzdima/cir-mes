@@ -362,3 +362,48 @@ tbody tr:hover td{background:var(--bg3);}
 .arc-btn[style*="font-size"]{font-size:11px!important}
 .arc-btn[style*="padding"]{padding:7px 14px!important}
 button.arc-btn,button.topbar-btn{line-height:1}
+
+
+/*Дерево каталога изделий*/
+.nomNav {
+  height: 100%;
+  overflow: auto;
+  width: auto;
+  padding-left: 20px;
+  margin-left: -6px;
+  color: var(--text2);
+  max-height: 680px;
+}
+
+.childUl {
+  padding-left: 20px;
+}
+
+.childLi span:hover,
+.parentLi span:hover {
+  text-decoration: underline;
+}
+
+.chidLi span.selected,
+.parentLi span.selected {
+  outline-style: solid;
+  outline-color: var(--text2);
+}
+
+#nom-content-cat .two-col {
+  grid-template-columns: 0.5fr 1fr;
+}
+
+.cat-tbl-scroller {
+  max-height: 640px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+
+.two-col1-2 {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr;
+    gap: 14px;
+    overflow: hidden;
+}
