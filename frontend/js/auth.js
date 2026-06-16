@@ -33,18 +33,9 @@ function applyUser(u) {
     adminMenu.style.display = (u.role === 'admin') ? 'block' : 'none';
   }
 
-  // Всегда начинаем с номенклатуры, чтобы не показывать панели предыдущего пользователя
-  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
-  document.querySelectorAll('.nav-item[data-panel]').forEach(function(n) { n.classList.remove('active'); });
-  var nomPanel = document.getElementById('panel-nomenclature');
-  if (nomPanel) nomPanel.classList.add('active');
-  var nomNav = document.querySelector('.nav-item[data-panel="nomenclature"]');
-  if (nomNav) nomNav.classList.add('active');
-  var pageTitle = document.getElementById('page-title');
-  if (pageTitle) pageTitle.textContent = 'Номенклатура';
-
   loadRefs();
   initArc();
+  showPanel('nomenclature');
 }
 
 function doLogout() {

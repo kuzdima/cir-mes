@@ -120,7 +120,6 @@ pm2 startup
 
 | Email | Пароль | Роль |
 |-------|--------|------|
-| admin@cir.ru | Admin123 | Администратор |
 | dispatcher@cir.ru | Dispatch123 | Диспетчер |
 | master@cir.ru | Master123 | Мастер |
 | technolog@cir.ru | Tech123 | Технолог |
@@ -152,7 +151,8 @@ cir-mes/
 │   ├── index.html          — Главная страница (SPA)
 │   ├── fact.html           — Мобильная страница отметки факта (открывается по QR с маршрутного листа)
 │   ├── css/
-│   │   └── main.css        — Стили (тёмная тема)
+│   │   ├── main.css        — Стили (тёмная тема)
+│   │   └── fact.css        — Стили для страницы отметки факта
 │   └── js/
 │       ├── api.js          — HTTP запросы, глобалы, toast
 │       ├── auth.js         — Авторизация (вход / выход)
@@ -296,3 +296,4 @@ SELECT COUNT(*) FROM users;
 ---
 
 ## Контакты
+telegram - @kuzdima
