@@ -23,7 +23,7 @@ function catLoadFromDB() {
       catRenderArchive();
       var countEl = document.getElementById('cat-db-count');
       if (countEl) countEl.textContent = catArcDB.length;
-
+      CatFilterArchive(document.getElementById("cat-search").value);
       prepareProductCatalogue();
     }
   });
@@ -36,6 +36,16 @@ function catRenderArchive(filter, id) {
   if (!tbody) return;
 
   var rows = catArcDB;
+  
+  // Если передали Id изделия - фильтруем его и его прямых потомков(без потомков потомков)
+  if (id) {
+    let parent = rows.find((e) => { return e.id === id });
+    if (parent) {
+      rows = findCildren(parent, rows);
+      rows.push(parent);
+    }
+  }
+
   if (filter) {
     var q = filter.toLowerCase();
     // Если ищут конкретный Assembly_ID — показываем всю структуру
@@ -54,14 +64,6 @@ function catRenderArchive(filter, id) {
       });
     }
 
-  }
-  // Если передали Id изделия - фильтруем его и его прямых потомков(без потомков потомков)
-  if (id) {
-    let parent = rows.find((e) => { return e.id === id });
-    if (parent) {
-      rows = findCildren(parent, rows);
-      rows.push(parent);
-    }
   }
 
   // Сортировка по иерархии: 0, 1, 1.1, 1.2, 2, 2.1, 2.1.1, ...
@@ -133,12 +135,14 @@ function catRenderArchive(filter, id) {
 
 // ── ФИЛЬТРАЦИЯ АРХИВА ─────────────────────────────────────
 function CatFilterArchive(q) {
-  catRenderArchive(q || undefined);
+  let selectedElement = parseInt(document.querySelector(".parentLi span.selected")?.parentElement.dataset.id);
+  catRenderArchive(q || undefined, selectedElement || undefined);
 }
 
 function CatFilterArchiveByParentId(id) {
+  let searcElementValue = document.getElementById("cat-search").value;
   id = parseInt(id);
-  catRenderArchive(undefined, id);
+  catRenderArchive(searcElementValue, id);
 }
 
 
