@@ -534,17 +534,45 @@ function arcExportCSV() {
 }
 
 function arcLoadFromDBPrompt() {
-  var assemblyId = prompt('Введите обозначение головного изделия (Assembly_ID):');
-  if (!assemblyId) return;
-  assemblyId = assemblyId.trim();
-  
+  var modal = document.getElementById('arc-load-modal');
+  var input = document.getElementById('arc-load-modal-input');
+  var err   = document.getElementById('arc-load-modal-err');
+  input.value = '';
+  err.style.display = 'none';
+  modal.style.display = 'flex';
+  setTimeout(function() { input.focus(); }, 100);
+}
+
+function arcLoadModalClose() {
+  document.getElementById('arc-load-modal').style.display = 'none';
+}
+
+function arcLoadModalConfirm() {
+  var input = document.getElementById('arc-load-modal-input');
+  var err   = document.getElementById('arc-load-modal-err');
+  var btn   = document.getElementById('arc-load-modal-btn');
+  var assemblyId = input.value.trim();
+
+  if (!assemblyId) {
+    err.textContent = 'Введите обозначение головного изделия';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Загрузка...';
+  err.style.display = 'none';
+
   api('GET', '/api/archive?assembly_id=' + encodeURIComponent(assemblyId)).then(function(res) {
+    btn.disabled = false;
+    btn.textContent = 'Загрузить';
     if (res.ok && res.rows && res.rows.length > 0) {
-      if (confirm('Найдена структура: ' + res.rows.length + ' элементов.\nЗагрузить для редактирования?')) {
-        arcLoadStructure(assemblyId);
-      }
+      arcLoadModalClose();
+      arcLoadStructure(assemblyId);
+      showToast('Загружена структура: ' + res.rows.length + ' элементов');
     } else {
-      showToast('Структура "' + assemblyId + '" не найдена в базе');
+      err.textContent = 'Структура "' + assemblyId + '" не найдена в базе';
+      err.style.display = 'block';
     }
   });
 }
