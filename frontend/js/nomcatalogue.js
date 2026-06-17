@@ -216,7 +216,7 @@ function prepareCatalogueStructureElement(db) {
     parentli.setAttribute("data-id", product.id);
     navUl.appendChild(parentli);
     const innerSpan = document.createElement("span");
-    innerSpan.textContent = `${product.classifier || product.assembly_id} ${product.item_name}(${product.struct_id})${product.children ? "(" + product.children.length + "+)" : ""}`;
+    innerSpan.textContent = `${product.classifier || product.assembly_id} ${product.item_name}${product.children ? "(" + product.children.length + ")" : ""}`;
     parentli.appendChild(innerSpan);
 
   }
@@ -243,7 +243,7 @@ function childrenElementsConstruct(chidrenArray) {
 
       el.children ? childLi.classList.add("hasChildren") : null;
       const innerSpan = document.createElement("span");
-      innerSpan.textContent = `${el.classifier || el.assembly_id} ${el.item_name}(${el.struct_id})${el.children ? "(" + el.children.length + "+)" : ""}`;
+      innerSpan.textContent = `${el.classifier || el.assembly_id} ${el.item_name}${el.children ? "(" + el.children.length + ")" : ""}`;
       childLi.appendChild(innerSpan);
       childUl.appendChild(childLi);
 
@@ -277,7 +277,7 @@ function prepareProductCatalogue() {
       let childrenElement = childrenElementsConstruct(children);
       target.childElementCount === 1 ? target.replaceChildren(target.children[0], childrenElement) : target.replaceChildren(target.children[0]);
 
-
+      target.toggleAttribute("open")
 
     }
 

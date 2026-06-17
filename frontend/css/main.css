@@ -402,3 +402,19 @@ button.arc-btn,button.topbar-btn{line-height:1}
     gap: 14px;
     overflow: hidden;
 }
+
+.nomNavList li {
+  list-style-type: "   ";
+  
+}
+
+
+.nomNavList li.hasChildren {
+  list-style-type: "+  ";
+  
+}
+
+.nomNavList li.hasChildren[open] {
+  list-style-type: "-  ";
+  
+}
