@@ -115,11 +115,15 @@
             <svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><path d="M23 3H1v5h22V3z"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
             База архив изделий
           </div>
+          <div class="chrome-tab" id="nom-tab-cat" onclick="switchNomTab('catalogue')">
+                <svg viewBox="0 0 24 24"><path d="M21 8v13H3V8" /><path d="M23 3H1v5h22V3z" /><line x1="10" y1="12" x2="14" y2="12" /></svg>
+                Каталог номенклатуры
+          </div>
         </div>
 
         <!-- Вкладка: Архив операций -->
         <div id="nom-content-ops">
-<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
           <input class="form-inp" id="ops-q" oninput="OPS_PAGE=1;clearTimeout(OPS_SEARCH_T);OPS_SEARCH_T=setTimeout(loadTechOps,400)" placeholder="Поиск по обозначению или названию..."
                  style="width:320px;font-size:12px" id="ops-q" oninput="OPS_PAGE=1;clearTimeout(OPS_SEARCH_T);OPS_SEARCH_T=setTimeout(loadTechOps,400)">
           <select class="form-inp" id="ops-type" onchange="OPS_PAGE=1;loadTechOps()" style="width:160px;font-size:12px" id="ops-type" onchange="OPS_PAGE=1;loadTechOps()">
@@ -193,7 +197,7 @@
 
         <!-- Вкладка: База архив изделий -->
         <div id="nom-content-arc" style="display:none">
-<div class="msg msg-err"  id="arc-validation"></div>
+        <div class="msg msg-err"  id="arc-validation"></div>
         <div class="msg msg-ok"   id="arc-success"></div>
         <div class="msg msg-warn" id="arc-warn"></div>
 
@@ -275,6 +279,61 @@
           </div>
         </div>
       </div>
+
+      <!-- Вкладка:  Катлог номенклатуры -->
+            <div id="nom-content-cat" style="display:none">
+              <div class="msg msg-err" id="arc-validation"></div>
+              <div class="msg msg-ok" id="arc-success"></div>
+              <div class="msg msg-warn" id="arc-warn"></div>
+
+              
+
+              <div class="two-col1-2">
+                <!-- FORM Список номенклатуры-->
+                <div>
+                  <div class="card">
+                    <div class="card-hd">Каталог</div>
+
+                    <div id="productTree"> </div>
+                  </div>
+                </div>
+                <!-- ARCHIVE VIEW -->
+                <div>
+                  <div class="card">
+                    <div class="card-hd">Номенклатура</div>
+                    <input class="form-inp" id="cat-search" oninput="CatFilterArchive(this.value)"
+                      placeholder="Поиск по Assembly_ID или названию..." style="margin-bottom:10px;font-size:12px;"
+                      oninput="CatFilterArchive(this.value)">
+                    <div class="cat-tbl-scroller" >
+                      <table class="arc-tbl">
+                        <thead>
+                          <tr>
+                            <th>Головное изделие</th>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Обозначение</th>
+                            <th>Тип</th>
+                            <th>Кол-во</th>
+                            <th>Уровень</th>
+                            <th>Родит. ID</th>
+                            <th>Трудоёмк.</th>
+                            <th>№ п/п</th>
+                            <th>Создал</th>
+                          </tr>
+                        </thead>
+                        <tbody id="arc-catalogue-tbody">
+                          <tr>
+                            <td colspan="11" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">
+                              Архив пуст.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
 
       </div><!-- panel-nomenclature -->
 
@@ -989,6 +1048,7 @@
 <script src="js/production.js"></script>
 <script src="js/app.js"></script>
 <script src="js/profile.js"></script>
+<script src="js/nomcatalogue.js"></script>
 
 <script>
 document.addEventListener('click', function(e) {
