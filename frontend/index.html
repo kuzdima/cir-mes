@@ -1,1066 +1,1200 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>РосТек MES</title>
-<link rel="stylesheet" href="css/main.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>РосТек MES</title>
+  <!-- Подключение внешнего файла стилей (если он есть) -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/fromtags.css">
+
 </head>
+
 <body>
 
-
-</head>
-<body>
-
-<!-- ═══ AUTH SCREEN ═══ -->
-<div class="auth-screen show" id="auth-screen">
-  <div class="auth-bg-grid"></div>
-  <div class="auth-wrap">
+  <!-- ═══ AUTH SCREEN ═══ -->
+  <div class="auth-screen show" id="auth-screen">
+    <div class="auth-bg-grid"></div>
+    <div class="auth-wrap">
       <div class="auth-logo">
-        <img src="img/logo.svg" alt="РосТек" style="width:280px;max-width:90%;height:auto;border-radius:10px;">
+        <img src="img/logo.svg" alt="РосТек">
       </div>
-    <div class="auth-card">
-      <!-- LOGIN -->
-      <div class="auth-form active" id="form-login">
-        <div class="auth-err" id="login-err"></div>
-        <label class="auth-lbl">Email</label>
-        <input class="auth-inp" id="login-email" type="email" placeholder="login">
-        <label class="auth-lbl">Пароль</label>
-        <input class="auth-inp" id="login-pass" onkeydown="if(event.key==='Enter')doLogin()" type="password" placeholder="password">
-        <button class="auth-btn" id="login-btn" onclick="doLogin()">Войти в систему</button>
-      </div>
-    </div>
-    <div class="auth-footer">РосТек · Технология Роста · Только для авторизованных сотрудников</div>
-  </div>
-</div>
-
-<!-- ═══ APP ═══ -->
-<div class="app">
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    
-    <!-- Кнопка сворачивания -->
-    <button class="toggle-sidebar-btn" id="toggleSidebarBtn" title="Свернуть/развернуть меню">
-      ←
-    </button>
-
-    <div class="logo-block">
-      <img src="img/logo.svg" alt="РосТек" class="logo-img">
-    </div>
-
-    <nav class="nav">
-      <div class="nav-sect">Номенклатура</div>
-      <div class="nav-item active" data-panel="nomenclature" onclick="showPanel('nomenclature')">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-        <span class="menu-text">Номенклатура</span>
-      </div>
-
-      <div class="nav-sect">Производство</div>
-      <div class="nav-item" data-panel="production" onclick="showPanel('production')">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><rect x="9" y="12" width="6" height="8"/></svg>
-        <span class="menu-text">Производство</span>
-      </div>
-
-      <div class="nav-sect">Профиль</div>
-      <div class="nav-item" data-panel="profile" onclick="showPanel('profile')">
-        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        <span class="menu-text">Личный кабинет</span>
-      </div>
-
-      <div class="nav-item" data-panel="users" onclick="showPanel('users')" id="admin-users-menu" style="display:none;">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.34a4 4 0 0 1 0 7.32"/></svg>
-        <span class="menu-text">Управление пользователями</span>
-      </div>
-    </nav>
-
-    <div class="sidebar-bottom" onclick="toggleUserMenu()">
-      <div class="user-menu" id="user-menu">
-        <div class="user-menu-item" onclick="openPersonalCabinet()">
-          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4-4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-          Личный кабинет
-        </div>
-        <div class="user-menu-item" id="logout-btn" onclick="doLogout()">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Выйти
+      <div class="auth-card">
+        <!-- LOGIN -->
+        <div class="auth-form active" id="form-login">
+          <div class="auth-err" id="login-err"></div>
+          <label class="auth-lbl">Email</label>
+          <input class="auth-inp" id="login-email" type="email" placeholder="login">
+          <label class="auth-lbl">Пароль</label>
+          <input class="auth-inp" id="login-pass" onkeydown="if(event.key==='Enter')doLogin()" type="password"
+            placeholder="password">
+          <button class="auth-btn" id="login-btn" onclick="doLogin()">Войти в систему</button>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="av" id="sidebar-av">??</div>
-        <div>
-          <div class="u-name" id="sidebar-uname">Загрузка...</div>
-          <div class="u-role" id="sidebar-urole">—</div>
-        </div>
-      </div>
+      <div class="auth-footer">РосТек · Технология Роста · Только для авторизованных сотрудников</div>
     </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
-    <div class="topbar">
-      <div class="page-title" id="page-title">База архив изделий</div>
-      <button class="topbar-btn btn-accent" id="add-btn-nom" onclick="openAddForm()" style="display:none">+ Добавить операции</button>
-      <button class="topbar-btn btn-accent" id="add-btn-prod" onclick="openProdForm()" style="display:none">+ Добавить наряд</button>
+  <!-- ═══ APP ═══ -->
+  <div class="app">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+
+      <!-- Кнопка сворачивания -->
+      <button class="toggle-sidebar-btn" id="toggleSidebarBtn" title="Свернуть/развернуть меню">
+        ←
+      </button>
+
+      <div class="logo-block">
+        <img src="img/logo.svg" alt="РосТек" class="logo-img">
+      </div>
+
+      <nav class="nav">
+        <div class="nav-sect">Номенклатура</div>
+        <div class="nav-item active" data-panel="nomenclature" onclick="showPanel('nomenclature')">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 7V4h16v3" />
+            <path d="M9 20h6" />
+            <path d="M12 4v16" />
+          </svg>
+          <span class="menu-text">Номенклатура</span>
+        </div>
+
+        <div class="nav-sect">Производство</div>
+        <div class="nav-item" data-panel="production" onclick="showPanel('production')">
+          <svg viewBox="0 0 24 24">
+            <path d="M2 20h20" />
+            <path d="M5 20V8l7-5 7 5v12" />
+            <rect x="9" y="12" width="6" height="8" />
+          </svg>
+          <span class="menu-text">Производство</span>
+        </div>
+
+        <div class="nav-sect">Профиль</div>
+        <div class="nav-item" data-panel="profile" onclick="showPanel('profile')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+          <span class="menu-text">Личный кабинет</span>
+        </div>
+
+        <div class="nav-item" data-panel="users" onclick="showPanel('users')" id="admin-users-menu"
+          style="display:none;">
+          <svg viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.34a4 4 0 0 1 0 7.32" />
+          </svg>
+          <span class="menu-text">Управление пользователями</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-bottom" onclick="toggleUserMenu()">
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-item" onclick="openPersonalCabinet()">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            Личный кабинет
+          </div>
+          <div class="user-menu-item" id="logout-btn" onclick="doLogout()">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Выйти
+          </div>
+        </div>
+        <div class="sidebar-bottom1">
+          <div class="av" id="sidebar-av">??</div>
+          <div>
+            <div class="u-name" id="sidebar-uname">Загрузка...</div>
+            <div class="u-role" id="sidebar-urole">—</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="content">
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div class="page-title" id="page-title">База архив изделий</div>
+        <button class="topbar-btn btn-accent" id="add-btn-nom" onclick="openAddForm()">+ Добавить операции</button>
+        <button class="topbar-btn btn-accent" id="add-btn-prod" onclick="openProdForm()">+ Добавить наряд</button>
+      </div>
 
-      <!-- ═══ НОМЕНКЛАТУРА (вкладки) ═══ -->
-      <div class="panel active" id="panel-nomenclature">
-        <div class="chrome-tabs">
-          <div class="chrome-tab active" id="nom-tab-ops" onclick="switchNomTab('techops')">
-            <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            Архив операций
+      <div class="content">
+
+        <!-- ═══ НОМЕНКЛАТУРА (вкладки) ═══ -->
+        <div class="panel active" id="panel-nomenclature">
+          <div class="chrome-tabs">
+            <div class="chrome-tab active" id="nom-tab-ops" onclick="switchNomTab('techops')">
+              <svg viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+              Архив операций
+            </div>
+            <div class="chrome-tab" id="nom-tab-arc" onclick="switchNomTab('archive')">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 8v13H3V8" />
+                <path d="M23 3H1v5h22V3z" />
+                <line x1="10" y1="12" x2="14" y2="12" />
+              </svg>
+              База архив изделий
+            </div>
+            <div class="chrome-tab" id="nom-tab-cat" onclick="switchNomTab('catalogue')">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 8v13H3V8" />
+                <path d="M23 3H1v5h22V3z" />
+                <line x1="10" y1="12" x2="14" y2="12" />
+              </svg>
+              Каталог номенклатуры
+            </div>
           </div>
-          <div class="chrome-tab" id="nom-tab-arc" onclick="switchNomTab('archive')">
-            <svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><path d="M23 3H1v5h22V3z"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-            База архив изделий
-          </div>
-          <div class="chrome-tab" id="nom-tab-cat" onclick="switchNomTab('catalogue')">
-                <svg viewBox="0 0 24 24"><path d="M21 8v13H3V8" /><path d="M23 3H1v5h22V3z" /><line x1="10" y1="12" x2="14" y2="12" /></svg>
-                Каталог номенклатуры
-          </div>
-        </div>
 
-        <!-- Вкладка: Архив операций -->
-        <div id="nom-content-ops">
-        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
-          <input class="form-inp" id="ops-q" oninput="OPS_PAGE=1;clearTimeout(OPS_SEARCH_T);OPS_SEARCH_T=setTimeout(loadTechOps,400)" placeholder="Поиск по обозначению или названию..."
-                 style="width:320px;font-size:12px" id="ops-q" oninput="OPS_PAGE=1;clearTimeout(OPS_SEARCH_T);OPS_SEARCH_T=setTimeout(loadTechOps,400)">
-          <select class="form-inp" id="ops-type" onchange="OPS_PAGE=1;loadTechOps()" style="width:160px;font-size:12px" id="ops-type" onchange="OPS_PAGE=1;loadTechOps()">
-            <option value="">Все типы</option>
-            <option value="Деталь">Деталь</option>
-            <option value="Сборочная единица">Сборочная единица</option>
-            <option value="Головное изделие">Головное изделие</option>
-          </select>
-          <button class="arc-btn" id="ops-refresh" onclick="OPS_PAGE=1;loadTechOps()">Обновить</button>
-          <span id="ops-total" style="font-size:11px;color:var(--text3)"></span>
-        </div>
-        <div id="ops-action-bar" style="display:none;background:var(--accent-glow);border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius);padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
-          <span style="font-size:12px;color:var(--accent);font-weight:600;" id="ops-selected-info">—</span>
-          <div style="margin-left:auto;display:flex;gap:8px;">
-            <button onclick="editSelected()" style="padding:5px 14px;border:1px solid var(--accent);border-radius:var(--radius);background:var(--accent-glow);color:var(--accent);font-size:12px;cursor:pointer;">📝 Редактировать</button>
-            <button onclick="deleteSelected()" style="padding:5px 14px;border:1px solid var(--red);border-radius:var(--radius);background:var(--red-bg);color:var(--red-text);font-size:12px;cursor:pointer;">🗑 Удалить</button>
-            <button onclick="clearSelection()" style="padding:5px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg3);color:var(--text3);font-size:12px;cursor:pointer;">✕</button>
-          </div>
-        </div>
-        <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:2400px;">
-            <thead style="position:sticky;top:0;z-index:10;">
-              <tr>
-                <th colspan="15" style="background:#1a2540;color:#60a5fa;padding:5px 8px;text-align:center;border-bottom:1px solid var(--border);border-right:2px solid rgba(59,130,246,0.5);font-size:9px;font-weight:700;letter-spacing:.06em;">ДАННЫЕ ИЗДЕЛИЯ</th>
-                <th colspan="15" style="background:#162030;color:#34d399;padding:5px 8px;text-align:center;border-bottom:1px solid var(--border);font-size:9px;font-weight:700;letter-spacing:.06em;">ТЕХНОЛОГИЧЕСКИЕ ОПЕРАЦИИ</th>
-              </tr>
-              <tr style="background:var(--bg3);">
-                <th style="min-width:200px;padding:5px 7px;text-align:left;font-size:9px;font-weight:700;color:#60a5fa;border-bottom:1px solid var(--border);white-space:nowrap;">Обозначение</th>
-                <th style="min-width:160px;padding:5px 7px;font-size:9px;color:#60a5fa;border-bottom:1px solid var(--border);white-space:nowrap;">Название изделия</th>
-                <th style="min-width:80px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">№ извещения</th>
-                <th style="min-width:100px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Тип объекта</th>
-                <th style="min-width:150px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Марка материала</th>
-                <th style="min-width:120px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Сортамент</th>
-                <th style="min-width:70px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Кол-во мат.</th>
-                <th style="min-width:50px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Ед.изм.</th>
-                <th style="min-width:110px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Покрытие</th>
-                <th style="min-width:80px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Твёрдость</th>
-                <th style="min-width:100px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">ФИО</th>
-                <th style="min-width:60px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Кол-во (шт.)</th>
-                <th style="min-width:65px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Масса дет.</th>
-                <th style="min-width:80px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Габарит</th>
-                <th style="min-width:130px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);border-right:2px solid rgba(59,130,246,0.5);white-space:nowrap;">В каком изделии</th>
-                <th style="min-width:55px;padding:5px 7px;font-size:9px;color:#34d399;border-bottom:1px solid var(--border);white-space:nowrap;">№ опер.</th>
-                <th style="min-width:160px;padding:5px 7px;font-size:9px;color:#34d399;border-bottom:1px solid var(--border);white-space:nowrap;">Наименование операции</th>
-                <th style="min-width:100px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Исполнитель</th>
-                <th style="min-width:200px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Станок ресурс</th>
-                <th style="min-width:150px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Комментарии</th>
-                <th style="min-width:100px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Инструмент</th>
-                <th style="min-width:65px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Норма (ч)</th>
-                <th style="min-width:65px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Загот. (ч)</th>
-                <th style="min-width:55px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Аутсорс</th>
-                <th style="min-width:55px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Финальный</th>
-                <th style="min-width:40px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">ЧПУ</th>
-                <th style="min-width:65px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Загрузка (ч)</th>
-                <th style="min-width:130px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Коммент. к изделию</th>
-                <th style="min-width:60px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">№ изгот.</th>
-                <th style="min-width:90px;padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;">Создал</th>
-              </tr>
-            </thead>
-            <tbody id="ops-tbody">
-              <tr><td colspan="30" style="text-align:center;color:var(--text3);padding:30px;">Нажмите «Обновить»</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;font-size:12px;color:var(--text2);">
-          <button class="arc-btn" id="ops-prev" onclick="OPS_PAGE--;if(OPS_PAGE<1)OPS_PAGE=1;loadTechOps()" id="ops-prev" onclick="OPS_PAGE--;if(OPS_PAGE<1)OPS_PAGE=1;loadTechOps()">← Назад</button>
-          <span id="ops-page-info">—</span>
-          <button class="arc-btn" id="ops-next" onclick="OPS_PAGE++;loadTechOps()" id="ops-next" onclick="OPS_PAGE++;loadTechOps()">Вперёд →</button>
-        </div>
-        </div>
+          <!-- Вкладка: Архив операций -->
+          <div id="nom-content-ops">
+            <div class="prod-search-row">
+              <input class="form-inp" id="ops-q"
+                oninput="OPS_PAGE=1;clearTimeout(OPS_SEARCH_T);OPS_SEARCH_T=setTimeout(loadTechOps,400)"
+                placeholder="Поиск по обозначению или названию...">
+              <select class="form-inp" id="ops-type" onchange="OPS_PAGE=1;loadTechOps()">
+                <option value="">Все типы</option>
+                <option value="Деталь">Деталь</option>
+                <option value="Сборочная единица">Сборочная единица</option>
+                <option value="Головное изделие">Головное изделие</option>
+              </select>
+              <button class="arc-btn" id="ops-refresh" onclick="OPS_PAGE=1;loadTechOps()">Обновить</button>
+              <span id="ops-total"></span>
+            </div>
 
-        <!-- Вкладка: База архив изделий -->
-        <div id="nom-content-arc" style="display:none">
-        <div class="msg msg-err"  id="arc-validation"></div>
-        <div class="msg msg-ok"   id="arc-success"></div>
-        <div class="msg msg-warn" id="arc-warn"></div>
-
-        <div class="arc-meta">
-          <div class="arc-meta-item"><div class="arc-meta-lbl">Assembly_ID</div><div class="arc-meta-val" id="arc-assembly-id" style="color:var(--accent)">—</div></div>
-          <div class="arc-meta-item"><div class="arc-meta-lbl">Элементов</div><div class="arc-meta-val" id="arc-total-rows">1</div></div>
-          <div class="arc-meta-item"><div class="arc-meta-lbl">Всего в архиве</div><div class="arc-meta-val" id="arc-db-count">0</div></div>
-        </div>
-
-        <div class="two-col">
-          <!-- FORM -->
-          <div class="card">
-              <div class="card-hd">Структура изделия</div>
-              <div class="arc-actions">
-                <button class="arc-btn" id="arc-add-row" onclick="arcAddRow()">+ Добавить элемент</button>
-                <button class="arc-btn" id="arc-add-child" onclick="arcAddChildRow()">↳ Дочерний</button>
-                <button class="arc-btn" onclick="arcLoadFromDBPrompt()" style="border-color:var(--accent);color:var(--accent);">📥 Загрузить из базы</button>
-                <button class="arc-btn danger" id="arc-clear-table" onclick="arcClearTable()">Очистить</button>
+            <div id="ops-action-bar">
+              <span id="ops-selected-info">—</span>
+              <div style="margin-left:auto;display:flex;gap:8px;">
+                <button class="btn-edit-ops" onclick="editSelected()">📝 Редактировать</button>
+                <button class="btn-delete-ops" onclick="deleteSelected()">🗑 Удалить</button>
+                <button class="btn-clear-ops" onclick="clearSelection()">✕</button>
               </div>
-              <div class="arc-tbl-scroller">
-                <table class="arc-tbl">
-                  <thead><tr>
-                    <th style="width:65px">ID *</th>
-                    <th style="width:210px">Название *</th>
-                    <th style="width:160px">Обозначение *</th>
-                    <th style="width:55px">Кол-во</th>
-                    <th style="width:125px">Тип объекта</th>
-                    <th style="width:48px">Уровень</th>
-                    <th style="width:75px">Родит. ID</th>
-                    <th style="width:34px"></th>
-                  </tr></thead>
-                  <tbody id="arc-tbody">
-                  <tr class="arc-row-0">
-                    <td><input type="text" name="arc-id" value="0" onchange="arcUpdateStructure()"></td>
-                    <td><div class="combo-wrap"><input type="text" name="arc-name" placeholder="Наименование изделия" autocomplete="off" onchange="arcUpdateAssemblyId()" oninput="arcAcSearch(this,'arcrow-0-dd-name','product')" onfocus="arcAcSearch(this,'arcrow-0-dd-name','product')"><div class="combo-dd" id="arcrow-0-dd-name"></div></div></td>
-                    <td><div class="combo-wrap"><input type="text" name="arc-classifier" placeholder="АРВЦ..." autocomplete="off" onchange="arcUpdateAssemblyId()" oninput="arcAcSearch(this,'arcrow-0-dd-code','classifier')" onfocus="arcAcSearch(this,'arcrow-0-dd-code','classifier')"><div class="combo-dd" id="arcrow-0-dd-code"></div></div></td>
-                    <td><input type="number" name="arc-qty" value="1" min="1"></td>
-                    <td><select name="arc-type"><option value="">—</option><option value="Головное изделие" selected>Головное изделие</option><option value="Деталь">Деталь</option><option value="ПКИ">ПКИ</option><option value="Сборочная единица">Сборочная единица</option><option value="Комплект">Комплект</option></select></td>
-                    <td><div class="arc-lvl-badge arc-lvl-0">0</div></td>
-                    <td><input type="text" value="0" readonly style="color:var(--text3)"></td>
-                    <td><button class="arc-del-btn" onclick="arcRemoveRow(this)" disabled>×</button></td>
+            </div>
+
+            <div class="ops-table-container">
+              <table class="ops-main-table">
+                <thead>
+                  <tr>
+                    <th colspan="15" class="th-group-data">ДАННЫЕ ИЗДЕЛИЯ</th>
+                    <th colspan="15" class="th-group-tech">ТЕХНОЛОГИЧЕСКИЕ ОПЕРАЦИИ</th>
                   </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="arc-actions" style="flex-shrink:0;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-                <button class="arc-btn primary" onclick="arcSubmit()">✓ Добавить в архив</button>
-                <button class="arc-btn" onclick="arcClearForm()">↺ Сбросить</button>
-              </div>
+                  <tr>
+                    <th class="th-sub th-sub-blue">Обозначение</th>
+                    <th class="th-sub th-sub-blue">Название изделия</th>
+                    <th class="th-sub">№ извещения</th>
+                    <th class="th-sub">Тип объекта</th>
+                    <th class="th-sub">Марка материала</th>
+                    <th class="th-sub">Сортамент</th>
+                    <th class="th-sub">Кол-во мат.</th>
+                    <th class="th-sub">Ед.изм.</th>
+                    <th class="th-sub">Покрытие</th>
+                    <th class="th-sub">Твёрдость</th>
+                    <th class="th-sub">ФИО</th>
+                    <th class="th-sub">Кол-во (шт.)</th>
+                    <th class="th-sub">Масса дет.</th>
+                    <th class="th-sub">Габарит</th>
+                    <th class="th-sub th-border-right">В каком изделии</th>
+                    <th class="th-sub th-sub-green">№ опер.</th>
+                    <th class="th-sub th-sub-green">Наименование операции</th>
+                    <th class="th-sub">Исполнитель</th>
+                    <th class="th-sub">Станок ресурс</th>
+                    <th class="th-sub">Комментарии</th>
+                    <th class="th-sub">Инструмент</th>
+                    <th class="th-sub">Норма (ч)</th>
+                    <th class="th-sub">Загот. (ч)</th>
+                    <th class="th-sub">Аутсорс</th>
+                    <th class="th-sub">Финальный</th>
+                    <th class="th-sub">ЧПУ</th>
+                    <th class="th-sub">Загрузка (ч)</th>
+                    <th class="th-sub">Коммент. к изделию</th>
+                    <th class="th-sub">№ изгот.</th>
+                    <th class="th-sub">Создал</th>
+                  </tr>
+                </thead>
+                <tbody id="ops-tbody">
+                  <tr>
+                    <td colspan="30" style="text-align:center;color:var(--text3);padding:30px;">Нажмите «Обновить»</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="ops-pagination">
+              <button class="arc-btn" id="ops-prev" onclick="OPS_PAGE--;if(OPS_PAGE<1)OPS_PAGE=1;loadTechOps()">←
+                Назад</button>
+              <span id="ops-page-info">—</span>
+              <button class="arc-btn" id="ops-next" onclick="OPS_PAGE++;loadTechOps()">Вперёд →</button>
+            </div>
           </div>
-          <!-- ARCHIVE VIEW -->
-          <div class="card">
-              <div class="card-hd">База архив изделий</div>
-              <input class="form-inp" id="arc-search" oninput="arcFilterArchive(this.value)" placeholder="Поиск по Assembly_ID или названию..." style="flex-shrink:0;margin-bottom:10px;font-size:12px;">
-              <div class="arc-tbl-scroller">
-                <table class="arc-tbl">
-                  <thead><tr>
-                    <th>Головное изделие</th>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Обозначение</th>
-                    <th>Тип</th>
-                    <th>Кол-во</th>
-                    <th>Уровень</th>
-                    <th>Родит. ID</th>
-                    <th>Трудоёмк.</th>
-                    <th>№ п/п</th>
-                    <th>Создал</th>
-                  </tr></thead>
-                  <tbody id="arc-archive-tbody">
-                    <tr><td colspan="11" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">Архив пуст.</td></tr>
-                  </tbody>
-                </table>
+
+          <!-- Вкладка: База архив изделий -->
+          <div id="nom-content-arc" class="">
+            <div class="msg msg-err" id="arc-validation"></div>
+            <div class="msg msg-ok" id="arc-success"></div>
+            <div class="msg msg-warn" id="arc-warn"></div>
+
+            <div class="arc-meta">
+              <div class="arc-meta-item">
+                <div class="arc-meta-lbl">Assembly_ID</div>
+                <div class="arc-meta-val" id="arc-assembly-id">—</div>
               </div>
-              <div style="flex-shrink:0;margin-top:8px;display:flex;gap:8px;">
-                <button class="arc-btn danger" onclick="arcClearArchive()">Очистить архив</button>
-                <button class="arc-btn" id="arc-export" onclick="arcExportCSV()">Экспорт CSV</button>
+              <div class="arc-meta-item">
+                <div class="arc-meta-lbl">Элементов</div>
+                <div class="arc-meta-val" id="arc-total-rows">1</div>
               </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Вкладка:  Катлог номенклатуры -->
-            <div id="nom-content-cat" style="display:none">
-              <div class="msg msg-err" id="arc-validation"></div>
-              <div class="msg msg-ok" id="arc-success"></div>
-              <div class="msg msg-warn" id="arc-warn"></div>
-
-              
-
-              <div class="two-col1-2">
-                <!-- FORM Список номенклатуры-->
-                <div>
-                  <div class="card">
-                    <div class="card-hd">Каталог</div>
-
-                    <div id="productTree"> </div>
-                  </div>
-                </div>
-                <!-- ARCHIVE VIEW -->
-                <div>
-                  <div class="card">
-                    <div class="card-hd">Номенклатура</div>
-                    <input class="form-inp" id="cat-search" oninput="CatFilterArchive(this.value)"
-                      placeholder="Поиск по Assembly_ID или названию..." style="margin-bottom:10px;font-size:12px;"
-                      oninput="CatFilterArchive(this.value)">
-                    <div class="cat-tbl-scroller" >
-                      <table class="arc-tbl">
-                        <thead>
-                          <tr>
-                            <th>Головное изделие</th>
-                            <th>ID</th>
-                            <th>Название</th>
-                            <th>Обозначение</th>
-                            <th>Тип</th>
-                            <th>Кол-во</th>
-                            <th>Уровень</th>
-                            <th>Родит. ID</th>
-                            <th>Трудоёмк.</th>
-                            <th>№ п/п</th>
-                            <th>Создал</th>
-                          </tr>
-                        </thead>
-                        <tbody id="arc-catalogue-tbody">
-                          <tr>
-                            <td colspan="11" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">
-                              Архив пуст.</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    
-                  </div>
-                </div>
+              <div class="arc-meta-item">
+                <div class="arc-meta-lbl">Всего в архиве</div>
+                <div class="arc-meta-val" id="arc-db-count">0</div>
               </div>
             </div>
 
-      </div><!-- panel-nomenclature -->
-
-      <!-- ═══ ПРОИЗВОДСТВО (вкладки) ═══ -->
-      <div class="panel" id="panel-production">
-        <div class="chrome-tabs">
-          <div class="chrome-tab active" id="prod-tab-ops" onclick="switchProdTab('ops')">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            План по операциям
-          </div>
-          <div class="chrome-tab" id="prod-tab-proj" onclick="switchProdTab('proj')">
-            <svg viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-            План проектов
-          </div>
-        </div>
-
-        <!-- ПЛАН ПО ОПЕРАЦИЯМ -->
-        <div id="prod-content-ops">
-          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
-            <input class="form-inp" id="prod-ops-q" placeholder="Поиск по наряду, изделию..." style="width:280px;font-size:12px" oninput="clearTimeout(PROD_SEARCH_T);PROD_SEARCH_T=setTimeout(loadProdOps,400)">
-            <select class="form-inp" id="prod-ops-status" style="width:140px;font-size:12px" onchange="loadProdOps()">
-              <option value="">Все статусы</option>
-              <!-- <option value="Новый">Новый</option>
-              <option value="🔄 В работе">В работе</option>
-              <option value="✅ Готово">Готово</option> -->
-              <option value="Новый">Новый</option>
-              <option value="В работе">В работе</option>
-              <option value="Готово">Готово</option>
-              <option value="⏸ Пауза">Пауза</option>
-            </select>
-            <button class="arc-btn" onclick="loadProdOps()">Обновить</button>
-            <span id="prod-ops-info" style="font-size:11px;color:var(--text3)"></span>
-          </div>
-          <div id="prod-action-bar" style="display:none;background:var(--accent-glow);border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius);padding:10px 16px;margin-bottom:10px;align-items:center;gap:12px">
-            <span style="font-size:12px;color:var(--accent);font-weight:600" id="prod-selected-info">—</span>
-            <div style="margin-left:auto;display:flex;gap:8px">
-              <button onclick="prodPrintRoute()" style="padding:5px 14px;border:1px solid #10b981;border-radius:var(--radius);background:rgba(16,185,129,0.1);color:#10b981;font-size:12px;cursor:pointer">📄 Маршрутный лист</button>
-              <button onclick="prodShowDetail()" style="padding:5px 14px;border:1px solid var(--accent);border-radius:var(--radius);background:var(--accent-glow);color:var(--accent);font-size:12px;cursor:pointer">👁 Подробнее</button>
-              <button onclick="prodEdit()" style="padding:5px 14px;border:1px solid var(--accent);border-radius:var(--radius);background:var(--accent-glow);color:var(--accent);font-size:12px;cursor:pointer">📝 Редактировать</button>
-              <button onclick="prodDelete()" style="padding:5px 14px;border:1px solid var(--red);border-radius:var(--radius);background:var(--red-bg);color:var(--red-text);font-size:12px;cursor:pointer">🗑 Удалить</button>
-              <button onclick="prodClearSelection()" style="padding:5px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg3);color:var(--text3);font-size:12px;cursor:pointer">✕</button>
+            <div class="two-col">
+              <!-- FORM -->
+              <div class="card">
+                <div class="card-hd">Структура изделия</div>
+                <div class="arc-actions">
+                  <button class="arc-btn" id="arc-add-row" onclick="arcAddRow()">+ Добавить элемент</button>
+                  <button class="arc-btn" id="arc-add-child" onclick="arcAddChildRow()">↳ Дочерний</button>
+                  <button class="arc-btn" onclick="arcLoadFromDBPrompt()"
+                    style="border-color:var(--accent);color:var(--accent);">📥 Загрузить из базы</button>
+                  <button class="arc-btn danger" id="arc-clear-table" onclick="arcClearTable()">Очистить</button>
+                </div>
+                <div class="arc-tbl-scroller">
+                  <table class="arc-tbl">
+                    <thead>
+                      <tr>
+                        <th style="width:65px">ID *</th>
+                        <th style="width:210px">Название *</th>
+                        <th style="width:160px">Обозначение *</th>
+                        <th style="width:55px">Кол-во</th>
+                        <th style="width:125px">Тип объекта</th>
+                        <th style="width:48px">Уровень</th>
+                        <th style="width:75px">Родит. ID</th>
+                        <th style="width:34px"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="arc-tbody">
+                      <tr class="arc-row-0">
+                        <td><input type="text" name="arc-id" value="0" onchange="arcUpdateStructure()"></td>
+                        <td>
+                          <div class="combo-wrap"><input type="text" name="arc-name" placeholder="Наименование изделия"
+                              autocomplete="off" onchange="arcUpdateAssemblyId()"
+                              oninput="arcAcSearch(this,'arcrow-0-dd-name','product')"
+                              onfocus="arcAcSearch(this,'arcrow-0-dd-name','product')">
+                            <div class="combo-dd" id="arcrow-0-dd-name"></div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="combo-wrap"><input type="text" name="arc-classifier" placeholder="АРВЦ..."
+                              autocomplete="off" onchange="arcUpdateAssemblyId()"
+                              oninput="arcAcSearch(this,'arcrow-0-dd-code','classifier')"
+                              onfocus="arcAcSearch(this,'arcrow-0-dd-code','classifier')">
+                            <div class="combo-dd" id="arcrow-0-dd-code"></div>
+                          </div>
+                        </td>
+                        <td><input type="number" name="arc-qty" value="1" min="1"></td>
+                        <td><select name="arc-type">
+                            <option value="">—</option>
+                            <option value="Головное изделие" selected>Головное изделие</option>
+                            <option value="Деталь">Деталь</option>
+                            <option value="ПКИ">ПКИ</option>
+                            <option value="Сборочная единица">Сборочная единица</option>
+                            <option value="Комплект">Комплект</option>
+                          </select></td>
+                        <td>
+                          <div class="arc-lvl-badge arc-lvl-0">0</div>
+                        </td>
+                        <td><input type="text" value="0" readonly style="color:var(--text3)"></td>
+                        <td><button class="arc-del-btn" onclick="arcRemoveRow(this)" disabled>×</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="arc-actions"
+                  style="flex-shrink:0;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                  <button class="arc-btn primary" onclick="arcSubmit()">✓ Добавить в архив</button>
+                  <button class="arc-btn" onclick="arcClearForm()">↺ Сбросить</button>
+                </div>
+              </div>
+              <!-- ARCHIVE VIEW -->
+              <div class="card">
+                <div class="card-hd">База архив изделий</div>
+                <input class="form-inp" id="arc-search" oninput="arcFilterArchive(this.value)"
+                  placeholder="Поиск по Assembly_ID или названию...">
+                <div class="arc-tbl-scroller">
+                  <table class="arc-tbl">
+                    <thead>
+                      <tr>
+                        <th>Головное изделие</th>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Обозначение</th>
+                        <th>Тип</th>
+                        <th>Кол-во</th>
+                        <th>Уровень</th>
+                        <th>Родит. ID</th>
+                        <th>Трудоёмк.</th>
+                        <th>№ п/п</th>
+                        <th>Создал</th>
+                      </tr>
+                    </thead>
+                    <tbody id="arc-archive-tbody">
+                      <tr>
+                        <td colspan="11" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">Архив
+                          пуст.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="flex-shrink:0;margin-top:8px;display:flex;gap:8px;">
+                  <button class="arc-btn danger" onclick="arcClearArchive()">Очистить архив</button>
+                  <button class="arc-btn" id="arc-export" onclick="arcExportCSV()">Экспорт CSV</button>
+                </div>
+              </div>
             </div>
           </div>
-          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1800px">
-              <thead style="position:sticky;top:0;z-index:5">
-                <tr style="background:var(--bg3)">
-                  <th style="padding:6px 8px;font-size:9px;color:var(--accent);border-bottom:1px solid var(--border);white-space:nowrap">Наряд №</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Статус</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Заказ</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Заказчик</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Матер.</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--amber-text);border-bottom:1px solid var(--border)">№ опер.</th>
-                  <th style="padding:6px 8px;font-size:9px;color:#34d399;border-bottom:1px solid var(--border)">Операция</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Изделие</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Обозначение</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Станок</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Кол-во</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Норма(ч)</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">План(мин)</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Факт(мин)</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">%</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Срок</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Готово</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Не гот.</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Брак</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Исполн.</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Головное</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Создал</th>
-                </tr>
-              </thead>
-              <tbody id="prod-ops-tbody">
-                <tr><td colspan="22" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td></tr>
-              </tbody>
-            </table>
+
+          <!-- Вкладка:  Катлог номенклатуры -->
+          <div id="nom-content-cat" class="">
+            <div class="msg msg-err" id="arc-validation"></div>
+            <div class="msg msg-ok" id="arc-success"></div>
+            <div class="msg msg-warn" id="arc-warn"></div>
+
+
+
+            <div class="two-col1-2">
+              <!-- FORM Список номенклатуры-->
+              <div>
+                <div class="card">
+                  <div class="card-hd">Каталог</div>
+
+                  <div id="productTree"> </div>
+                </div>
+              </div>
+              <!-- ARCHIVE VIEW -->
+              <div>
+                <div class="card">
+                  <div class="card-hd">Номенклатура</div>
+                  <input class="form-inp" id="cat-search" oninput="CatFilterArchive(this.value)"
+                    placeholder="Поиск по Assembly_ID или названию..." oninput="CatFilterArchive(this.value)">
+                  <div class="cat-tbl-scroller">
+                    <table class="arc-tbl">
+                      <thead>
+                        <tr>
+                          <th>Головное изделие</th>
+                          <th>ID</th>
+                          <th>Название</th>
+                          <th>Обозначение</th>
+                          <th>Тип</th>
+                          <th>Кол-во</th>
+                          <th>Уровень</th>
+                          <th>Родит. ID</th>
+                          <th>Трудоёмк.</th>
+                          <th>№ п/п</th>
+                          <th>Создал</th>
+                        </tr>
+                      </thead>
+                      <tbody id="arc-catalogue-tbody">
+                        <tr>
+                          <td colspan="11" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">
+                            Архив пуст.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+            </div>
           </div>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--text3)">
+
+        </div><!-- panel-nomenclature -->
+
+        <!-- ═══ ПРОИЗВОДСТВО (вкладки) ═══ -->
+        <div class="panel" id="panel-production">
+          <div class="chrome-tabs">
+            <div class="chrome-tab active" id="prod-tab-ops" onclick="switchProdTab('ops')">
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+              </svg>
+              План по операциям
+            </div>
+            <div class="chrome-tab" id="prod-tab-proj" onclick="switchProdTab('proj')">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 20V10" />
+                <path d="M18 20V4" />
+                <path d="M6 20v-4" />
+              </svg>
+              План проектов
+            </div>
+          </div>
+
+          <!-- ПЛАН ПО ОПЕРАЦИЯМ -->
+          <div id="prod-content-ops">
+            <div class="prod-search-row">
+              <input class="form-inp" id="prod-ops-q" placeholder="Поиск по наряду, изделию..."
+                oninput="clearTimeout(PROD_SEARCH_T);PROD_SEARCH_T=setTimeout(loadProdOps,400)">
+              <select class="form-inp" id="prod-ops-status" onchange="loadProdOps()">
+                <option value="">Все статусы</option>
+                <option value="Новый">Новый</option>
+                <option value="В работе">В работе</option>
+                <option value="Готово">Готово</option>
+                <option value="⏸ Пауза">Пауза</option>
+              </select>
+              <button class="arc-btn" onclick="loadProdOps()">Обновить</button>
+              <span id="prod-ops-info"></span>
+            </div>
+            <div id="prod-action-bar">
+              <span id="prod-selected-info">—</span>
+              <div style="margin-left:auto;display:flex;gap:8px">
+                <button class="btn-prod-print" onclick="prodPrintRoute()">📄 Маршрутный лист</button>
+                <button class="btn-prod-detail" onclick="prodShowDetail()">👁 Подробнее</button>
+                <button class="btn-prod-edit" onclick="prodEdit()">📝 Редактировать</button>
+                <button class="btn-prod-delete" onclick="prodDelete()">🗑 Удалить</button>
+                <button class="btn-prod-clear" onclick="prodClearSelection()">✕</button>
+              </div>
+            </div>
+            <div class="prod-table-wrap">
+              <table class="prod-table">
+                <thead>
+                  <tr>
+                    <th class="prod-th prod-th-accent">Наряд №</th>
+                    <th class="prod-th">Статус</th>
+                    <th class="prod-th">Заказ</th>
+                    <th class="prod-th">Заказчик</th>
+                    <th class="prod-th">Матер.</th>
+                    <th class="prod-th prod-th-amber">№ опер.</th>
+                    <th class="prod-th prod-th-green">Операция</th>
+                    <th class="prod-th">Изделие</th>
+                    <th class="prod-th">Обозначение</th>
+                    <th class="prod-th">Станок</th>
+                    <th class="prod-th">Кол-во</th>
+                    <th class="prod-th">Норма(ч)</th>
+                    <th class="prod-th">План(мин)</th>
+                    <th class="prod-th">Факт(мин)</th>
+                    <th class="prod-th">%</th>
+                    <th class="prod-th">Срок</th>
+                    <th class="prod-th">Готово</th>
+                    <th class="prod-th">Не гот.</th>
+                    <th class="prod-th">Брак</th>
+                    <th class="prod-th">Исполн.</th>
+                    <th class="prod-th">Головное</th>
+                    <th class="prod-th">Создал</th>
+                  </tr>
+                </thead>
+                <tbody id="prod-ops-tbody">
+                  <tr>
+                    <td colspan="22" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="prod-pagination">
               <button class="arc-btn" onclick="prodPage(-1)" id="prod-prev">← Назад</button>
               <span id="prod-page-info">Стр. 1</span>
               <button class="arc-btn" onclick="prodPage(1)" id="prod-next">Вперёд →</button>
             </div>
-        </div>
-
-
-
-        <!-- ПЛАН ПРОЕКТОВ -->
-        <div id="prod-content-proj" style="display:none">
-          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
-            <input class="form-inp" id="prod-proj-q" placeholder="Поиск по наряду, изделию..." style="width:280px;font-size:12px" oninput="clearTimeout(PROD_SEARCH_T);PROD_SEARCH_T=setTimeout(loadProdProjects,400)">
-            <select class="form-inp" id="prod-proj-status" style="width:140px;font-size:12px" onchange="loadProdProjects()">
-              <option value="">Все статусы</option>
-              <option value="Новый">Новый</option>
-              <option value="🔄 В работе">В работе</option>
-              <option value="✅ Готово">Готово</option>
-            </select>
-            <button class="arc-btn" onclick="loadProdProjects()">Обновить</button>
           </div>
-          <div style="overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);max-height:calc(100vh - 260px);overflow-y:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px">
-              <thead style="position:sticky;top:0;z-index:5">
-                <tr style="background:var(--bg3)">
-                  <th style="padding:6px 8px;font-size:9px;color:var(--accent);border-bottom:1px solid var(--border)">Наряд №</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Статус</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Заказ</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Заказчик</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Изделие</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Обозначение</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Тип</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Матер.</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Кол-во</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Срок</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Готово</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">%</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Исполн.</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Головное</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Создал</th>
-                  <th style="padding:6px 8px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Коммент.</th>
-                </tr>
-              </thead>
-              <tbody id="prod-proj-tbody">
-                <tr><td colspan="16" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td></tr>
-              </tbody>
-            </table>
-          </div>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--text3)">
+
+
+
+          <!-- ПЛАН ПРОЕКТОВ -->
+          <div id="prod-content-proj" class="">
+            <div class="prod-search-row">
+              <input class="form-inp" id="prod-proj-q" placeholder="Поиск по наряду, изделию..."
+                oninput="clearTimeout(PROD_SEARCH_T);PROD_SEARCH_T=setTimeout(loadProdProjects,400)">
+              <select class="form-inp" id="prod-proj-status" onchange="loadProdProjects()">
+                <option value="">Все статусы</option>
+                <option value="Новый">Новый</option>
+                <option value="🔄 В работе">В работе</option>
+                <option value="✅ Готово">Готово</option>
+              </select>
+              <button class="arc-btn" onclick="loadProdProjects()">Обновить</button>
+            </div>
+            <div class="prod-table-wrap">
+              <table class="prod-table proj">
+                <thead>
+                  <tr>
+                    <th class="prod-th prod-th-accent">Наряд №</th>
+                    <th class="prod-th">Статус</th>
+                    <th class="prod-th">Заказ</th>
+                    <th class="prod-th">Заказчик</th>
+                    <th class="prod-th">Изделие</th>
+                    <th class="prod-th">Обозначение</th>
+                    <th class="prod-th">Тип</th>
+                    <th class="prod-th">Матер.</th>
+                    <th class="prod-th">Кол-во</th>
+                    <th class="prod-th">Срок</th>
+                    <th class="prod-th">Готово</th>
+                    <th class="prod-th">%</th>
+                    <th class="prod-th">Исполн.</th>
+                    <th class="prod-th">Головное</th>
+                    <th class="prod-th">Создал</th>
+                    <th class="prod-th">Коммент.</th>
+                  </tr>
+                </thead>
+                <tbody id="prod-proj-tbody">
+                  <tr>
+                    <td colspan="16" style="text-align:center;color:var(--text3);padding:30px">Нет данных</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="prod-pagination">
               <button class="arc-btn" onclick="prodProjPage(-1)">← Назад</button>
               <span id="prod-proj-page-info">Стр. 1</span>
               <button class="arc-btn" onclick="prodProjPage(1)">Вперёд →</button>
             </div>
-        </div>
-      </div>
-
-      <!-- ═══ МОДАЛЬНОЕ ОКНО: ДЕТАЛИ НАРЯДА ═══ -->
-      <div id="narad-detail-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);overflow-y:auto">
-        <div style="max-width:800px;margin:40px auto;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">
-            <div style="font-size:16px;font-weight:700;color:var(--accent)" id="nd-title">Наряд</div>
-            <button onclick="document.getElementById('narad-detail-modal').style.display='none'" style="background:none;border:1px solid var(--border2);border-radius:var(--radius);color:var(--text3);padding:8px 16px;cursor:pointer">✕</button>
           </div>
-          <div id="nd-content"></div>
         </div>
-      </div>
 
-      <!-- ═══ ЛИЧНЫЙ КАБИНЕТ ═══ -->
-      <div class="panel" id="panel-profile">
-        <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ПРОФИЛЯ -->
-        <div id="edit-profile-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100001; align-items:center; justify-content:center;">
-          <div style="background:#161b27; border:1px solid #3b82f6; border-radius:12px; padding:32px; width:100%; max-width:420px;">
-            <h3 style="margin:0 0 20px 0;">✏️ Редактировать профиль</h3>
-            
-            <label style="display:block; margin:12px 0 6px;">Имя</label>
-            <input type="text" id="edit-firstname" class="auth-inp" style="width:100%;">
-
-            <label style="display:block; margin:12px 0 6px;">Фамилия</label>
-            <input type="text" id="edit-lastname" class="auth-inp" style="width:100%;">
-
-            <label style="display:block; margin:12px 0 6px;">Email</label>
-            <input type="email" id="edit-email" class="auth-inp" style="width:100%;">
-
-            <div style="margin-top:25px; display:flex; gap:12px;">
-              <button onclick="saveProfile()" style="flex:1; padding:12px; background:#3b82f6; color:white; border:none; border-radius:8px; cursor:pointer;">Сохранить</button>
-              <button onclick="closeEditProfile()" style="flex:1; padding:12px; background:#334155; color:white; border:none; border-radius:8px; cursor:pointer;">Отмена</button>
+        <!-- ═══ МОДАЛЬНОЕ ОКНО: ДЕТАЛИ НАРЯДА ═══ -->
+        <div id="narad-detail-modal" class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div class="modal-title" id="nd-title">Наряд</div>
+              <button class="modal-close-btn"
+                onclick="document.getElementById('narad-detail-modal').style.display='none'">✕</button>
             </div>
+            <div id="nd-content"></div>
           </div>
         </div>
-        
-        <div style="max-width:620px; margin:40px auto; background:var(--bg2); border-radius:16px; padding:40px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-          
-          <!-- Профиль -->
-          <div style="text-align:center; margin-bottom:40px;">
-            <div id="profile-av" style="width:110px; height:110px; margin:0 auto 20px; background:#3b82f6; color:white; font-size:42px; font-weight:bold; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 25px rgba(59,130,246,0.4);">??</div>
-            <h2 id="profile-name" style="margin:0 0 8px 0; font-size:26px;">Имя Фамилия</h2>
-            <p id="profile-email" style="color:var(--text3); font-size:16px; margin:0 0 16px 0;">email@cir.ru</p>
-            <span id="profile-role" style="display:inline-block; padding:8px 24px; background:#334155; color:var(--accent); border-radius:30px; font-size:15px;">Роль</span>
-          </div>
 
-          <!-- Статистика -->
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px; margin-bottom:40px;">
-            <div class="card">
-              <div class="card-hd">Моя статистика</div>
-              <div style="padding:24px; text-align:center;">
-                <div id="stat-ops-count" style="font-size:42px; font-weight:700; color:var(--accent);">0</div>
-                <div style="color:var(--text3);">Технологических операций добавлено</div>
-              </div>
-            </div>
-            
-            <div class="card">
-              <div class="card-hd">Последняя активность</div>
-              <div style="padding:24px; text-align:center;">
-                <div id="stat-last-login" style="font-size:18px; color:var(--text2);">Сегодня</div>
-                <div style="color:var(--text3); margin-top:8px;">в системе</div>
+        <!-- ═══ ЛИЧНЫЙ КАБИНЕТ ═══ -->
+        <div class="panel" id="panel-profile">
+          <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ПРОФИЛЯ -->
+          <div id="edit-profile-modal">
+            <div>
+              <h3 style="margin:0 0 20px 0;">✏️ Редактировать профиль</h3>
+
+              <label>Имя</label>
+              <input type="text" id="edit-firstname" class="auth-inp">
+
+              <label>Фамилия</label>
+              <input type="text" id="edit-lastname" class="auth-inp">
+
+              <label>Email</label>
+              <input type="email" id="edit-email" class="auth-inp">
+
+              <div class="admin-modal-actions">
+                <button class="admin-save-btn" onclick="saveProfile()">Сохранить</button>
+                <button class="admin-cancel-btn" onclick="closeEditProfile()">Отмена</button>
               </div>
             </div>
           </div>
 
-          <!-- Действия -->
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <button onclick="changePassword()" class="cabinet-btn" style="padding:14px; font-size:16px;">
-              🔑 Изменить пароль
-            </button>
-            <button onclick="editProfile()" class="cabinet-btn" style="padding:14px; font-size:16px;">
-              ✏️ Редактировать профиль
-            </button>
-            <button onclick="doLogout()" class="auth-btn danger" style="padding:14px; font-size:16px; margin-top:20px;">
-              Выйти из аккаунта
-            </button>
+          <div class="profile-container">
+
+            <!-- Профиль -->
+            <div class="profile-header">
+              <div id="profile-av">??</div>
+              <h2 id="profile-name">Имя Фамилия</h2>
+              <p id="profile-email">email@cir.ru</p>
+              <span id="profile-role">Роль</span>
+            </div>
+
+            <!-- Статистика -->
+            <div class="profile-stats">
+              <div class="card">
+                <div class="card-hd">Моя статистика</div>
+                <div class="stat-card-inner">
+                  <div id="stat-ops-count">0</div>
+                  <div style="color:var(--text3);">Технологических операций добавлено</div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-hd">Последняя активность</div>
+                <div class="stat-card-inner">
+                  <div id="stat-last-login">Сегодня</div>
+                  <div style="color:var(--text3); margin-top:8px;">в системе</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Действия -->
+            <div class="profile-actions">
+              <button onclick="changePassword()" class="cabinet-btn">
+                🔑 Изменить пароль
+              </button>
+              <button onclick="editProfile()" class="cabinet-btn">
+                ✏️ Редактировать профиль
+              </button>
+              <button onclick="doLogout()" class="auth-btn danger cabinet-btn" style="margin-top:20px;">
+                Выйти из аккаунта
+              </button>
+            </div>
+          </div>
+
+          <!-- Мои записи -->
+          <div class="my-records-section" id="my-records-section">
+            <h3 class="my-records-title">Мои записи</h3>
+
+            <!-- Технологические операции -->
+            <div class="card">
+              <div class="card-hd">Технологические операции (<span id="mr-ops-count">0</span>)</div>
+              <div class="records-table-wrap">
+                <table class="arc-tbl records-table">
+                  <thead>
+                    <tr>
+                      <th>Обозначение</th>
+                      <th>Название изделия</th>
+                      <th>№ опер.</th>
+                      <th>Операция</th>
+                      <th>Дата</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mr-ops-tbody">
+                    <tr>
+                      <td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Структуры изделий -->
+            <div class="card">
+              <div class="card-hd">Структуры изделий (<span id="mr-arc-count">0</span>)</div>
+              <div class="records-table-wrap">
+                <table class="arc-tbl records-table">
+                  <thead>
+                    <tr>
+                      <th>Головное изделие</th>
+                      <th>Название</th>
+                      <th>Обозначение</th>
+                      <th>Тип</th>
+                      <th>Дата</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mr-arc-tbody">
+                    <tr>
+                      <td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Производственные наряды -->
+            <div class="card">
+              <div class="card-hd">Производственные наряды (<span id="mr-prod-count">0</span>)</div>
+              <div class="records-table-wrap">
+                <table class="arc-tbl records-table prod">
+                  <thead>
+                    <tr>
+                      <th>№ наряда</th>
+                      <th>Изделие</th>
+                      <th>Статус</th>
+                      <th>Дата</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mr-prod-tbody">
+                    <tr>
+                      <td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Мои записи -->
-        <div style="max-width:920px; margin:32px auto 40px; display:flex; flex-direction:column; gap:20px;" id="my-records-section">
-          <h3 style="margin:0; font-size:18px; color:var(--accent);">Мои записи</h3>
+        <!-- ═══ УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (только для ADMIN) ═══ -->
+        <div class="panel" id="panel-users">
 
-          <!-- Технологические операции -->
-          <div class="card">
-            <div class="card-hd">Технологические операции (<span id="mr-ops-count">0</span>)</div>
-            <div style="overflow-x:auto;">
-              <table class="arc-tbl" style="min-width:600px; font-size:11px;">
-                <thead><tr>
-                  <th>Обозначение</th>
-                  <th>Название изделия</th>
-                  <th>№ опер.</th>
-                  <th>Операция</th>
-                  <th>Дата</th>
-                </tr></thead>
-                <tbody id="mr-ops-tbody">
-                  <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td></tr>
-                </tbody>
-              </table>
+          <!-- Модал: Добавить / Редактировать пользователя -->
+          <div id="admin-user-modal">
+            <div>
+              <h3 id="admin-user-modal-title" style="margin:0 0 20px 0;">Добавить пользователя</h3>
+              <input type="hidden" id="admin-edit-id">
+              <div class="admin-form-grid">
+                <div>
+                  <label class="admin-label">Имя *</label>
+                  <input type="text" id="admin-edit-firstname" class="auth-inp admin-input">
+                </div>
+                <div>
+                  <label class="admin-label">Фамилия</label>
+                  <input type="text" id="admin-edit-lastname" class="auth-inp admin-input">
+                </div>
+              </div>
+              <label class="admin-label" style="margin-top:12px;">Email (логин) *</label>
+              <input type="email" id="admin-edit-email" class="auth-inp admin-input">
+              <div class="admin-form-grid" style="margin-top:12px;">
+                <div>
+                  <label class="admin-label">Роль *</label>
+                  <select id="admin-edit-role" class="auth-inp admin-input">
+                    <option value="admin">Администратор</option>
+                    <option value="technologist">Технолог</option>
+                    <option value="master">Мастер</option>
+                    <option value="dispatcher">Диспетчер</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="admin-label">Статус</label>
+                  <select id="admin-edit-active" class="auth-inp admin-input">
+                    <option value="true">Активен</option>
+                    <option value="false">Заблокирован</option>
+                  </select>
+                </div>
+              </div>
+              <div id="admin-edit-pass-wrap">
+                <label class="admin-label" style="margin-top:12px;">Пароль *</label>
+                <input type="password" id="admin-edit-password" class="auth-inp admin-input"
+                  placeholder="Минимум 6 символов">
+              </div>
+              <div id="admin-user-modal-err"></div>
+              <div class="admin-modal-actions">
+                <button class="admin-save-btn" onclick="adminSaveUser()">Сохранить</button>
+                <button class="admin-cancel-btn" onclick="adminCloseUserModal()">Отмена</button>
+              </div>
             </div>
           </div>
 
-          <!-- Структуры изделий -->
-          <div class="card">
-            <div class="card-hd">Структуры изделий (<span id="mr-arc-count">0</span>)</div>
-            <div style="overflow-x:auto;">
-              <table class="arc-tbl" style="min-width:600px; font-size:11px;">
-                <thead><tr>
-                  <th>Головное изделие</th>
-                  <th>Название</th>
-                  <th>Обозначение</th>
-                  <th>Тип</th>
-                  <th>Дата</th>
-                </tr></thead>
-                <tbody id="mr-arc-tbody">
-                  <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td></tr>
-                </tbody>
-              </table>
+          <!-- Модал: Смена пароля -->
+          <div id="admin-pass-modal">
+            <div>
+              <h3 style="margin:0 0 8px 0;">🔑 Смена пароля</h3>
+              <p id="admin-pass-user-name" style="color:var(--text3);margin:0 0 16px;font-size:13px;"></p>
+              <input type="hidden" id="admin-pass-uid">
+              <label class="admin-label">Новый пароль *</label>
+              <input type="password" id="admin-new-pass" class="auth-inp admin-input" placeholder="Минимум 6 символов">
+              <div id="admin-pass-modal-err"></div>
+              <div class="admin-modal-actions">
+                <button class="admin-save-btn" onclick="adminSavePassword()">Сохранить</button>
+                <button class="admin-cancel-btn" onclick="adminClosePassModal()">Отмена</button>
+              </div>
             </div>
           </div>
 
-          <!-- Производственные наряды -->
-          <div class="card">
-            <div class="card-hd">Производственные наряды (<span id="mr-prod-count">0</span>)</div>
-            <div style="overflow-x:auto;">
-              <table class="arc-tbl" style="min-width:500px; font-size:11px;">
-                <thead><tr>
-                  <th>№ наряда</th>
-                  <th>Изделие</th>
+          <div class="admin-users-header">
+            <button class="admin-add-btn" onclick="adminOpenAddUser()">+ Добавить пользователя</button>
+            <span id="users-count"></span>
+          </div>
+          <div class="users-table-scroller">
+            <table class="arc-tbl users-table">
+              <thead>
+                <tr>
+                  <th>ФИО</th>
+                  <th>Email (Логин)</th>
+                  <th>Роль</th>
                   <th>Статус</th>
-                  <th>Дата</th>
-                </tr></thead>
-                <tbody id="mr-prod-tbody">
-                  <tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">Загрузка...</td></tr>
-                </tbody>
-              </table>
+                  <th>Последний вход</th>
+                  <th>Дата регистрации</th>
+                  <th style="min-width:220px;">Действия</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ═══ МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ В ПРОИЗВОДСТВО ═══ -->
+        <div id="prod-form-modal" class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div>
+                <div class="modal-title">Добавление в план цеха</div>
+                <div class="pf-header-text">Управление технологическими операциями и производственными заданиями</div>
+              </div>
+              <button class="modal-close-btn" onclick="closeProdForm()">✕ Закрыть</button>
+            </div>
+
+            <div class="msg msg-err" id="pf-err"></div>
+            <div class="msg msg-ok" id="pf-ok"></div>
+
+            <div class="card">
+              <div class="card-hd">Основные параметры заказа</div>
+              <div style="display:flex;gap:8px;margin-bottom:10px">
+                <button class="arc-btn primary" onclick="pfLoadOps()">🔍 Найти операции</button>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Головное изделие (из архива)</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="pf-assembly" placeholder="Кликните для выбора..." autocomplete="off"
+                      onfocus="pfAssemblyFocus()" oninput="pfAssemblyInput()">
+                    <div class="combo-dd" id="dd-pf-assembly"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Изделие</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="pf-product" placeholder="Название изделия" autocomplete="off"
+                      onfocus="pfProductFocus()" oninput="pfProductInput()">
+                    <div class="combo-dd" id="dd-pf-product"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Чертёж</label>
+                  <input class="form-inp" id="pf-drawing" placeholder="Заполняется автоматически" readonly
+                    style="background:var(--bg3)">
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl req">Номер наряда</label>
+                  <input class="form-inp" id="pf-narad" placeholder="2025-001">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Номер заказа</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="pf-order" placeholder="ВП-2025-89" autocomplete="off"
+                      onfocus="pfOrderFocus()" oninput="pfOrderFocus()">
+                    <div class="combo-dd" id="dd-pf-order"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Заказчик</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="pf-customer" placeholder="Название заказчика" autocomplete="off"
+                      onfocus="pfCustomerFocus()" oninput="pfCustomerFocus()">
+                    <div class="combo-dd" id="dd-pf-customer"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Количество (шт.)</label>
+                  <input class="form-inp" id="pf-quantity" type="number" value="1" min="1">
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Приоритет</label>
+                  <select class="form-inp" id="pf-priority">
+                    <option value="1">1 — Срочный</option>
+                    <option value="2">2 — Высокий</option>
+                    <option value="3" selected>3 — Обычный</option>
+                    <option value="4">4 — Низкий</option>
+                    <option value="5">5 — Плановый</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Дата начала производства</label>
+                  <input class="form-inp" id="pf-start-date" type="date">
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Срок выполнения</label>
+                  <input class="form-inp" id="pf-deadline" type="date">
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hd">Технологические операции — Детализация из архива</div>
+              <div id="pf-ops-info"></div>
+              <div class="pf-ops-table-wrap">
+                <table class="pf-ops-table">
+                  <thead>
+                    <tr>
+                      <th class="prod-th">Деталь / Узел</th>
+                      <th class="prod-th">Чертёж</th>
+                      <th class="prod-th prod-th-amber">№ опер.</th>
+                      <th class="prod-th prod-th-green">Операция</th>
+                      <th class="prod-th">Станок/ресурс</th>
+                      <th class="prod-th">Норма(ч)</th>
+                      <th class="prod-th">Загот.(ч)</th>
+                      <th class="prod-th">Аутсорс</th>
+                      <th class="prod-th">Финальн.</th>
+                      <th class="prod-th">ЧПУ</th>
+                      <th class="prod-th">Загрузка</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pf-ops-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="pf-actions">
+              <button class="topbar-btn btn-accent" style="padding:12px 28px;font-size:14px" onclick="pfSubmit()">✓
+                Создать наряд</button>
+              <button class="topbar-btn" style="padding:12px 22px;font-size:14px;margin-left:auto"
+                onclick="closeProdForm()">Отмена</button>
             </div>
           </div>
         </div>
+
+        <!-- ═══ МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ ОПЕРАЦИЙ ═══ -->
+        <div id="panel-techops-form" class="modal-overlay">
+          <div class="modal-content">
+
+            <!-- Заголовок модалки -->
+            <div class="modal-header">
+              <div>
+                <div class="modal-title">Добавить технологические операции</div>
+                <div class="pf-header-text">Заполните данные изделия и операции → нажмите «Отправить в архив»</div>
+              </div>
+              <button class="modal-close-btn" onclick="closeAddForm()">✕ Закрыть</button>
+            </div>
+
+            <div class="msg msg-err" id="tf-err"></div>
+            <div class="msg msg-ok" id="tf-ok"></div>
+
+            <!-- Действие -->
+            <div class="card">
+              <div class="card-hd">Основное действие</div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Действие</label>
+                  <select class="form-inp" id="tf-action" onchange="handleTFAction()">
+                    <option value="Новое">Новое изделие</option>
+                    <option value="Найти Старое">Найти существующее (заменить)</option>
+                  </select>
+                </div>
+              </div>
+              <div id="tf-action-hint" class="tf-action-hint">
+                При выборе «Найти существующее» заполните Изделие и Чертёж — форма загрузит данные из архива. При
+                отправке старые данные будут заменены.
+              </div>
+            </div>
+
+            <!-- Основные данные -->
+            <div class="card">
+              <div class="card-hd">Основные данные изделия</div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl req">Изделие (название)</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="tf-orderId" placeholder="Начните вводить название..." autocomplete="off"
+                      oninput="acSearch(this,'dd-tf-orderId','product')"
+                      onfocus="acSearch(this,'dd-tf-orderId','product')">
+                    <div class="combo-dd" id="dd-tf-orderId"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl req">Чертёж (обозначение по классификатору)</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="tf-drawing" placeholder="Начните вводить обозначение..."
+                      autocomplete="off" oninput="acSearch(this,'dd-tf-drawing','classifier')"
+                      onfocus="acSearch(this,'dd-tf-drawing','classifier')">
+                    <div class="combo-dd" id="dd-tf-drawing"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl req">Тип объекта</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="tf-objectType" placeholder="Деталь" autocomplete="off"
+                      oninput="comboFilter('tf-objectType','dd-objectType')" onfocus="comboShow('dd-objectType')">
+                    <div class="combo-dd" id="dd-objectType"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl req">Головное изделие</label>
+                  <input class="form-inp" id="tf-mainOrderId" placeholder="АРВЦ.303011.001">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Кол-во в изделии</label>
+                  <input class="form-inp" id="tf-makeQty" type="number" value="1">
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Комментарий к изделию</label>
+                  <input class="form-inp" id="tf-comments" placeholder="">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Номер извещения</label>
+                  <input class="form-inp" id="tf-noticeNumber">
+                </div>
+                <div class="form-field" hidden>
+                  <label class="form-lbl">ФИО исполнителя</label>
+                  <input class="form-inp" id="tf-fullName" placeholder="Иванов И.И.">
+                </div>
+              </div>
+            </div>
+
+            <!-- Материал -->
+            <div class="card">
+              <div class="card-hd">Материал и характеристики</div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Марка материала</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="tf-materialGrade" placeholder="40Х ГОСТ 4543-2016" autocomplete="off"
+                      oninput="comboFilter('tf-materialGrade','dd-materialGrade')"
+                      onfocus="comboShow('dd-materialGrade')">
+                    <div class="combo-dd" id="dd-materialGrade"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Сортамент</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="tf-assortment" placeholder="Круг 20 ГОСТ 2590-2016" autocomplete="off"
+                      oninput="comboFilter('tf-assortment','dd-assortment')" onfocus="comboShow('dd-assortment')">
+                    <div class="combo-dd" id="dd-assortment"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Кол-во материала</label>
+                  <input class="form-inp" id="tf-materialAmount" type="number" step="0.001">
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Единица измерения</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="tf-unitOfMeasure" placeholder="м., кг., шт" autocomplete="off"
+                      oninput="comboFilter('tf-unitOfMeasure','dd-unitOfMeasure')"
+                      onfocus="comboShow('dd-unitOfMeasure')">
+                    <div class="combo-dd" id="dd-unitOfMeasure"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Покрытие</label>
+                  <div class="combo-wrap">
+                    <input class="form-inp" id="tf-coating" placeholder="Хим. Пас." autocomplete="off"
+                      oninput="comboFilter('tf-coating','dd-coating')" onfocus="comboShow('dd-coating')">
+                    <div class="combo-dd" id="dd-coating"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Твёрдость</label>
+                  <input class="form-inp" id="tf-hardness">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-lbl">Масса детали</label>
+                  <input class="form-inp" id="tf-mass" placeholder="0.003">
+                </div>
+                <div class="form-field">
+                  <label class="form-lbl">Габарит</label>
+                  <input class="form-inp" id="tf-dimensions" placeholder="ф11х15">
+                </div>
+              </div>
+            </div>
+
+            <!-- Операции -->
+            <div class="card">
+              <div class="card-hd">Технологические операции</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">
+                Последняя операция автоматически отмечается финальной. Исполнитель определяется по названию.
+              </div>
+              <div class="ops-table-wrap">
+                <table class="ops-table">
+                  <thead>
+                    <tr>
+                      <th style="width:55px">№ опер.</th>
+                      <th style="width:180px">Наименование операции</th>
+                      <th style="width:130px">Исполнитель</th>
+                      <th style="width:200px">Станок-ресурс</th>
+                      <th style="width:130px">Комментарии</th>
+                      <th style="width:110px">Инструмент</th>
+                      <th style="width:65px">Норма (ч)</th>
+                      <th style="width:65px">Загот. (ч)</th>
+                      <th style="width:44px">Аутсорс</th>
+                      <th style="width:44px">Финал.</th>
+                      <th style="width:34px">ЧПУ</th>
+                      <th style="width:60px">Загрузка</th>
+                      <th style="width:34px"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tf-ops-body"></tbody>
+                </table>
+              </div>
+              <div style="margin-top:10px;">
+                <button class="arc-btn" id="tf-add-op" onclick="tfAddOp()">+ Добавить операцию</button>
+              </div>
+            </div>
+
+            <!-- Аналоги -->
+            <div class="card">
+              <div class="card-hd">Изделия-аналоги (одинаковый маршрут)</div>
+              <div id="tf-analogs-container"></div>
+              <button class="arc-btn" id="tf-add-analog" onclick="tfAddAnalog()" style="margin-top:8px;">+ Добавить
+                аналог</button>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="pf-actions">
+              <button class="topbar-btn btn-accent" style="padding:12px 28px;font-size:14px;" id="tf-submit"
+                onclick="tfSubmit()">
+                ✓ Отправить в архив
+              </button>
+              <button class="topbar-btn" style="padding:12px 22px;font-size:14px;" id="tf-clear"
+                onclick="tfClearForm()">
+                ↺ Очистить форму
+              </button>
+              <button class="topbar-btn" style="padding:12px 22px;font-size:14px;margin-left:auto;"
+                onclick="closeAddForm()">
+                Отмена
+              </button>
+            </div>
+
+          </div><!-- modal inner -->
+        </div><!-- modal overlay -->
+
+      </div><!-- content -->
+    </div><!-- main -->
+  </div><!-- app -->
+
+
+
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Модалка: Загрузить структуру из базы -->
+  <div id="arc-load-modal">
+    <div>
+      <h3>📥 Загрузить из базы</h3>
+      <p>Введите обозначение головного изделия (Assembly_ID)</p>
+      <input type="text" id="arc-load-modal-input" class="auth-inp" placeholder="Например: 08-0006С6 Оснастка"
+        onkeydown="if(event.key==='Enter')arcLoadModalConfirm()">
+      <div id="arc-load-modal-err"></div>
+      <div class="modal-btns">
+        <button class="modal-close-btn" onclick="arcLoadModalClose()">Отмена</button>
+        <button id="arc-load-modal-btn" onclick="arcLoadModalConfirm()">Загрузить</button>
       </div>
-
-      <!-- ═══ УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (только для ADMIN) ═══ -->
-      <div class="panel" id="panel-users">
-
-        <!-- Модал: Добавить / Редактировать пользователя -->
-        <div id="admin-user-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:100001;align-items:center;justify-content:center;">
-          <div style="background:#161b27;border:1px solid #3b82f6;border-radius:12px;padding:32px;width:100%;max-width:500px;">
-            <h3 id="admin-user-modal-title" style="margin:0 0 20px 0;">Добавить пользователя</h3>
-            <input type="hidden" id="admin-edit-id">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-              <div>
-                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Имя *</label>
-                <input type="text" id="admin-edit-firstname" class="auth-inp" style="width:100%;">
-              </div>
-              <div>
-                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Фамилия</label>
-                <input type="text" id="admin-edit-lastname" class="auth-inp" style="width:100%;">
-              </div>
-            </div>
-            <label style="display:block;margin:12px 0 4px;font-size:12px;color:var(--text3);">Email (логин) *</label>
-            <input type="email" id="admin-edit-email" class="auth-inp" style="width:100%;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-              <div>
-                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Роль *</label>
-                <select id="admin-edit-role" class="auth-inp" style="width:100%;">
-                  <option value="admin">Администратор</option>
-                  <option value="technologist">Технолог</option>
-                  <option value="master">Мастер</option>
-                  <option value="dispatcher">Диспетчер</option>
-                </select>
-              </div>
-              <div>
-                <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Статус</label>
-                <select id="admin-edit-active" class="auth-inp" style="width:100%;">
-                  <option value="true">Активен</option>
-                  <option value="false">Заблокирован</option>
-                </select>
-              </div>
-            </div>
-            <div id="admin-edit-pass-wrap">
-              <label style="display:block;margin:12px 0 4px;font-size:12px;color:var(--text3);">Пароль *</label>
-              <input type="password" id="admin-edit-password" class="auth-inp" placeholder="Минимум 6 символов" style="width:100%;">
-            </div>
-            <div id="admin-user-modal-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none;"></div>
-            <div style="margin-top:20px;display:flex;gap:12px;">
-              <button onclick="adminSaveUser()" style="flex:1;padding:12px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Сохранить</button>
-              <button onclick="adminCloseUserModal()" style="flex:1;padding:12px;background:#334155;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Отмена</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Модал: Смена пароля -->
-        <div id="admin-pass-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:100001;align-items:center;justify-content:center;">
-          <div style="background:#161b27;border:1px solid #3b82f6;border-radius:12px;padding:32px;width:100%;max-width:380px;">
-            <h3 style="margin:0 0 8px 0;">🔑 Смена пароля</h3>
-            <p id="admin-pass-user-name" style="color:var(--text3);margin:0 0 16px;font-size:13px;"></p>
-            <input type="hidden" id="admin-pass-uid">
-            <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text3);">Новый пароль *</label>
-            <input type="password" id="admin-new-pass" class="auth-inp" placeholder="Минимум 6 символов" style="width:100%;">
-            <div id="admin-pass-modal-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none;"></div>
-            <div style="margin-top:20px;display:flex;gap:12px;">
-              <button onclick="adminSavePassword()" style="flex:1;padding:12px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Сохранить</button>
-              <button onclick="adminClosePassModal()" style="flex:1;padding:12px;background:#334155;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Отмена</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="padding:12px 0 10px;display:flex;align-items:center;gap:12px;">
-          <button onclick="adminOpenAddUser()" style="padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">+ Добавить пользователя</button>
-          <span id="users-count" style="font-size:12px;color:var(--text3);"></span>
-        </div>
-        <div class="arc-tbl-scroller" style="max-height:calc(100vh - 200px);">
-          <table class="arc-tbl" style="min-width:900px;">
-            <thead><tr>
-              <th>ФИО</th>
-              <th>Email (Логин)</th>
-              <th>Роль</th>
-              <th>Статус</th>
-              <th>Последний вход</th>
-              <th>Дата регистрации</th>
-              <th style="min-width:220px;">Действия</th>
-            </tr></thead>
-            <tbody id="users-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- ═══ МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ В ПРОИЗВОДСТВО ═══ -->
-      <div id="prod-form-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);overflow-y:auto">
-        <div style="max-width:1100px;margin:20px auto;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">
-            <div>
-              <div style="font-size:16px;font-weight:700;color:var(--accent)">Добавление в план цеха</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:2px">Управление технологическими операциями и производственными заданиями</div>
-            </div>
-            <button onclick="closeProdForm()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius);color:var(--text3);padding:8px 16px;cursor:pointer;font-size:13px">✕ Закрыть</button>
-          </div>
-
-          <div class="msg msg-err" id="pf-err"></div>
-          <div class="msg msg-ok" id="pf-ok"></div>
-
-          <div class="card">
-            <div class="card-hd">Основные параметры заказа</div>
-            <div style="display:flex;gap:8px;margin-bottom:10px">
-              <button class="arc-btn primary" onclick="pfLoadOps()">🔍 Найти операции</button>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Головное изделие (из архива)</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="pf-assembly" placeholder="Кликните для выбора..." autocomplete="off"
-                        onfocus="pfAssemblyFocus()" oninput="pfAssemblyInput()">
-                  <div class="combo-dd" id="dd-pf-assembly"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Изделие</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="pf-product" placeholder="Название изделия" autocomplete="off"
-                        onfocus="pfProductFocus()" oninput="pfProductInput()">
-                  <div class="combo-dd" id="dd-pf-product"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Чертёж</label>
-                <input class="form-inp" id="pf-drawing" placeholder="Заполняется автоматически" readonly style="background:var(--bg3)">
-              </div>
-              <div class="form-field">
-                <label class="form-lbl req">Номер наряда</label>
-                <input class="form-inp" id="pf-narad" placeholder="2025-001">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Номер заказа</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="pf-order" placeholder="ВП-2025-89" autocomplete="off"
-                        onfocus="pfOrderFocus()" oninput="pfOrderFocus()">
-                  <div class="combo-dd" id="dd-pf-order"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Заказчик</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="pf-customer" placeholder="Название заказчика" autocomplete="off"
-                        onfocus="pfCustomerFocus()" oninput="pfCustomerFocus()">
-                  <div class="combo-dd" id="dd-pf-customer"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Количество (шт.)</label>
-                <input class="form-inp" id="pf-quantity" type="number" value="1" min="1">
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Приоритет</label>
-                <select class="form-inp" id="pf-priority">
-                  <option value="1">1 — Срочный</option>
-                  <option value="2">2 — Высокий</option>
-                  <option value="3" selected>3 — Обычный</option>
-                  <option value="4">4 — Низкий</option>
-                  <option value="5">5 — Плановый</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Дата начала производства</label>
-                <input class="form-inp" id="pf-start-date" type="date">
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Срок выполнения</label>
-                <input class="form-inp" id="pf-deadline" type="date">
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-hd">Технологические операции — Детализация из архива</div>
-            <div id="pf-ops-info"></div>
-            <div style="overflow-x:auto;max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius)">
-              <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1000px">
-                <thead style="position:sticky;top:0;z-index:3">
-                  <tr style="background:var(--bg3)">
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Деталь / Узел</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Чертёж</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--amber-text);border-bottom:1px solid var(--border)">№ опер.</th>
-                    <th style="padding:5px 7px;font-size:9px;color:#34d399;border-bottom:1px solid var(--border)">Операция</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Станок/ресурс</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Норма(ч)</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Загот.(ч)</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Аутсорс</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Финальн.</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">ЧПУ</th>
-                    <th style="padding:5px 7px;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Загрузка</th>
-                  </tr>
-                </thead>
-                <tbody id="pf-ops-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div style="display:flex;gap:10px;padding-top:12px;border-top:1px solid var(--border)">
-            <button class="topbar-btn btn-accent" style="padding:12px 28px;font-size:14px" onclick="pfSubmit()">✓ Создать наряд</button>
-            <button class="topbar-btn" style="padding:12px 22px;font-size:14px;margin-left:auto" onclick="closeProdForm()">Отмена</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ ОПЕРАЦИЙ ═══ -->
-      <div id="panel-techops-form" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);overflow-y:auto;">
-        <div style="max-width:1100px;margin:20px auto;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px;position:relative;">
-
-          <!-- Заголовок модалки -->
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-            <div>
-              <div style="font-size:16px;font-weight:700;color:var(--accent);">Добавить технологические операции</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:2px;">Заполните данные изделия и операции → нажмите «Отправить в архив»</div>
-            </div>
-            <button onclick="closeAddForm()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius);color:var(--text3);padding:8px 16px;cursor:pointer;font-size:13px;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red-text)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'">✕ Закрыть</button>
-          </div>
-
-          <div class="msg msg-err" id="tf-err"></div>
-          <div class="msg msg-ok"  id="tf-ok"></div>
-
-          <!-- Действие -->
-          <div class="card">
-            <div class="card-hd">Основное действие</div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Действие</label>
-                <select class="form-inp" id="tf-action" onchange="handleTFAction()">
-                  <option value="Новое">Новое изделие</option>
-                  <option value="Найти Старое">Найти существующее (заменить)</option>
-                </select>
-              </div>
-            </div>
-            <div id="tf-action-hint" style="display:none;font-size:11px;color:var(--amber-text);background:var(--amber-bg);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);padding:8px 10px;">
-              При выборе «Найти существующее» заполните Изделие и Чертёж — форма загрузит данные из архива. При отправке старые данные будут заменены.
-            </div>
-          </div>
-
-          <!-- Основные данные -->
-          <div class="card">
-            <div class="card-hd">Основные данные изделия</div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl req">Изделие (название)</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="tf-orderId" placeholder="Начните вводить название..." autocomplete="off"
-                        oninput="acSearch(this,'dd-tf-orderId','product')" onfocus="acSearch(this,'dd-tf-orderId','product')">
-                  <div class="combo-dd" id="dd-tf-orderId"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl req">Чертёж (обозначение по классификатору)</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="tf-drawing" placeholder="Начните вводить обозначение..." autocomplete="off"
-                        oninput="acSearch(this,'dd-tf-drawing','classifier')" onfocus="acSearch(this,'dd-tf-drawing','classifier')">
-                  <div class="combo-dd" id="dd-tf-drawing"></div>
-                </div>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl req">Тип объекта</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="tf-objectType" placeholder="Деталь" autocomplete="off"
-                        oninput="comboFilter('tf-objectType','dd-objectType')" onfocus="comboShow('dd-objectType')">
-                  <div class="combo-dd" id="dd-objectType"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl req">Головное изделие</label>
-                <input class="form-inp" id="tf-mainOrderId" placeholder="АРВЦ.303011.001">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Кол-во в изделии</label>
-                <input class="form-inp" id="tf-makeQty" type="number" value="1">
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Комментарий к изделию</label>
-                <input class="form-inp" id="tf-comments" placeholder="">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Номер извещения</label>
-                <input class="form-inp" id="tf-noticeNumber">
-              </div>
-              <div class="form-field" style="display:none">
-                <label class="form-lbl">ФИО исполнителя</label>
-                <input class="form-inp" id="tf-fullName" placeholder="Иванов И.И.">
-              </div>
-            </div>
-          </div>
-
-          <!-- Материал -->
-          <div class="card">
-            <div class="card-hd">Материал и характеристики</div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Марка материала</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="tf-materialGrade" placeholder="40Х ГОСТ 4543-2016" autocomplete="off"
-                        oninput="comboFilter('tf-materialGrade','dd-materialGrade')" onfocus="comboShow('dd-materialGrade')">
-                  <div class="combo-dd" id="dd-materialGrade"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Сортамент</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="tf-assortment" placeholder="Круг 20 ГОСТ 2590-2016" autocomplete="off"
-                        oninput="comboFilter('tf-assortment','dd-assortment')" onfocus="comboShow('dd-assortment')">
-                  <div class="combo-dd" id="dd-assortment"></div>
-                </div>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Кол-во материала</label>
-                <input class="form-inp" id="tf-materialAmount" type="number" step="0.001">
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Единица измерения</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="tf-unitOfMeasure" placeholder="м., кг., шт" autocomplete="off"
-                        oninput="comboFilter('tf-unitOfMeasure','dd-unitOfMeasure')" onfocus="comboShow('dd-unitOfMeasure')">
-                  <div class="combo-dd" id="dd-unitOfMeasure"></div>
-                </div>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Покрытие</label>
-                <div class="combo-wrap">
-                  <input class="form-inp" id="tf-coating" placeholder="Хим. Пас." autocomplete="off"
-                        oninput="comboFilter('tf-coating','dd-coating')" onfocus="comboShow('dd-coating')">
-                  <div class="combo-dd" id="dd-coating"></div>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Твёрдость</label>
-                <input class="form-inp" id="tf-hardness">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-lbl">Масса детали</label>
-                <input class="form-inp" id="tf-mass" placeholder="0.003">
-              </div>
-              <div class="form-field">
-                <label class="form-lbl">Габарит</label>
-                <input class="form-inp" id="tf-dimensions" placeholder="ф11х15">
-              </div>
-            </div>
-          </div>
-
-          <!-- Операции -->
-          <div class="card">
-            <div class="card-hd">Технологические операции</div>
-            <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">
-              Последняя операция автоматически отмечается финальной. Исполнитель определяется по названию.
-            </div>
-            <div class="ops-table-wrap" style="overflow-x:auto;">
-              <table class="ops-table">
-                <thead><tr>
-                  <th style="width:55px">№ опер.</th>
-                  <th style="width:180px">Наименование операции</th>
-                  <th style="width:130px">Исполнитель</th>
-                  <th style="width:200px">Станок-ресурс</th>
-                  <th style="width:130px">Комментарии</th>
-                  <th style="width:110px">Инструмент</th>
-                  <th style="width:65px">Норма (ч)</th>
-                  <th style="width:65px">Загот. (ч)</th>
-                  <th style="width:44px">Аутсорс</th>
-                  <th style="width:44px">Финал.</th>
-                  <th style="width:34px">ЧПУ</th>
-                  <th style="width:60px">Загрузка</th>
-                  <th style="width:34px"></th>
-                </tr></thead>
-                <tbody id="tf-ops-body"></tbody>
-              </table>
-            </div>
-            <div style="margin-top:10px;">
-              <button class="arc-btn" id="tf-add-op" onclick="tfAddOp()">+ Добавить операцию</button>
-            </div>
-          </div>
-
-          <!-- Аналоги -->
-          <div class="card">
-            <div class="card-hd">Изделия-аналоги (одинаковый маршрут)</div>
-            <div id="tf-analogs-container"></div>
-            <button class="arc-btn" id="tf-add-analog" onclick="tfAddAnalog()" style="margin-top:8px;">+ Добавить аналог</button>
-          </div>
-
-          <!-- Кнопки -->
-          <div style="display:flex;gap:10px;padding-top:12px;border-top:1px solid var(--border);">
-            <button class="topbar-btn btn-accent" style="padding:12px 28px;font-size:14px;" id="tf-submit" onclick="tfSubmit()">
-              ✓ Отправить в архив
-            </button>
-            <button class="topbar-btn" style="padding:12px 22px;font-size:14px;" id="tf-clear" onclick="tfClearForm()">
-              ↺ Очистить форму
-            </button>
-            <button class="topbar-btn" style="padding:12px 22px;font-size:14px;margin-left:auto;" onclick="closeAddForm()">
-              Отмена
-            </button>
-          </div>
-
-        </div><!-- modal inner -->
-      </div><!-- modal overlay -->
-
-    </div><!-- content -->
-  </div><!-- main -->
-</div><!-- app -->
-
-      
-
-<div class="toast" id="toast"></div>
-
-<!-- Модалка: Загрузить структуру из базы -->
-<div id="arc-load-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:100001;align-items:center;justify-content:center;">
-  <div style="background:#161b27;border:1px solid #3b82f6;border-radius:12px;padding:32px;width:100%;max-width:440px;margin:0 16px;">
-    <h3 style="margin:0 0 6px 0;color:#e2e8f0;font-size:16px;">📥 Загрузить из базы</h3>
-    <p style="margin:0 0 20px 0;font-size:12px;color:#64748b;">Введите обозначение головного изделия (Assembly_ID)</p>
-    <input type="text" id="arc-load-modal-input" class="auth-inp" style="width:100%;" placeholder="Например: 08-0006С6 Оснастка" onkeydown="if(event.key==='Enter')arcLoadModalConfirm()">
-    <div id="arc-load-modal-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none;"></div>
-    <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
-      <button onclick="arcLoadModalClose()" style="padding:10px 20px;background:none;border:1px solid #3a4560;border-radius:8px;color:#94a3b8;cursor:pointer;font-size:13px;">Отмена</button>
-      <button id="arc-load-modal-btn" onclick="arcLoadModalConfirm()" style="padding:10px 20px;background:#3b82f6;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:13px;">Загрузить</button>
     </div>
   </div>
-</div>
 
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/refs.js"></script>
-<script src="js/techops.js"></script>
-<script src="js/archive.js"></script>
-<script src="js/qrcode.js"></script>
-<script src="js/production.js"></script>
-<script src="js/app.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/nomcatalogue.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/refs.js"></script>
+  <script src="js/techops.js"></script>
+  <script src="js/archive.js"></script>
+  <script src="js/qrcode.js"></script>
+  <script src="js/production.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/nomcatalogue.js"></script>
 
-<script>
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.sidebar-bottom')) {
-    var um = document.getElementById('user-menu');
-    if (um) um.classList.remove('show');
-  }
-  if (!e.target.closest('.combo-wrap')) {
-    document.querySelectorAll('.combo-dd').forEach(function(d){ d.classList.remove('show'); });
-  }
-});
-</script>
+  <script>
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.sidebar-bottom')) {
+        var um = document.getElementById('user-menu');
+        if (um) um.classList.remove('show');
+      }
+      if (!e.target.closest('.combo-wrap')) {
+        document.querySelectorAll('.combo-dd').forEach(function (d) { d.classList.remove('show'); });
+      }
+    });
+  </script>
 
 </body>
+
 </html>
