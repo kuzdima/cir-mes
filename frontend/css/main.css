@@ -403,18 +403,14 @@ button.arc-btn,button.topbar-btn{line-height:1}
     overflow: hidden;
 }
 
-.nomNavList li {
-  list-style-type: "   ";
-  
-}
-
 
 .nomNavList li.hasChildren {
-  list-style-type: "+  ";
+  
+  list-style-type: disclosure-closed;
   
 }
 
 .nomNavList li.hasChildren[open] {
-  list-style-type: "-  ";
   
+  list-style-type: disclosure-open;
 }
