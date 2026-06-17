@@ -23,8 +23,8 @@ function catLoadFromDB() {
       catRenderArchive();
       var countEl = document.getElementById('cat-db-count');
       if (countEl) countEl.textContent = catArcDB.length;
-      CatFilterArchive(document.getElementById("cat-search").value);
       prepareProductCatalogue();
+      CatFilterArchive(document.getElementById("cat-search").value);
     }
   });
 }
