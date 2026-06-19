@@ -1,0 +1,77 @@
+/* ── Board ────────────────────────────────────────────── */
+.crm-board{display:flex;gap:14px;overflow-x:auto;padding:4px 0 16px;min-height:400px;align-items:flex-start;}
+
+/* ── Column ──────────────────────────────────────────── */
+.crm-column{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);min-width:280px;max-width:320px;flex-shrink:0;display:flex;flex-direction:column;}
+.crm-column-header{padding:10px 12px;font-size:12px;font-weight:600;color:var(--text);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.crm-column-counter{font-size:10px;color:var(--text3);font-weight:400;}
+.crm-column-body{padding:8px;min-height:60px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.crm-column.drag-over{background:var(--bg3);border-color:var(--accent);}
+
+/* ── Card ────────────────────────────────────────────── */
+.crm-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;cursor:grab;transition:all 0.1s;}
+.crm-card:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-glow);}
+.crm-card.dragging{opacity:0.4;box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+.crm-card-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px;word-break:break-word;}
+.crm-card-meta{font-size:10px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;}
+.crm-card-meta span{display:inline-flex;align-items:center;gap:3px;}
+
+/* ── Toolbar ─────────────────────────────────────────── */
+.crm-toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.crm-toolbar select{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:var(--radius);font-size:11px;}
+
+/* ── List view ───────────────────────────────────────── */
+.crm-list-view{display:none;}
+.crm-list-view.active{display:block;}
+
+/* ── Modals ──────────────────────────────────────────── */
+.crm-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;}
+.crm-modal-content{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);width:90%;max-width:560px;max-height:80vh;overflow-y:auto;padding:20px;}
+.crm-modal-content.crm-modal-wide{max-width:720px;}
+.crm-modal-title{font-size:14px;font-weight:600;margin-bottom:14px;}
+.crm-modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+
+/* ── Form inside modal ───────────────────────────────── */
+.crm-field{margin-bottom:12px;}
+.crm-field label{display:block;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.crm-field input,.crm-field textarea,.crm-field select{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:12px;}
+.crm-field textarea{resize:vertical;min-height:60px;}
+.crm-field input[type="checkbox"]{width:auto;margin-right:6px;}
+
+/* ── Participants in card detail ─────────────────────── */
+.crm-participant{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--bg4);border-radius:4px;font-size:10px;color:var(--text2);}
+.crm-participant-list{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;}
+
+/* ── File list ───────────────────────────────────────── */
+.crm-file-list{display:flex;flex-direction:column;gap:4px;margin:8px 0;}
+.crm-file-item{display:flex;align-items:center;gap:6px;padding:4px 8px;background:var(--bg3);border-radius:var(--radius);font-size:11px;}
+.crm-file-item a{color:var(--accent);text-decoration:none;}
+.crm-file-item a:hover{text-decoration:underline;}
+.crm-file-size{color:var(--text3);font-size:10px;margin-left:auto;}
+
+/* ── Field values in card detail ─────────────────────── */
+.crm-field-value{margin-bottom:8px;}
+.crm-field-value .crm-field-label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;}
+.crm-field-value .crm-field-text{font-size:12px;color:var(--text);margin-top:2px;word-break:break-word;}
+
+/* ── Access modal ────────────────────────────────────── */
+.crm-access-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.crm-access-row input[type="checkbox"]{width:16px;height:16px;}
+
+/* ── Columns / Fields managment ──────────────────────── */
+.crm-mgmt-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:var(--radius);margin-bottom:6px;}
+.crm-mgmt-item .crm-mgmt-name{flex:1;font-size:12px;}
+.crm-mgmt-item button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;}
+.crm-mgmt-item button:hover{color:var(--red);}
+
+/* ── Drag handle ─────────────────────────────────────── */
+.crm-drag-handle{color:var(--text3);font-size:11px;cursor:grab;user-select:none;}
+
+/* ── Hidden helpers ──────────────────────────────────── */
+.crm-hide{display:none !important;}
+
+/* ── Buttons matching topbar style ───────────────────── */
+.crm-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border-radius:var(--radius);font-size:11px;font-weight:500;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.12s;height:32px;box-sizing:border-box;white-space:nowrap;}
+.crm-toolbar button:hover{border-color:var(--accent);color:var(--accent);}
+.crm-toolbar .btn-accent{background:var(--accent);color:#fff;border-color:var(--accent);}
+.crm-toolbar .btn-accent:hover{background:var(--accent2);color:#fff;}

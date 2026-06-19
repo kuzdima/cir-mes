@@ -7,8 +7,14 @@ const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 
 const app  = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, { cors: { origin: '*' } });
 const PORT = process.env.PORT || 8080;
-const SECRET = process.env.JWT_SECRET || 'cirmesjwtsecret2026';
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  console.error('FATAL: JWT_SECRET не задан. Укажите в .env');
+  process.exit(1);
+}
 
 const pool = new Pool({
   host:     process.env.DB_HOST     || '185.41.161.31',
@@ -1007,10 +1013,21 @@ app.post('/api/production/status', auth, async (req, res) => {
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
-// Static frontend
+// CRM module
+require('./crm')(app, pool, SECRET, io, auth);
+
+// Socket.IO
+io.on('connection', function(socket) {
+  console.log('Socket.IO: клиент подключился');
+});
+
+// Static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../frontend/index.html')));
 
-app.listen(PORT, () => console.log('ЦИР MES -> http://localhost:' + PORT));
+server.listen(PORT, () => console.log('ЦИР MES -> http://localhost:' + PORT));
+
+module.exports = { app, pool, server, io, auth };
 
 
