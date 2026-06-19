@@ -72,45 +72,6 @@ app.post('/api/auth/login', async (req, res) => {
 
 
 
-// Register — Добавление пользователя в базу
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    const { email, password, firstName, lastName, role } = req.body;
-
-    if (!email || !password || !firstName) {
-      return res.status(400).json({ ok: false, error: 'Заполните обязательные поля (Имя, Email, Пароль)' });
-    }
-
-    // Проверка существования email
-    const exists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (exists.rows.length > 0) {
-      return res.status(409).json({ ok: false, error: 'Пользователь с таким email уже существует' });
-    }
-
-    // Хэширование пароля
-    const hash = await bcrypt.hash(password, 10);
-
-    // Добавление в базу
-    const result = await pool.query(
-      `INSERT INTO users 
-       (email, password_hash, first_name, last_name, role, is_active, created_at) 
-       VALUES ($1, $2, $3, $4, $5, TRUE, NOW()) 
-       RETURNING id, email, role, first_name, last_name`,
-      [email, hash, firstName, lastName || '', role || 'technologist']
-    );
-
-    res.json({ 
-      ok: true, 
-      message: 'Пользователь успешно зарегистрирован',
-      user: result.rows[0]
-    });
-
-  } catch(e) {
-    console.error('Register error:', e.message);
-    res.status(500).json({ ok: false, error: 'Ошибка при регистрации' });
-  }
-});
-
 // Delete tech operations by classifier + product
 app.delete('/api/tech-ops', auth, async (req, res) => {
   try {
