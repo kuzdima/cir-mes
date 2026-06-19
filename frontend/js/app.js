@@ -64,12 +64,6 @@ function handleAddBtn() {
 }
 
 
-function quickLogin(email, pass) {
-  document.getElementById('login-email').value = email;
-  document.getElementById('login-pass').value  = pass;
-  doLogin();
-}
-
 function opsPage(dir) {
   OPS_PAGE += dir;
   if (OPS_PAGE < 1) OPS_PAGE = 1;
