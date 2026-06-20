@@ -5,6 +5,9 @@ var request = require('supertest');
 var { app, pool } = require('../server');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+var fs = require('fs');
+var path = require('path');
+var uploadDir = path.join(__dirname, '..', 'uploads');
 
 var ADMIN_EMAIL = 'crm-test-admin@cir.ru';
 var USER_EMAIL = 'crm-test-user@cir.ru';
@@ -547,11 +550,15 @@ describe('Files', function() {
   });
 
   after(async function() {
+    var filesR = await pool.query('SELECT file_name FROM crm_card_files WHERE card_id IN (SELECT id FROM crm_cards WHERE title LIKE $1)', ['CRM-Test-File-%']);
     await pool.query('DELETE FROM crm_card_field_values WHERE card_id IN (SELECT id FROM crm_cards WHERE title LIKE $1)', ['CRM-Test-File-%']);
     await pool.query('DELETE FROM crm_card_files WHERE card_id IN (SELECT id FROM crm_cards WHERE title LIKE $1)', ['CRM-Test-File-%']);
     await pool.query('DELETE FROM crm_card_participants WHERE card_id IN (SELECT id FROM crm_cards WHERE title LIKE $1)', ['CRM-Test-File-%']);
     await pool.query('DELETE FROM crm_cards WHERE title LIKE $1', ['CRM-Test-File-%']);
     await pool.query('DELETE FROM crm_columns WHERE name LIKE $1', ['CRM-Test-File-%']);
+    for (var ffi = 0; ffi < filesR.rows.length; ffi++) {
+      try { fs.unlinkSync(path.join(uploadDir, filesR.rows[ffi].file_name)); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+    }
   });
 
   test('POST /api/crm/upload загрузить PNG', async function() {
@@ -562,18 +569,18 @@ describe('Files', function() {
       .field('card_id', cardId);
     assert.equal(res.status, 200);
     assert.equal(res.body.ok, true);
-    assert.equal(typeof res.body.row.id, 'number');
-    assert.equal(res.body.row.card_id, cardId);
-    assert.equal(res.body.row.original_name, 'test.png');
+    assert.equal(typeof res.body.rows[0].id, 'number');
+    assert.equal(res.body.rows[0].card_id, cardId);
+    assert.equal(res.body.rows[0].original_name, 'test.png');
 
-    var dbR = await pool.query('SELECT * FROM crm_card_files WHERE id = $1', [res.body.row.id]);
+    var dbR = await pool.query('SELECT * FROM crm_card_files WHERE id = $1', [res.body.rows[0].id]);
     assert.equal(dbR.rows.length, 1);
     assert.equal(dbR.rows[0].original_name, 'test.png');
 
     var cardR = await request(app).get('/api/crm/cards/' + cardId).set('Authorization', 'Bearer ' + adminToken);
     var files = cardR.body.row.files;
     assert.equal(Array.isArray(files), true);
-    var found = files.filter(function(f) { return f.id === res.body.row.id; });
+    var found = files.filter(function(f) { return f.id === res.body.rows[0].id; });
     assert.equal(found.length, 1);
   });
 
@@ -620,10 +627,44 @@ describe('Files', function() {
       .field('card_id', cardId)
       .field('field_id', fieldId);
     assert.equal(res.status, 200);
-    assert.equal(res.body.row.field_id, fieldId);
+    assert.equal(res.body.rows[0].field_id, fieldId);
 
-    var dbR = await pool.query('SELECT * FROM crm_card_files WHERE id = $1', [res.body.row.id]);
+    var dbR = await pool.query('SELECT * FROM crm_card_files WHERE id = $1', [res.body.rows[0].id]);
     assert.equal(dbR.rows[0].field_id, fieldId);
+  });
+
+  test('POST /api/crm/upload загрузить 3 файла', async function() {
+    var res = await request(app)
+      .post('/api/crm/upload')
+      .set('Authorization', 'Bearer ' + adminToken)
+      .attach('file', Buffer.alloc(100), { filename: 'multi1.png', contentType: 'image/png' })
+      .attach('file', Buffer.alloc(200), { filename: 'multi2.png', contentType: 'image/png' })
+      .attach('file', Buffer.alloc(300), { filename: 'multi3.png', contentType: 'image/png' })
+      .field('card_id', cardId);
+    assert.equal(res.status, 200);
+    assert.equal(res.body.ok, true);
+    assert.equal(res.body.count, 3);
+    assert.equal(res.body.rows.length, 3);
+    assert.equal(res.body.rows[0].original_name, 'multi1.png');
+    assert.equal(res.body.rows[1].original_name, 'multi2.png');
+    assert.equal(res.body.rows[2].original_name, 'multi3.png');
+
+    var dbR = await pool.query('SELECT * FROM crm_card_files WHERE card_id = $1 AND original_name LIKE $2', [cardId, 'multi%.png']);
+    assert.equal(dbR.rows.length, 3);
+  });
+
+  test('POST /api/crm/upload 400 больше 10 файлов', async function() {
+    var reqBuilder = request(app)
+      .post('/api/crm/upload')
+      .set('Authorization', 'Bearer ' + adminToken)
+      .field('card_id', cardId);
+    for (var i = 0; i < 11; i++) {
+      reqBuilder = reqBuilder.attach('file', Buffer.alloc(10), { filename: 'many' + i + '.png', contentType: 'image/png' });
+    }
+    var res = await reqBuilder;
+    assert.equal(res.status, 400);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'Максимум 10 файлов за раз');
   });
 
   test('DELETE /api/crm/files/:id удалить файл', async function() {
@@ -632,7 +673,8 @@ describe('Files', function() {
       .set('Authorization', 'Bearer ' + adminToken)
       .attach('file', Buffer.alloc(100), { filename: 'todelete.png', contentType: 'image/png' })
       .field('card_id', cardId);
-    var fid = upR.body.row.id;
+    var fid = upR.body.rows[0].id;
+    var fileName = upR.body.rows[0].file_name;
 
     var res = await request(app)
       .delete('/api/crm/files/' + fid)
@@ -642,6 +684,8 @@ describe('Files', function() {
 
     var dbR = await pool.query('SELECT * FROM crm_card_files WHERE id = $1', [fid]);
     assert.equal(dbR.rows.length, 0);
+
+    assert.ok(!fs.existsSync(path.join(uploadDir, fileName)), 'Файл должен быть удалён с диска');
   });
 
   test('DELETE /api/crm/files/:id 403 для не-участника', async function() {
@@ -650,7 +694,8 @@ describe('Files', function() {
       .set('Authorization', 'Bearer ' + adminToken)
       .attach('file', Buffer.alloc(100), { filename: 'noaccess.png', contentType: 'image/png' })
       .field('card_id', cardId);
-    var fid = upR.body.row.id;
+    var fid = upR.body.rows[0].id;
+    var fileName = upR.body.rows[0].file_name;
 
     var res = await request(app)
       .delete('/api/crm/files/' + fid)
@@ -658,6 +703,7 @@ describe('Files', function() {
     assert.equal(res.status, 403);
 
     await pool.query('DELETE FROM crm_card_files WHERE id = $1', [fid]);
+    try { fs.unlinkSync(path.join(uploadDir, fileName)); } catch (e) { if (e.code !== 'ENOENT') throw e; }
   });
 
 });

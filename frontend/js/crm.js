@@ -218,6 +218,15 @@ var CRM_RENDERER = null;
 // ── Init ────────────────────────────────────────────────────
 
 function crmInit() {
+  if (CRM_SOCKET) {
+    CRM_STORE.loadAll(function() {
+      crmPopulateFilterColumns();
+      CRM_RENDERER.render();
+      CRM_RENDERER.applyFilter();
+    });
+    return;
+  }
+
   CRM_STORE = new CRMStore();
   CRM_RENDERER = new CRMRenderer(CRM_STORE, 'board');
   CRM_SOCKET = io();
@@ -264,11 +273,14 @@ function crmInit() {
     crmPopulateFilterColumns();
     CRM_RENDERER.render();
     CRM_RENDERER.applyFilter();
+    crmRefreshColumnsModal();
   });
   CRM_SOCKET.on('crm:fields-changed', function(data) {
     CRM_STORE.setFields(data.fields);
     CRM_RENDERER.render();
     CRM_RENDERER.applyFilter();
+    crmRefreshFieldsModal();
+    crmLoadDeletedFields();
   });
   CRM_SOCKET.on('crm:access-changed', function(data) {
     if (USER && data.userId === USER.id) {
@@ -308,7 +320,7 @@ function crmRenderFieldInput(field, value) {
       html += '<input type="url" id="' + id + '" value="' + crmEscAttr(value || '') + '"' + disabledAttr + '>';
       break;
     case 'file':
-      html += '<input type="file" id="' + id + '" style="font-size:12px;width:100%;"' + disabledAttr + '>';
+      html += '<input type="file" id="' + id + '" style="font-size:12px;width:100%;"' + disabledAttr + ' multiple>';
       break;
     case 'select':
       html += '<select id="' + id + '"' + disabledAttr + '>';
@@ -464,6 +476,20 @@ function crmEditCard(cardId) {
 
     for (var i = 0; i < fieldsMeta.length; i++) {
       html += crmRenderFieldInput(fieldsMeta[i], fieldValues[fieldsMeta[i].id] || '');
+      if (fieldsMeta[i].type === 'file' && card.files && card.files.length) {
+        var fieldFiles = card.files.filter(function(f) { return f.field_id === fieldsMeta[i].id; });
+        if (fieldFiles.length) {
+          html += '<div style="margin-top:4px;padding-left:12px;font-size:11px;color:var(--text3);">Прикреплено:</div>';
+          for (var j = 0; j < fieldFiles.length; j++) {
+            var ff = fieldFiles[j];
+            html += '<div class="crm-file-item" id="crm-edit-file-' + ff.id + '" style="font-size:11px;padding:2px 0 2px 12px;">' +
+              '<a href="/uploads/' + ff.file_name + '" target="_blank">' + crmEsc(ff.original_name) + '</a>' +
+              (ff.file_size ? '<span class="crm-file-size">' + (ff.file_size / 1024).toFixed(1) + ' KB</span>' : '') +
+              '<button onclick="crmDeleteFile(' + ff.id + ', ' + cardId + ', function(){document.getElementById(\'crm-edit-file-' + ff.id + '\').remove();})" title="Удалить" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:6px;">✕</button>' +
+              '</div>';
+          }
+        }
+      }
     }
 
     for (var i = 0; i < inactiveFields.length; i++) {
@@ -506,11 +532,23 @@ function crmAddFile(cardId, fieldId, cb) {
   var input = document.getElementById('crm-field-' + fieldId);
   if (!input || !input.files || !input.files.length) { if (cb) cb(); return; }
   var fd = new FormData();
-  fd.append('file', input.files[0]);
   fd.append('card_id', cardId);
   fd.append('field_id', fieldId);
+  for (var fi = 0; fi < input.files.length; fi++) {
+    fd.append('file', input.files[fi]);
+  }
   httpUpload('POST', '/api/crm/upload', fd, function(res) {
+    if (!res.ok) { showToast(res.error || 'Ошибка загрузки'); return; }
+    showToast('Загружено ' + (res.count || res.rows?.length || input.files.length) + ' файлов');
     if (cb) cb(res);
+  });
+}
+
+function crmDeleteFile(fileId, cardId, onSuccess) {
+  if (!confirm('Удалить файл?')) return;
+  http('DELETE', '/api/crm/files/' + fileId, null, function(res) {
+    if (res.ok) { showToast('Файл удалён'); if (onSuccess) onSuccess(); else crmOpenCard(cardId); }
+    else { showToast(res.error || 'Ошибка удаления'); }
   });
 }
 
@@ -572,6 +610,7 @@ function crmOpenCard(cardId) {
         html += '<div class="crm-file-item">' +
           '<a href="/uploads/' + card.files[i].file_name + '" target="_blank">' + crmEsc(card.files[i].original_name) + '</a>' +
           (card.files[i].file_size ? '<span class="crm-file-size">' + (card.files[i].file_size / 1024).toFixed(1) + ' KB</span>' : '') +
+          '<button onclick="crmDeleteFile(' + card.files[i].id + ', ' + card.id + ')" title="Удалить файл" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:auto;">✕</button>' +
           '</div>';
       }
       html += '</div></div>';
@@ -596,7 +635,7 @@ function crmOpenCard(cardId) {
           var ff = fileFields[i];
           html += '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;">' +
             '<span style="font-size:12px;min-width:80px;">' + crmEsc(ff.name) + '</span>' +
-            '<input type="file" id="crm-field-' + ff.field_id + '" style="font-size:12px;flex:1;">' +
+            '<input type="file" id="crm-field-' + ff.field_id + '" style="font-size:12px;flex:1;" multiple>' +
             '<button class="topbar-btn" onclick="crmAddFile(' + card.id + ',' + ff.field_id + ',function(){crmOpenCard(' + card.id + ');})">Загрузить</button>' +
             '</div>';
         }
@@ -668,6 +707,22 @@ function crmManageColumns() {
   ]);
 }
 
+function crmRefreshColumnsModal() {
+  var colList = document.getElementById('crm-col-list');
+  if (!colList) return;
+  var cols = CRM_STORE.getColumns();
+  var html = '';
+  for (var i = 0; i < cols.length; i++) {
+    html += '<div class="crm-mgmt-item" data-col-id="' + cols[i].id + '">' +
+      '<span class="crm-drag-handle">⠿</span>' +
+      '<span class="crm-mgmt-name">' + crmEsc(cols[i].name) + '</span>' +
+      '<button onclick="crmRenameColumn(' + cols[i].id + ')" title="Переименовать">✎</button>' +
+      '<button onclick="crmDeleteColumn(' + cols[i].id + ')" title="Удалить">✕</button>' +
+      '</div>';
+  }
+  colList.innerHTML = html;
+}
+
 function crmAddColumn() {
   var name = document.getElementById('crm-new-col-name').value.trim();
   if (!name) { showToast('Введите название'); return; }
@@ -725,30 +780,54 @@ function crmManageFields() {
     html += '<button onclick="crmDeleteField(' + fields[i].id + ')" title="Удалить">✕</button>' +
       '</div>';
   }
-  html += '</div>';
+  html += '</div><div id="crm-deleted-fields"></div>';
 
   crmShowModal('Настройка полей', html, [
     { label: 'Готово', class: 'btn-accent', action: function() { crmCloseModal(); } }
   ]);
 
-  loadDeletedFields();
+  crmLoadDeletedFields();
+}
 
-  function loadDeletedFields() {
-    http('GET', '/api/crm/fields/deleted', null, function(res) {
-      if (!res.ok || !res.rows || !res.rows.length) return;
-      var modalBody = document.querySelector('.crm-modal-content');
-      if (!modalBody) return;
-      var delHtml = '<hr style="margin:16px 0;border-color:var(--border2);">' +
-        '<h4 style="margin:0 0 8px;color:var(--text3);font-size:13px;">Удалённые поля</h4>';
-      for (var i = 0; i < res.rows.length; i++) {
-        delHtml += '<div class="crm-mgmt-item" style="opacity:0.6;">' +
-          '<span class="crm-mgmt-name">' + crmEsc(res.rows[i].name) + ' <span style="color:var(--text3);font-size:10px;">' + res.rows[i].type + '</span></span>' +
-          '<button onclick="crmRestoreField(' + res.rows[i].id + ')" title="Восстановить" style="background:none;border:none;color:#4caf50;cursor:pointer;">↩ Восстановить</button>' +
-          '</div>';
-      }
-      modalBody.insertAdjacentHTML('beforeend', delHtml);
-    });
+function crmLoadDeletedFields() {
+  http('GET', '/api/crm/fields/deleted', null, function(res) {
+    var delContainer = document.getElementById('crm-deleted-fields');
+    if (!delContainer) return;
+
+    if (!res.ok || !res.rows || !res.rows.length) {
+      delContainer.innerHTML = '';
+      return;
+    }
+
+    var delHtml = '<hr style="margin:16px 0;border-color:var(--border2);">' +
+      '<h4 style="margin:0 0 8px;color:var(--text3);font-size:13px;">Удалённые поля</h4>';
+    for (var i = 0; i < res.rows.length; i++) {
+      delHtml += '<div class="crm-mgmt-item" style="opacity:0.6;">' +
+        '<span class="crm-mgmt-name">' + crmEsc(res.rows[i].name) + ' <span style="color:var(--text3);font-size:10px;">' + res.rows[i].type + '</span></span>' +
+        '<button onclick="crmRestoreField(' + res.rows[i].id + ')" title="Восстановить" style="background:none;border:none;color:#4caf50;cursor:pointer;">↩ Восстановить</button>' +
+        '</div>';
+    }
+    delContainer.innerHTML = delHtml;
+  });
+}
+
+function crmRefreshFieldsModal() {
+  var list = document.getElementById('crm-field-list');
+  if (!list) return;
+  var fields = CRM_STORE.getFields();
+  var html = '';
+  for (var i = 0; i < fields.length; i++) {
+    var isSelect = fields[i].type === 'select';
+    html += '<div class="crm-mgmt-item">' +
+      '<span class="crm-mgmt-name">' + crmEsc(fields[i].name) +
+      ' <span style="color:var(--text3);font-size:10px;">' + fields[i].type + '</span></span>';
+    if (isSelect) {
+      html += '<button onclick="crmEditFieldOptions(' + fields[i].id + ')" title="Изменить варианты" style="background:none;border:none;color:var(--text3);cursor:pointer;">⚙</button>';
+    }
+    html += '<button onclick="crmDeleteField(' + fields[i].id + ')" title="Удалить">✕</button>' +
+      '</div>';
   }
+  list.innerHTML = html;
 }
 
 function crmToggleFieldOptions() {
@@ -804,18 +883,6 @@ function crmDeleteField(fieldId) {
 function crmRestoreField(fieldId) {
   http('POST', '/api/crm/fields/' + fieldId + '/restore', null, function(res) {
     if (!res.ok) { showToast(res.error || 'Ошибка'); return; }
-    var btn = document.querySelector('.crm-modal-content button[onclick="crmRestoreField(' + fieldId + ')"]');
-    if (btn) {
-      var item = btn.closest('.crm-mgmt-item');
-      if (item) item.remove();
-      var remaining = document.querySelectorAll('.crm-modal-content .crm-mgmt-item[style*="opacity"]');
-      if (!remaining.length) {
-        var hr = document.querySelector('.crm-modal-content hr');
-        var h4 = document.querySelector('.crm-modal-content h4');
-        if (hr) hr.remove();
-        if (h4) h4.remove();
-      }
-    }
     showToast('Поле восстановлено');
   });
 }

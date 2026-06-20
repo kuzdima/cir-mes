@@ -1,4 +1,7 @@
-module.exports = function(app, pool, io, auth, adminOnly, crmAccessOnly) {
+var fs = require('fs');
+var path = require('path');
+
+module.exports = function(app, pool, io, auth, adminOnly, crmAccessOnly, uploadDir) {
 
 async function fetchCardEnriched(pool, cardId) {
   var fieldsR = await pool.query(
@@ -13,7 +16,11 @@ async function fetchCardEnriched(pool, cardId) {
     'SELECT u.id, u.first_name, u.last_name, u.email FROM crm_card_participants cp INNER JOIN users u ON u.id = cp.user_id WHERE cp.card_id = $1',
     [cardId]
   );
-  return { fields: fieldsR.rows, files: filesR.rows, participants: partsR.rows };
+  var fileFieldsR = await pool.query(
+    'SELECT NULL AS id, NULL AS card_id, fd.id AS field_id, NULL AS value, fd.name, fd.type, fd.is_active FROM crm_field_definitions fd WHERE fd.type = $1 AND fd.is_active = TRUE AND fd.id NOT IN (SELECT field_id FROM crm_card_field_values WHERE card_id = $2)',
+    ['file', cardId]
+  );
+  return { fields: fieldsR.rows.concat(fileFieldsR.rows), files: filesR.rows, participants: partsR.rows };
 }
 
   app.get('/api/crm/cards', auth, crmAccessOnly, async function(req, res) {
@@ -166,6 +173,18 @@ async function fetchCardEnriched(pool, cardId) {
     try {
       var partR = await pool.query('SELECT 1 FROM crm_card_participants WHERE card_id = $1 AND user_id = $2', [req.params.id, req.user.id]);
       if (!partR.rows.length) return res.status(403).json({ ok: false, error: 'Нет доступа к карточке' });
+
+      var filesR = await pool.query('SELECT * FROM crm_card_files WHERE card_id = $1', [req.params.id]);
+      for (var fi = 0; fi < filesR.rows.length; fi++) {
+        try {
+          await fs.promises.unlink(path.join(uploadDir, filesR.rows[fi].file_name));
+        } catch (unlinkErr) {
+          if (unlinkErr.code !== 'ENOENT') {
+            console.error('Ошибка удаления файла с диска:', unlinkErr.message);
+          }
+        }
+      }
+
       await pool.query('DELETE FROM crm_cards WHERE id = $1', [req.params.id]);
       io.emit('crm:card-deleted', { id: parseInt(req.params.id) });
       res.json({ ok: true });

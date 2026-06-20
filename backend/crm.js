@@ -1,3 +1,6 @@
+var path = require('path');
+var uploadDir = path.join(__dirname, 'uploads');
+
 module.exports = function(app, pool, SECRET, io, auth) {
 
   function adminOnly(req, res, next) {
@@ -14,8 +17,8 @@ module.exports = function(app, pool, SECRET, io, auth) {
   initTables(pool).then(function() {});
 
   require('./crm/columns')(app, pool, io, auth, adminOnly, crmAccessOnly);
-  require('./crm/cards')(app, pool, io, auth, adminOnly, crmAccessOnly);
-  require('./crm/files')(app, pool, io, auth, adminOnly, crmAccessOnly);
+  require('./crm/cards')(app, pool, io, auth, adminOnly, crmAccessOnly, uploadDir);
+  require('./crm/files')(app, pool, io, auth, adminOnly, crmAccessOnly, uploadDir);
   require('./crm/fields')(app, pool, io, auth, adminOnly, crmAccessOnly);
   require('./crm/access')(app, pool, io, auth, adminOnly, crmAccessOnly);
 
