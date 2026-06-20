@@ -247,6 +247,10 @@ function crmInit() {
     CRM_STORE.removeCard(data.id);
     CRM_RENDERER.render();
     CRM_RENDERER.applyFilter();
+    var modalTitle = document.querySelector('.crm-modal-title');
+    if (modalTitle && modalTitle.textContent === 'Карточка #' + data.id) {
+      crmCloseModal();
+    }
   });
   CRM_SOCKET.on('crm:card-moved', function(data) {
     CRM_STORE.moveCard(data.id, data.column_id, data.sort_order);
@@ -572,7 +576,7 @@ function crmUploadCardFiles(cardId, callback) {
 function crmDeleteCard(cardId) {
   if (!confirm('Удалить карточку?')) return;
   http('DELETE', '/api/crm/cards/' + cardId, null, function(res) {
-    if (res.ok) { showToast('Карточка удалена'); }
+    if (res.ok) { showToast('Карточка удалена'); crmCloseModal(); }
     else { showToast(res.error || 'Ошибка'); }
   });
 }
