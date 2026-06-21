@@ -8,7 +8,7 @@
 function showPanel(id) {
   var titles = {
     'nomenclature':'Номенклатура', 'production':'Производство',
-    'profile':'Личный кабинет', 'users':'Управление пользователями'
+    'profile':'Личный кабинет', 'users':'Управление пользователями', 'crm':'CRM'
   };
   // Переключаем кнопки в топбаре
   var btnNom  = document.getElementById('add-btn-nom');
@@ -47,6 +47,9 @@ function showPanel(id) {
   }
   if (id === 'users' && typeof loadAllUsers === 'function') {
     loadAllUsers();
+  }
+  if (id === 'crm' && typeof crmInit === 'function') {
+    crmInit();
   }
 }
 

@@ -52,7 +52,7 @@ sudo -u postgres psql -d cir_mes -f backend/schema.sql
 psql -U postgres -d cir_mes -c "\dt"
 ```
 
-Должно показать 12 таблиц:
+Должно показать 19 таблиц:
 - `users` — пользователи
 - `tech_operations_archive` — архив операций технолога
 - `products_archive` — база архив изделий
@@ -65,6 +65,13 @@ psql -U postgres -d cir_mes -c "\dt"
 - `ref_coatings` — справочник покрытий
 - `ref_units` — справочник единиц измерения
 - `ref_object_types` — справочник типов объектов
+- `crm_access` — доступ к CRM
+- `crm_columns` — колонки канбан-доски
+- `crm_field_definitions` — настраиваемые поля карточек
+- `crm_cards` — карточки
+- `crm_card_field_values` — значения полей карточек
+- `crm_card_files` — прикреплённые файлы
+- `crm_card_participants` — участники карточки
 
 ---
 
@@ -145,14 +152,23 @@ cir-mes/
 │   ├── schema.sql         — Схема базы данных
 │   ├── .env               — Конфигурация (не в Git!)
 │   ├── .env.example       — Пример конфигурации
-│   └── package.json       — Зависимости Node.js
-│
+│   ├── package.json       — Зависимости Node.js
+│   ├── crm/               — Модуль CRM (канбан-доска)
+│   │   ├── cards.js       — CRUD карточек + Socket.IO
+│   │   ├── columns.js     — Управление колонками
+│   │   ├── fields.js      — Настраиваемые поля + загрузка файлов
+│   │   ├── access.js      — Доступ к CRM
+│   │   └── users.js       — Список пользователей для доступа
+│   └── __tests__/
+│       └── crm.test.js    — Интеграционные тесты CRM
+
 ├── frontend/
 │   ├── index.html          — Главная страница (SPA)
 │   ├── fact.html           — Мобильная страница отметки факта (открывается по QR с маршрутного листа)
 │   ├── css/
 │   │   ├── main.css        — Стили (тёмная тема)
-│   │   └── fact.css        — Стили для страницы отметки факта
+│   │   ├── fact.css        — Стили для страницы отметки факта
+│   │   └── crm.css         — Стили CRM-доски
 │   └── js/
 │       ├── api.js          — HTTP запросы, глобалы, toast
 │       ├── auth.js         — Авторизация (вход / выход)
@@ -161,7 +177,8 @@ cir-mes/
 │       ├── archive.js      — База архив изделий
 │       ├── production.js   — Производство
 │       ├── profile.js      — Личный кабинет + управление пользователями
-│       └── app.js          — Навигация, инициализация
+│       ├── app.js          — Навигация, инициализация
+│       └── crm.js          — CRM: доска, карточки, файлы, настройки
 │
 ├── .gitignore
 ├── .env.example
@@ -245,6 +262,29 @@ git push
 | POST | `/api/production/fact` | Факт цеха (отметка мастера) |
 | POST | `/api/production/status` | Изменение статуса наряда |
 | DELETE | `/api/production` | Удаление наряда |
+| GET | `/api/crm/columns` | Список колонок доски |
+| POST | `/api/crm/columns` | Создать колонку (admin) |
+| PUT | `/api/crm/columns/:id` | Переименовать колонку (admin) |
+| DELETE | `/api/crm/columns/:id` | Удалить колонку (admin) |
+| GET | `/api/crm/cards` | Все карточки пользователя |
+| POST | `/api/crm/cards` | Создать карточку |
+| GET | `/api/crm/cards/:id` | Детали карточки |
+| PUT | `/api/crm/cards/:id` | Обновить карточку |
+| DELETE | `/api/crm/cards/:id` | Удалить карточку |
+| POST | `/api/crm/cards/:id/move` | Переместить карточку |
+| POST | `/api/crm/cards/:id/participants` | Изменить участников |
+| POST | `/api/crm/upload` | Загрузить файл (JPG, PNG, GIF, PDF, DOC, DOCX, XLS, XLSX) |
+| DELETE | `/api/crm/files/:id` | Удалить файл |
+| GET | `/api/crm/fields` | Список настраиваемых полей |
+| POST | `/api/crm/fields` | Создать поле (admin) |
+| PUT | `/api/crm/fields/:id` | Изменить поле (admin) |
+| DELETE | `/api/crm/fields/:id` | Удалить поле (admin) |
+| POST | `/api/crm/fields/:id/restore` | Восстановить удалённое поле (admin) |
+| GET | `/api/crm/fields/deleted` | Список удалённых полей |
+| GET | `/api/crm/access` | Список пользователей с доступом (admin) |
+| POST | `/api/crm/access` | Добавить доступ (admin) |
+| DELETE | `/api/crm/access/:userId` | Убрать доступ (admin) |
+| GET | `/api/crm/users` | Все пользователи (admin) |
 
 ---
 

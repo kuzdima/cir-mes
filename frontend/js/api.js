@@ -26,6 +26,20 @@ function http(method, url, data, cb) {
   xhr.send(data ? JSON.stringify(data) : null);
 }
 
+function httpUpload(method, url, data, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url, true);
+  if (TOKEN) xhr.setRequestHeader('Authorization', 'Bearer ' + TOKEN);
+  xhr.onload = function() {
+    var res;
+    try { res = JSON.parse(xhr.responseText); }
+    catch(e) { res = {ok:false, error:'Ошибка: ' + xhr.responseText.slice(0,80)}; }
+    if (cb) cb(res);
+  };
+  xhr.onerror = function() { if (cb) cb({ok:false, error:'Нет связи с сервером'}); };
+  xhr.send(data);
+}
+
 function showToast(msg) {
   var t = document.getElementById('toast');
   if (!t) return;
