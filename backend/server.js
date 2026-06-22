@@ -61,7 +61,7 @@ app.post('/api/auth/login', async (req, res) => {
     await pool.query('UPDATE users SET last_login=NOW() WHERE id=$1', [user.id]);
     var token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.first_name + ' ' + user.last_name },
-      SECRET, { expiresIn: '10s' }
+      SECRET, { expiresIn: '8h' }
     );
     res.json({ ok: true, token, user: {
       id: user.id, email: user.email, role: user.role,
