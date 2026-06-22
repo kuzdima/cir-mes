@@ -17,6 +17,7 @@ function http(method, url, data, cb) {
   xhr.setRequestHeader('Content-Type', 'application/json');
   if (TOKEN) xhr.setRequestHeader('Authorization', 'Bearer ' + TOKEN);
   xhr.onload = function() {
+    if (xhr.status === 401) { if (typeof doLogout === 'function') doLogout(); return; }
     var res;
     try { res = JSON.parse(xhr.responseText); }
     catch(e) { res = {ok:false, error:'Ошибка: ' + xhr.responseText.slice(0,80)}; }
