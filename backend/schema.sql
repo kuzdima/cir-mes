@@ -493,6 +493,72 @@ CREATE TABLE public.work_orders (
     updated_at timestamp with time zone DEFAULT now()
 );
 
+-- ============================================================
+-- CRM (канбан-доска)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS crm_access (
+    user_id INTEGER REFERENCES users(id) PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS crm_columns (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS crm_field_definitions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    options JSONB,
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS crm_cards (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    description TEXT,
+    column_id INTEGER REFERENCES crm_columns(id),
+    sort_order INTEGER DEFAULT 0,
+    created_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS crm_card_field_values (
+    card_id INTEGER REFERENCES crm_cards(id) ON DELETE CASCADE,
+    field_id INTEGER REFERENCES crm_field_definitions(id) ON DELETE CASCADE,
+    value TEXT,
+    PRIMARY KEY (card_id, field_id)
+);
+
+CREATE TABLE IF NOT EXISTS crm_card_files (
+    id SERIAL PRIMARY KEY,
+    card_id INTEGER REFERENCES crm_cards(id) ON DELETE CASCADE,
+    field_id INTEGER REFERENCES crm_field_definitions(id),
+    file_name TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    file_size INTEGER,
+    uploaded_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS crm_card_participants (
+    card_id INTEGER REFERENCES crm_cards(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id),
+    added_by INTEGER REFERENCES users(id),
+    PRIMARY KEY (card_id, user_id)
+);
+
+-- ============================================================
+-- ПРАВА ДОСТУПА
+-- ============================================================
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO cir_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO cir_user;
 
 --
 -- Name: work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: -

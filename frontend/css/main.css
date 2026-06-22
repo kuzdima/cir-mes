@@ -239,13 +239,13 @@ tbody tr:hover td{background:var(--bg3);}
 }
 
 .modal-content {
-    background: #161b27 ;
-    border: 1px solid #3b82f6 ;
-    border-radius: 12px ;
-    padding: 28px ;
-    width: 100% ;
-    max-width: 480px ;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.7) ;
+    background: #161b27 !important;
+    border: 1px solid #3b82f6 !important;
+    border-radius: 12px !important;
+    padding: 28px !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important;
 }
 
 /* Панели архива — фиксированная высота, скроллинг внутри */
@@ -372,7 +372,7 @@ button.arc-btn,button.topbar-btn{line-height:1}
   padding-left: 20px;
   margin-left: -6px;
   color: var(--text2);
-  max-height: 740px;
+  max-height: 680px;
 }
 
 .childUl {
@@ -391,14 +391,15 @@ button.arc-btn,button.topbar-btn{line-height:1}
 }
 
 .cat-tbl-scroller {
-  max-height: 700px;
-  overflow-y: auto;
-  overflow-x: auto;
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:auto;
 }
 
 .two-col1-2 {
     display: grid;
-    grid-template-columns: 1fr 2fr;;
+    grid-template-columns: 0.5fr 1.5fr;;
     gap: 14px;
     overflow: hidden;
 }

@@ -17,6 +17,7 @@ function http(method, url, data, cb) {
   xhr.setRequestHeader('Content-Type', 'application/json');
   if (TOKEN) xhr.setRequestHeader('Authorization', 'Bearer ' + TOKEN);
   xhr.onload = function() {
+    if (xhr.status === 401) { if (typeof doLogout === 'function') doLogout(); return; }
     var res;
     try { res = JSON.parse(xhr.responseText); }
     catch(e) { res = {ok:false, error:'Ошибка: ' + xhr.responseText.slice(0,80)}; }
@@ -24,6 +25,20 @@ function http(method, url, data, cb) {
   };
   xhr.onerror = function() { if (cb) cb({ok:false, error:'Нет связи с сервером'}); };
   xhr.send(data ? JSON.stringify(data) : null);
+}
+
+function httpUpload(method, url, data, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url, true);
+  if (TOKEN) xhr.setRequestHeader('Authorization', 'Bearer ' + TOKEN);
+  xhr.onload = function() {
+    var res;
+    try { res = JSON.parse(xhr.responseText); }
+    catch(e) { res = {ok:false, error:'Ошибка: ' + xhr.responseText.slice(0,80)}; }
+    if (cb) cb(res);
+  };
+  xhr.onerror = function() { if (cb) cb({ok:false, error:'Нет связи с сервером'}); };
+  xhr.send(data);
 }
 
 function showToast(msg) {

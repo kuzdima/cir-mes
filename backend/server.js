@@ -7,8 +7,14 @@ const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 
 const app  = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, { cors: { origin: '*' } });
 const PORT = process.env.PORT || 8080;
-const SECRET = process.env.JWT_SECRET || 'cirmesjwtsecret2026';
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  console.error('FATAL: JWT_SECRET не задан. Укажите в .env');
+  process.exit(1);
+}
 
 const pool = new Pool({
   host:     process.env.DB_HOST     || '185.41.161.31',
@@ -65,45 +71,6 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 
-
-// Register — Добавление пользователя в базу
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    const { email, password, firstName, lastName, role } = req.body;
-
-    if (!email || !password || !firstName) {
-      return res.status(400).json({ ok: false, error: 'Заполните обязательные поля (Имя, Email, Пароль)' });
-    }
-
-    // Проверка существования email
-    const exists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (exists.rows.length > 0) {
-      return res.status(409).json({ ok: false, error: 'Пользователь с таким email уже существует' });
-    }
-
-    // Хэширование пароля
-    const hash = await bcrypt.hash(password, 10);
-
-    // Добавление в базу
-    const result = await pool.query(
-      `INSERT INTO users 
-       (email, password_hash, first_name, last_name, role, is_active, created_at) 
-       VALUES ($1, $2, $3, $4, $5, TRUE, NOW()) 
-       RETURNING id, email, role, first_name, last_name`,
-      [email, hash, firstName, lastName || '', role || 'technologist']
-    );
-
-    res.json({ 
-      ok: true, 
-      message: 'Пользователь успешно зарегистрирован',
-      user: result.rows[0]
-    });
-
-  } catch(e) {
-    console.error('Register error:', e.message);
-    res.status(500).json({ ok: false, error: 'Ошибка при регистрации' });
-  }
-});
 
 // Delete tech operations by classifier + product
 app.delete('/api/tech-ops', auth, async (req, res) => {
@@ -1007,10 +974,21 @@ app.post('/api/production/status', auth, async (req, res) => {
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
-// Static frontend
+// CRM module
+require('./crm')(app, pool, SECRET, io, auth);
+
+// Socket.IO
+io.on('connection', function(socket) {
+  console.log('Socket.IO: клиент подключился');
+});
+
+// Static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../frontend/index.html')));
 
-app.listen(PORT, () => console.log('ЦИР MES -> http://localhost:' + PORT));
+server.listen(PORT, () => console.log('ЦИР MES -> http://localhost:' + PORT));
+
+module.exports = { app, pool, server, io, auth };
 
 

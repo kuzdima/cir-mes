@@ -33,6 +33,14 @@ function applyUser(u) {
     adminMenu.style.display = (u.role === 'admin') ? 'block' : 'none';
   }
 
+  // CRM admin buttons
+  var crmColsBtn = document.getElementById('crm-columns-btn');
+  var crmFieldsBtn = document.getElementById('crm-fields-btn');
+  var crmAccessBtn = document.getElementById('crm-access-btn');
+  if (crmColsBtn) crmColsBtn.style.display = (u.role === 'admin') ? '' : 'none';
+  if (crmFieldsBtn) crmFieldsBtn.style.display = (u.role === 'admin') ? '' : 'none';
+  if (crmAccessBtn) crmAccessBtn.style.display = (u.role === 'admin') ? '' : 'none';
+
   loadRefs();
   initArc();
   showPanel('nomenclature');
