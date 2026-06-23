@@ -263,7 +263,7 @@ function prepareProductCatalogue() {
     catElement.replaceChildren(prepareCatalogueStructureElement(catArcDB));
   }
 
-  let navlist = document.querySelector(".nomNavList")
+  let navlist = document.querySelector(".nomNavList");
   navlist.addEventListener("click", (e) => {
     let target = e.target.parentElement;
     let nom_id = parseInt(target.dataset.id);
