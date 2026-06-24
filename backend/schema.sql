@@ -16,12 +16,214 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: schema; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+CREATE SCHEMA schema;
+
+
+ALTER SCHEMA schema OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: event_log; Type: TABLE; Schema: public; Owner: -
+-- Name: crm_access; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.crm_access (
+    user_id integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.crm_access OWNER TO cir_user;
+
+--
+-- Name: crm_card_field_values; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.crm_card_field_values (
+    card_id integer NOT NULL,
+    field_id integer NOT NULL,
+    value text
+);
+
+
+ALTER TABLE public.crm_card_field_values OWNER TO cir_user;
+
+--
+-- Name: crm_card_files; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.crm_card_files (
+    id integer NOT NULL,
+    card_id integer,
+    field_id integer,
+    file_name text NOT NULL,
+    original_name text NOT NULL,
+    file_size integer,
+    uploaded_by integer,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.crm_card_files OWNER TO cir_user;
+
+--
+-- Name: crm_card_files_id_seq; Type: SEQUENCE; Schema: public; Owner: cir_user
+--
+
+CREATE SEQUENCE public.crm_card_files_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.crm_card_files_id_seq OWNER TO cir_user;
+
+--
+-- Name: crm_card_files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: cir_user
+--
+
+ALTER SEQUENCE public.crm_card_files_id_seq OWNED BY public.crm_card_files.id;
+
+
+--
+-- Name: crm_card_participants; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.crm_card_participants (
+    card_id integer NOT NULL,
+    user_id integer NOT NULL,
+    added_by integer
+);
+
+
+ALTER TABLE public.crm_card_participants OWNER TO cir_user;
+
+--
+-- Name: crm_cards; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.crm_cards (
+    id integer NOT NULL,
+    title character varying(500) NOT NULL,
+    description text,
+    column_id integer,
+    sort_order integer DEFAULT 0,
+    created_by integer,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.crm_cards OWNER TO cir_user;
+
+--
+-- Name: crm_cards_id_seq; Type: SEQUENCE; Schema: public; Owner: cir_user
+--
+
+CREATE SEQUENCE public.crm_cards_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.crm_cards_id_seq OWNER TO cir_user;
+
+--
+-- Name: crm_cards_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: cir_user
+--
+
+ALTER SEQUENCE public.crm_cards_id_seq OWNED BY public.crm_cards.id;
+
+
+--
+-- Name: crm_columns; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.crm_columns (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    sort_order integer DEFAULT 0,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.crm_columns OWNER TO cir_user;
+
+--
+-- Name: crm_columns_id_seq; Type: SEQUENCE; Schema: public; Owner: cir_user
+--
+
+CREATE SEQUENCE public.crm_columns_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.crm_columns_id_seq OWNER TO cir_user;
+
+--
+-- Name: crm_columns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: cir_user
+--
+
+ALTER SEQUENCE public.crm_columns_id_seq OWNED BY public.crm_columns.id;
+
+
+--
+-- Name: crm_field_definitions; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.crm_field_definitions (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    type character varying(50) NOT NULL,
+    options jsonb,
+    sort_order integer DEFAULT 0,
+    is_active boolean DEFAULT true,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.crm_field_definitions OWNER TO cir_user;
+
+--
+-- Name: crm_field_definitions_id_seq; Type: SEQUENCE; Schema: public; Owner: cir_user
+--
+
+CREATE SEQUENCE public.crm_field_definitions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.crm_field_definitions_id_seq OWNER TO cir_user;
+
+--
+-- Name: crm_field_definitions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: cir_user
+--
+
+ALTER SEQUENCE public.crm_field_definitions_id_seq OWNED BY public.crm_field_definitions.id;
+
+
+--
+-- Name: event_log; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.event_log (
@@ -35,8 +237,10 @@ CREATE TABLE public.event_log (
 );
 
 
+ALTER TABLE public.event_log OWNER TO postgres;
+
 --
--- Name: event_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: event_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.event_log_id_seq
@@ -48,15 +252,17 @@ CREATE SEQUENCE public.event_log_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.event_log_id_seq OWNER TO postgres;
+
 --
--- Name: event_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: event_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.event_log_id_seq OWNED BY public.event_log.id;
 
 
 --
--- Name: orders; Type: TABLE; Schema: public; Owner: -
+-- Name: orders; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.orders (
@@ -75,8 +281,10 @@ CREATE TABLE public.orders (
 );
 
 
+ALTER TABLE public.orders OWNER TO postgres;
+
 --
--- Name: orders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.orders_id_seq
@@ -88,15 +296,17 @@ CREATE SEQUENCE public.orders_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.orders_id_seq OWNER TO postgres;
+
 --
--- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.orders_id_seq OWNED BY public.orders.id;
 
 
 --
--- Name: production_orders; Type: TABLE; Schema: public; Owner: -
+-- Name: production_orders; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.production_orders (
@@ -150,8 +360,10 @@ CREATE TABLE public.production_orders (
 );
 
 
+ALTER TABLE public.production_orders OWNER TO postgres;
+
 --
--- Name: production_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: production_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.production_orders_id_seq
@@ -163,15 +375,17 @@ CREATE SEQUENCE public.production_orders_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.production_orders_id_seq OWNER TO postgres;
+
 --
--- Name: production_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: production_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.production_orders_id_seq OWNED BY public.production_orders.id;
 
 
 --
--- Name: products_archive; Type: TABLE; Schema: public; Owner: -
+-- Name: products_archive; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.products_archive (
@@ -191,8 +405,10 @@ CREATE TABLE public.products_archive (
 );
 
 
+ALTER TABLE public.products_archive OWNER TO postgres;
+
 --
--- Name: products_archive_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: products_archive_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.products_archive_id_seq
@@ -204,15 +420,17 @@ CREATE SEQUENCE public.products_archive_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.products_archive_id_seq OWNER TO postgres;
+
 --
--- Name: products_archive_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: products_archive_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.products_archive_id_seq OWNED BY public.products_archive.id;
 
 
 --
--- Name: ref_coatings; Type: TABLE; Schema: public; Owner: -
+-- Name: ref_coatings; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.ref_coatings (
@@ -221,8 +439,10 @@ CREATE TABLE public.ref_coatings (
 );
 
 
+ALTER TABLE public.ref_coatings OWNER TO postgres;
+
 --
--- Name: ref_coatings_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: ref_coatings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.ref_coatings_id_seq
@@ -234,15 +454,17 @@ CREATE SEQUENCE public.ref_coatings_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.ref_coatings_id_seq OWNER TO postgres;
+
 --
--- Name: ref_coatings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: ref_coatings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.ref_coatings_id_seq OWNED BY public.ref_coatings.id;
 
 
 --
--- Name: ref_machines; Type: TABLE; Schema: public; Owner: -
+-- Name: ref_machines; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.ref_machines (
@@ -251,8 +473,10 @@ CREATE TABLE public.ref_machines (
 );
 
 
+ALTER TABLE public.ref_machines OWNER TO postgres;
+
 --
--- Name: ref_machines_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: ref_machines_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.ref_machines_id_seq
@@ -264,15 +488,17 @@ CREATE SEQUENCE public.ref_machines_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.ref_machines_id_seq OWNER TO postgres;
+
 --
--- Name: ref_machines_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: ref_machines_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.ref_machines_id_seq OWNED BY public.ref_machines.id;
 
 
 --
--- Name: ref_object_types; Type: TABLE; Schema: public; Owner: -
+-- Name: ref_object_types; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.ref_object_types (
@@ -281,8 +507,10 @@ CREATE TABLE public.ref_object_types (
 );
 
 
+ALTER TABLE public.ref_object_types OWNER TO postgres;
+
 --
--- Name: ref_object_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: ref_object_types_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.ref_object_types_id_seq
@@ -294,15 +522,17 @@ CREATE SEQUENCE public.ref_object_types_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.ref_object_types_id_seq OWNER TO postgres;
+
 --
--- Name: ref_object_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: ref_object_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.ref_object_types_id_seq OWNED BY public.ref_object_types.id;
 
 
 --
--- Name: ref_operations; Type: TABLE; Schema: public; Owner: -
+-- Name: ref_operations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.ref_operations (
@@ -311,8 +541,10 @@ CREATE TABLE public.ref_operations (
 );
 
 
+ALTER TABLE public.ref_operations OWNER TO postgres;
+
 --
--- Name: ref_operations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: ref_operations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.ref_operations_id_seq
@@ -324,15 +556,17 @@ CREATE SEQUENCE public.ref_operations_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.ref_operations_id_seq OWNER TO postgres;
+
 --
--- Name: ref_operations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: ref_operations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.ref_operations_id_seq OWNED BY public.ref_operations.id;
 
 
 --
--- Name: ref_units; Type: TABLE; Schema: public; Owner: -
+-- Name: ref_units; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.ref_units (
@@ -341,8 +575,10 @@ CREATE TABLE public.ref_units (
 );
 
 
+ALTER TABLE public.ref_units OWNER TO postgres;
+
 --
--- Name: ref_units_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: ref_units_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.ref_units_id_seq
@@ -354,15 +590,17 @@ CREATE SEQUENCE public.ref_units_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.ref_units_id_seq OWNER TO postgres;
+
 --
--- Name: ref_units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: ref_units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.ref_units_id_seq OWNED BY public.ref_units.id;
 
 
 --
--- Name: tech_operations_archive; Type: TABLE; Schema: public; Owner: -
+-- Name: tech_operations_archive; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tech_operations_archive (
@@ -402,8 +640,10 @@ CREATE TABLE public.tech_operations_archive (
 );
 
 
+ALTER TABLE public.tech_operations_archive OWNER TO postgres;
+
 --
--- Name: tech_operations_archive_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: tech_operations_archive_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.tech_operations_archive_id_seq
@@ -415,15 +655,17 @@ CREATE SEQUENCE public.tech_operations_archive_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tech_operations_archive_id_seq OWNER TO postgres;
+
 --
--- Name: tech_operations_archive_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: tech_operations_archive_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.tech_operations_archive_id_seq OWNED BY public.tech_operations_archive.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
@@ -439,8 +681,10 @@ CREATE TABLE public.users (
 );
 
 
+ALTER TABLE public.users OWNER TO postgres;
+
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -452,15 +696,140 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
+
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: work_orders; Type: TABLE; Schema: public; Owner: -
+-- Name: wh_items; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.wh_items (
+    id integer NOT NULL,
+    name text NOT NULL,
+    material_type text,
+    address text,
+    unit text DEFAULT 'шт'::text,
+    qty numeric(12,3) DEFAULT 0,
+    min_qty numeric(12,3) DEFAULT 0,
+    reserved numeric(12,3) DEFAULT 0,
+    comments text,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    sku character varying(9)
+);
+
+
+ALTER TABLE public.wh_items OWNER TO postgres;
+
+--
+-- Name: wh_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.wh_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.wh_items_id_seq OWNER TO postgres;
+
+--
+-- Name: wh_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.wh_items_id_seq OWNED BY public.wh_items.id;
+
+
+--
+-- Name: wh_mov_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.wh_mov_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.wh_mov_seq OWNER TO postgres;
+
+--
+-- Name: wh_movements; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.wh_movements (
+    id integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    operation text NOT NULL,
+    item_id integer,
+    item_name text NOT NULL,
+    qty numeric(12,3) NOT NULL,
+    unit text,
+    warehouse text,
+    address text,
+    supplier text,
+    doc_number text,
+    doc_date date,
+    doc_type text,
+    legal_entity text,
+    request_ref text,
+    order_ref text,
+    comments text,
+    created_by integer,
+    mov_num character varying(9)
+);
+
+
+ALTER TABLE public.wh_movements OWNER TO postgres;
+
+--
+-- Name: wh_movements_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.wh_movements_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.wh_movements_id_seq OWNER TO postgres;
+
+--
+-- Name: wh_movements_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.wh_movements_id_seq OWNED BY public.wh_movements.id;
+
+
+--
+-- Name: wh_sku_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.wh_sku_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.wh_sku_seq OWNER TO postgres;
+
+--
+-- Name: work_orders; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.work_orders (
@@ -493,75 +862,11 @@ CREATE TABLE public.work_orders (
     updated_at timestamp with time zone DEFAULT now()
 );
 
--- ============================================================
--- CRM (канбан-доска)
--- ============================================================
-CREATE TABLE IF NOT EXISTS crm_access (
-    user_id INTEGER REFERENCES users(id) PRIMARY KEY,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
 
-CREATE TABLE IF NOT EXISTS crm_columns (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    sort_order INTEGER DEFAULT 0,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS crm_field_definitions (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    options JSONB,
-    sort_order INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS crm_cards (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(500) NOT NULL,
-    description TEXT,
-    column_id INTEGER REFERENCES crm_columns(id),
-    sort_order INTEGER DEFAULT 0,
-    created_by INTEGER REFERENCES users(id),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS crm_card_field_values (
-    card_id INTEGER REFERENCES crm_cards(id) ON DELETE CASCADE,
-    field_id INTEGER REFERENCES crm_field_definitions(id) ON DELETE CASCADE,
-    value TEXT,
-    PRIMARY KEY (card_id, field_id)
-);
-
-CREATE TABLE IF NOT EXISTS crm_card_files (
-    id SERIAL PRIMARY KEY,
-    card_id INTEGER REFERENCES crm_cards(id) ON DELETE CASCADE,
-    field_id INTEGER REFERENCES crm_field_definitions(id),
-    file_name TEXT NOT NULL,
-    original_name TEXT NOT NULL,
-    file_size INTEGER,
-    uploaded_by INTEGER REFERENCES users(id),
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS crm_card_participants (
-    card_id INTEGER REFERENCES crm_cards(id) ON DELETE CASCADE,
-    user_id INTEGER REFERENCES users(id),
-    added_by INTEGER REFERENCES users(id),
-    PRIMARY KEY (card_id, user_id)
-);
-
--- ============================================================
--- ПРАВА ДОСТУПА
--- ============================================================
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO cir_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO cir_user;
+ALTER TABLE public.work_orders OWNER TO postgres;
 
 --
--- Name: work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.work_orders_id_seq
@@ -573,99 +878,199 @@ CREATE SEQUENCE public.work_orders_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.work_orders_id_seq OWNER TO postgres;
+
 --
--- Name: work_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: work_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.work_orders_id_seq OWNED BY public.work_orders.id;
 
 
 --
--- Name: event_log id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: crm_card_files id; Type: DEFAULT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_files ALTER COLUMN id SET DEFAULT nextval('public.crm_card_files_id_seq'::regclass);
+
+
+--
+-- Name: crm_cards id; Type: DEFAULT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_cards ALTER COLUMN id SET DEFAULT nextval('public.crm_cards_id_seq'::regclass);
+
+
+--
+-- Name: crm_columns id; Type: DEFAULT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_columns ALTER COLUMN id SET DEFAULT nextval('public.crm_columns_id_seq'::regclass);
+
+
+--
+-- Name: crm_field_definitions id; Type: DEFAULT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_field_definitions ALTER COLUMN id SET DEFAULT nextval('public.crm_field_definitions_id_seq'::regclass);
+
+
+--
+-- Name: event_log id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.event_log ALTER COLUMN id SET DEFAULT nextval('public.event_log_id_seq'::regclass);
 
 
 --
--- Name: orders id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: orders id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.orders ALTER COLUMN id SET DEFAULT nextval('public.orders_id_seq'::regclass);
 
 
 --
--- Name: production_orders id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: production_orders id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.production_orders ALTER COLUMN id SET DEFAULT nextval('public.production_orders_id_seq'::regclass);
 
 
 --
--- Name: products_archive id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: products_archive id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products_archive ALTER COLUMN id SET DEFAULT nextval('public.products_archive_id_seq'::regclass);
 
 
 --
--- Name: ref_coatings id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: ref_coatings id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_coatings ALTER COLUMN id SET DEFAULT nextval('public.ref_coatings_id_seq'::regclass);
 
 
 --
--- Name: ref_machines id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: ref_machines id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_machines ALTER COLUMN id SET DEFAULT nextval('public.ref_machines_id_seq'::regclass);
 
 
 --
--- Name: ref_object_types id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: ref_object_types id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_object_types ALTER COLUMN id SET DEFAULT nextval('public.ref_object_types_id_seq'::regclass);
 
 
 --
--- Name: ref_operations id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: ref_operations id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_operations ALTER COLUMN id SET DEFAULT nextval('public.ref_operations_id_seq'::regclass);
 
 
 --
--- Name: ref_units id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: ref_units id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_units ALTER COLUMN id SET DEFAULT nextval('public.ref_units_id_seq'::regclass);
 
 
 --
--- Name: tech_operations_archive id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: tech_operations_archive id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tech_operations_archive ALTER COLUMN id SET DEFAULT nextval('public.tech_operations_archive_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Name: work_orders id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: wh_items id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_items ALTER COLUMN id SET DEFAULT nextval('public.wh_items_id_seq'::regclass);
+
+
+--
+-- Name: wh_movements id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_movements ALTER COLUMN id SET DEFAULT nextval('public.wh_movements_id_seq'::regclass);
+
+
+--
+-- Name: work_orders id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.work_orders ALTER COLUMN id SET DEFAULT nextval('public.work_orders_id_seq'::regclass);
 
 
 --
--- Name: event_log event_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: crm_access crm_access_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_access
+    ADD CONSTRAINT crm_access_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: crm_card_field_values crm_card_field_values_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_field_values
+    ADD CONSTRAINT crm_card_field_values_pkey PRIMARY KEY (card_id, field_id);
+
+
+--
+-- Name: crm_card_files crm_card_files_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_files
+    ADD CONSTRAINT crm_card_files_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: crm_card_participants crm_card_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_participants
+    ADD CONSTRAINT crm_card_participants_pkey PRIMARY KEY (card_id, user_id);
+
+
+--
+-- Name: crm_cards crm_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_cards
+    ADD CONSTRAINT crm_cards_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: crm_columns crm_columns_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_columns
+    ADD CONSTRAINT crm_columns_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: crm_field_definitions crm_field_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_field_definitions
+    ADD CONSTRAINT crm_field_definitions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: event_log event_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.event_log
@@ -673,7 +1078,7 @@ ALTER TABLE ONLY public.event_log
 
 
 --
--- Name: orders orders_order_number_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: orders orders_order_number_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.orders
@@ -681,7 +1086,7 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.orders
@@ -689,7 +1094,7 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- Name: production_orders production_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: production_orders production_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.production_orders
@@ -697,7 +1102,7 @@ ALTER TABLE ONLY public.production_orders
 
 
 --
--- Name: products_archive products_archive_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: products_archive products_archive_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products_archive
@@ -705,7 +1110,7 @@ ALTER TABLE ONLY public.products_archive
 
 
 --
--- Name: ref_coatings ref_coatings_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_coatings ref_coatings_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_coatings
@@ -713,7 +1118,7 @@ ALTER TABLE ONLY public.ref_coatings
 
 
 --
--- Name: ref_coatings ref_coatings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_coatings ref_coatings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_coatings
@@ -721,7 +1126,7 @@ ALTER TABLE ONLY public.ref_coatings
 
 
 --
--- Name: ref_machines ref_machines_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_machines ref_machines_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_machines
@@ -729,7 +1134,7 @@ ALTER TABLE ONLY public.ref_machines
 
 
 --
--- Name: ref_machines ref_machines_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_machines ref_machines_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_machines
@@ -737,7 +1142,7 @@ ALTER TABLE ONLY public.ref_machines
 
 
 --
--- Name: ref_object_types ref_object_types_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_object_types ref_object_types_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_object_types
@@ -745,7 +1150,7 @@ ALTER TABLE ONLY public.ref_object_types
 
 
 --
--- Name: ref_object_types ref_object_types_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_object_types ref_object_types_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_object_types
@@ -753,7 +1158,7 @@ ALTER TABLE ONLY public.ref_object_types
 
 
 --
--- Name: ref_operations ref_operations_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_operations ref_operations_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_operations
@@ -761,7 +1166,7 @@ ALTER TABLE ONLY public.ref_operations
 
 
 --
--- Name: ref_operations ref_operations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_operations ref_operations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_operations
@@ -769,7 +1174,7 @@ ALTER TABLE ONLY public.ref_operations
 
 
 --
--- Name: ref_units ref_units_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_units ref_units_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_units
@@ -777,7 +1182,7 @@ ALTER TABLE ONLY public.ref_units
 
 
 --
--- Name: ref_units ref_units_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ref_units ref_units_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ref_units
@@ -785,7 +1190,7 @@ ALTER TABLE ONLY public.ref_units
 
 
 --
--- Name: tech_operations_archive tech_operations_archive_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tech_operations_archive tech_operations_archive_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tech_operations_archive
@@ -793,7 +1198,7 @@ ALTER TABLE ONLY public.tech_operations_archive
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -801,7 +1206,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -809,7 +1214,39 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: work_orders work_orders_narad_number_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: wh_items wh_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_items
+    ADD CONSTRAINT wh_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: wh_items wh_items_sku_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_items
+    ADD CONSTRAINT wh_items_sku_unique UNIQUE (sku);
+
+
+--
+-- Name: wh_movements wh_movements_mov_num_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_movements
+    ADD CONSTRAINT wh_movements_mov_num_unique UNIQUE (mov_num);
+
+
+--
+-- Name: wh_movements wh_movements_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_movements
+    ADD CONSTRAINT wh_movements_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: work_orders work_orders_narad_number_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.work_orders
@@ -817,7 +1254,7 @@ ALTER TABLE ONLY public.work_orders
 
 
 --
--- Name: work_orders work_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: work_orders work_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.work_orders
@@ -825,14 +1262,116 @@ ALTER TABLE ONLY public.work_orders
 
 
 --
--- Name: idx_production_started_at; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_production_started_at; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX idx_production_started_at ON public.production_orders USING btree (started_at) WHERE (started_at IS NOT NULL);
 
 
 --
--- Name: event_log event_log_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: wh_movements_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX wh_movements_created_at_idx ON public.wh_movements USING btree (created_at);
+
+
+--
+-- Name: wh_movements_item_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX wh_movements_item_id_idx ON public.wh_movements USING btree (item_id);
+
+
+--
+-- Name: crm_access crm_access_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_access
+    ADD CONSTRAINT crm_access_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: crm_card_field_values crm_card_field_values_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_field_values
+    ADD CONSTRAINT crm_card_field_values_card_id_fkey FOREIGN KEY (card_id) REFERENCES public.crm_cards(id) ON DELETE CASCADE;
+
+
+--
+-- Name: crm_card_field_values crm_card_field_values_field_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_field_values
+    ADD CONSTRAINT crm_card_field_values_field_id_fkey FOREIGN KEY (field_id) REFERENCES public.crm_field_definitions(id) ON DELETE CASCADE;
+
+
+--
+-- Name: crm_card_files crm_card_files_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_files
+    ADD CONSTRAINT crm_card_files_card_id_fkey FOREIGN KEY (card_id) REFERENCES public.crm_cards(id) ON DELETE CASCADE;
+
+
+--
+-- Name: crm_card_files crm_card_files_field_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_files
+    ADD CONSTRAINT crm_card_files_field_id_fkey FOREIGN KEY (field_id) REFERENCES public.crm_field_definitions(id);
+
+
+--
+-- Name: crm_card_files crm_card_files_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_files
+    ADD CONSTRAINT crm_card_files_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(id);
+
+
+--
+-- Name: crm_card_participants crm_card_participants_added_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_participants
+    ADD CONSTRAINT crm_card_participants_added_by_fkey FOREIGN KEY (added_by) REFERENCES public.users(id);
+
+
+--
+-- Name: crm_card_participants crm_card_participants_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_participants
+    ADD CONSTRAINT crm_card_participants_card_id_fkey FOREIGN KEY (card_id) REFERENCES public.crm_cards(id) ON DELETE CASCADE;
+
+
+--
+-- Name: crm_card_participants crm_card_participants_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_card_participants
+    ADD CONSTRAINT crm_card_participants_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: crm_cards crm_cards_column_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_cards
+    ADD CONSTRAINT crm_cards_column_id_fkey FOREIGN KEY (column_id) REFERENCES public.crm_columns(id);
+
+
+--
+-- Name: crm_cards crm_cards_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.crm_cards
+    ADD CONSTRAINT crm_cards_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id);
+
+
+--
+-- Name: event_log event_log_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.event_log
@@ -840,7 +1379,7 @@ ALTER TABLE ONLY public.event_log
 
 
 --
--- Name: orders orders_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: orders orders_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.orders
@@ -848,7 +1387,7 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- Name: production_orders production_orders_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: production_orders production_orders_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.production_orders
@@ -856,7 +1395,7 @@ ALTER TABLE ONLY public.production_orders
 
 
 --
--- Name: products_archive products_archive_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: products_archive products_archive_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products_archive
@@ -864,7 +1403,7 @@ ALTER TABLE ONLY public.products_archive
 
 
 --
--- Name: tech_operations_archive tech_operations_archive_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tech_operations_archive tech_operations_archive_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tech_operations_archive
@@ -872,7 +1411,23 @@ ALTER TABLE ONLY public.tech_operations_archive
 
 
 --
--- Name: work_orders work_orders_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: wh_movements wh_movements_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_movements
+    ADD CONSTRAINT wh_movements_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: wh_movements wh_movements_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.wh_movements
+    ADD CONSTRAINT wh_movements_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.wh_items(id) ON DELETE SET NULL;
+
+
+--
+-- Name: work_orders work_orders_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.work_orders
@@ -880,11 +1435,221 @@ ALTER TABLE ONLY public.work_orders
 
 
 --
--- Name: work_orders work_orders_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: work_orders work_orders_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.work_orders
     ADD CONSTRAINT work_orders_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id);
+
+
+--
+-- Name: TABLE event_log; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.event_log TO cir_user;
+
+
+--
+-- Name: SEQUENCE event_log_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.event_log_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE orders; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.orders TO cir_user;
+
+
+--
+-- Name: SEQUENCE orders_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.orders_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE production_orders; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.production_orders TO cir_user;
+
+
+--
+-- Name: SEQUENCE production_orders_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.production_orders_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE products_archive; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.products_archive TO cir_user;
+
+
+--
+-- Name: SEQUENCE products_archive_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.products_archive_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ref_coatings; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ref_coatings TO cir_user;
+
+
+--
+-- Name: SEQUENCE ref_coatings_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ref_coatings_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ref_machines; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ref_machines TO cir_user;
+
+
+--
+-- Name: SEQUENCE ref_machines_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ref_machines_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ref_object_types; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ref_object_types TO cir_user;
+
+
+--
+-- Name: SEQUENCE ref_object_types_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ref_object_types_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ref_operations; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ref_operations TO cir_user;
+
+
+--
+-- Name: SEQUENCE ref_operations_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ref_operations_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ref_units; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ref_units TO cir_user;
+
+
+--
+-- Name: SEQUENCE ref_units_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ref_units_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE tech_operations_archive; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.tech_operations_archive TO cir_user;
+
+
+--
+-- Name: SEQUENCE tech_operations_archive_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.tech_operations_archive_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE users; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.users TO cir_user;
+
+
+--
+-- Name: SEQUENCE users_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.users_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE wh_items; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.wh_items TO cir_user;
+
+
+--
+-- Name: SEQUENCE wh_items_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.wh_items_id_seq TO cir_user;
+
+
+--
+-- Name: SEQUENCE wh_mov_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.wh_mov_seq TO cir_user;
+
+
+--
+-- Name: TABLE wh_movements; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.wh_movements TO cir_user;
+
+
+--
+-- Name: SEQUENCE wh_movements_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.wh_movements_id_seq TO cir_user;
+
+
+--
+-- Name: SEQUENCE wh_sku_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.wh_sku_seq TO cir_user;
+
+
+--
+-- Name: TABLE work_orders; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.work_orders TO cir_user;
+
+
+--
+-- Name: SEQUENCE work_orders_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.work_orders_id_seq TO cir_user;
 
 
 --
