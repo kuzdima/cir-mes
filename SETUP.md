@@ -22,7 +22,7 @@ cd cir-mes
 ### 3.1. Создайте базу и пользователя
 
 **Windows (CMD):**
-```bash
+```cmd
 "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -c "CREATE DATABASE cir_mes;"
 "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -c "CREATE USER cir_user WITH PASSWORD 'CirMes2026';"
 ```
@@ -36,15 +36,17 @@ sudo -u postgres psql -c "CREATE USER cir_user WITH PASSWORD 'CirMes2026';"
 ### 3.2. Создайте таблицы
 
 **Windows:**
-```bash
+```cmd
 set PGCLIENTENCODING=UTF8
-"C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -d cir_mes -f backend\schema.sql
+"C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -d cir_mes -f schema.sql
 ```
 
 **Linux:**
 ```bash
-sudo -u postgres psql -d cir_mes -f backend/schema.sql
+sudo -u postgres psql -d cir_mes -f schema.sql
 ```
+
+> `schema.sql` в корне проекта — полная актуальная схема БД.
 
 ### 3.3. Проверьте что таблицы созданы
 
@@ -52,26 +54,31 @@ sudo -u postgres psql -d cir_mes -f backend/schema.sql
 psql -U postgres -d cir_mes -c "\dt"
 ```
 
-Должно показать 19 таблиц:
-- `users` — пользователи
-- `tech_operations_archive` — архив операций технолога
-- `products_archive` — база архив изделий
-- `production_orders` — наряды на производство
-- `orders` — заказы
-- `work_orders` — наряды (устаревшая)
-- `event_log` — лог событий
-- `ref_operations` — справочник операций
-- `ref_machines` — справочник станков
-- `ref_coatings` — справочник покрытий
-- `ref_units` — справочник единиц измерения
-- `ref_object_types` — справочник типов объектов
-- `crm_access` — доступ к CRM
-- `crm_columns` — колонки канбан-доски
-- `crm_field_definitions` — настраиваемые поля карточек
-- `crm_cards` — карточки
-- `crm_card_field_values` — значения полей карточек
-- `crm_card_files` — прикреплённые файлы
-- `crm_card_participants` — участники карточки
+Должно показать 21 таблицу:
+
+| Таблица | Описание |
+|---------|----------|
+| `users` | Пользователи |
+| `tech_operations_archive` | Архив операций технолога |
+| `products_archive` | База архив изделий |
+| `production_orders` | Наряды на производство |
+| `orders` | Заказы |
+| `work_orders` | Наряды (устаревшая) |
+| `event_log` | Лог событий |
+| `ref_operations` | Справочник операций |
+| `ref_machines` | Справочник станков |
+| `ref_coatings` | Справочник покрытий |
+| `ref_units` | Справочник единиц измерения |
+| `ref_object_types` | Справочник типов объектов |
+| `crm_access` | Доступ к CRM |
+| `crm_columns` | Колонки канбан-доски |
+| `crm_field_definitions` | Настраиваемые поля карточек |
+| `crm_cards` | Карточки |
+| `crm_card_field_values` | Значения полей карточек |
+| `crm_card_files` | Прикреплённые файлы |
+| `crm_card_participants` | Участники карточки |
+| `wh_items` | Позиции склада |
+| `wh_movements` | Движения склада (приход / расход / перемещение) |
 
 ---
 
@@ -86,8 +93,10 @@ cp .env.example .env
 
 ### 4.2. Отредактируйте `.env`
 
+```env
+```
 
-> ⚠️ Файл `.env` содержит пароли — он НЕ попадает в Git!
+> `.env` содержит пароли — он НЕ попадает в Git!
 
 ### 4.3. Установите зависимости
 
@@ -127,9 +136,23 @@ pm2 startup
 
 | Email | Пароль | Роль |
 |-------|--------|------|
+| admin@cir.ru | Admin123 | Администратор |
 | dispatcher@cir.ru | Dispatch123 | Диспетчер |
 | master@cir.ru | Master123 | Мастер |
 | technolog@cir.ru | Tech123 | Технолог |
+| warehouse@cir.ru | Wh123 | Кладовщик |
+
+### Доступные роли
+
+| Роль | Описание |
+|------|----------|
+| `admin` | Полный доступ, управление пользователями |
+| `dispatcher` | Производство, номенклатура |
+| `master` | Отметка факта в цехе |
+| `technolog` | Архив операций и изделий |
+| `warehouse` | Раздел «Склад» |
+
+> Доступ к CRM выдаётся отдельно через **Управление пользователями → CRM** для любой роли.
 
 ### Создание пользователя (через админ-панель)
 
@@ -139,7 +162,7 @@ pm2 startup
 4. Заполните имя, email, роль и пароль
 5. Нажмите **«Сохранить»**
 
-Доступные действия с пользователями: изменить данные, сменить пароль, удалить.
+> Сессия автоматически завершается через **8 часов** — пользователь перенаправляется на страницу авторизации.
 
 ---
 
@@ -149,7 +172,8 @@ pm2 startup
 cir-mes/
 ├── backend/
 │   ├── server.js          — API сервер (Express + PostgreSQL)
-│   ├── schema.sql         — Схема базы данных
+│   ├── warehouse.js       — Роутер раздела «Склад»
+│   ├── wh_schema.sql      — Миграция: таблицы склада (wh_items, wh_movements)
 │   ├── .env               — Конфигурация (не в Git!)
 │   ├── .env.example       — Пример конфигурации
 │   ├── package.json       — Зависимости Node.js
@@ -161,25 +185,31 @@ cir-mes/
 │   │   └── users.js       — Список пользователей для доступа
 │   └── __tests__/
 │       └── crm.test.js    — Интеграционные тесты CRM
-
+│
 ├── frontend/
 │   ├── index.html          — Главная страница (SPA)
-│   ├── fact.html           — Мобильная страница отметки факта (открывается по QR с маршрутного листа)
+│   ├── fact.html           — Мобильная страница отметки факта (QR с маршрутного листа)
 │   ├── css/
-│   │   ├── main.css        — Стили (тёмная тема)
-│   │   ├── fact.css        — Стили для страницы отметки факта
-│   │   └── crm.css         — Стили CRM-доски
+│   │   ├── main.css        — Базовые стили, тёмная тема, переменные
+│   │   ├── warehouse.css   — Раздел «Склад»
+│   │   ├── crm.css         — CRM-доска
+│   │   ├── fact.css        — Страница отметки факта
+│   │   └── fromtags.css    — Стили тегов
 │   └── js/
-│       ├── api.js          — HTTP запросы, глобалы, toast
-│       ├── auth.js         — Авторизация (вход / выход)
+│       ├── api.js          — fetch-обёртка, авторизация, автовыход (8 ч)
+│       ├── auth.js         — Вход / выход, восстановление положения после перезагрузки
+│       ├── app.js          — Навигация, инициализация
 │       ├── refs.js         — Справочники, автодополнение
 │       ├── techops.js      — Архив операций
 │       ├── archive.js      — База архив изделий
+│       ├── nomcatalogue.js — Номенклатура / каталог
 │       ├── production.js   — Производство
 │       ├── profile.js      — Личный кабинет + управление пользователями
-│       ├── app.js          — Навигация, инициализация
-│       └── crm.js          — CRM: доска, карточки, файлы, настройки
+│       ├── warehouse.js    — Раздел «Склад»
+│       ├── crm.js          — CRM: доска, карточки, файлы, настройки
+│       └── qrcode.js       — Генерация QR-кодов
 │
+├── schema.sql              — Полная схема БД (актуальная)
 ├── .gitignore
 ├── .env.example
 ├── SETUP.md
@@ -211,7 +241,7 @@ git push
 | Метод | URL | Описание |
 |-------|-----|----------|
 | GET | `/api/health` | Проверка соединения с БД |
-| POST | `/api/auth/login` | Вход в систему |
+| POST | `/api/auth/login` | Вход в систему (возвращает JWT, TTL 8 ч) |
 
 ### Пользователи (только Администратор)
 
@@ -254,7 +284,7 @@ git push
 
 | Метод | URL | Описание |
 |-------|-----|----------|
-| GET | `/api/production` | План производства (операции и проекты) |
+| GET | `/api/production` | План производства |
 | GET | `/api/production/form-data` | Данные для формы наряда |
 | GET | `/api/production/detail` | Детали одной операции |
 | GET | `/api/production/load-from-archive` | Загрузка операций из архива |
@@ -262,6 +292,27 @@ git push
 | POST | `/api/production/fact` | Факт цеха (отметка мастера) |
 | POST | `/api/production/status` | Изменение статуса наряда |
 | DELETE | `/api/production` | Удаление наряда |
+
+### Склад
+
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET | `/api/warehouse/refs` | Справочники (склады, типы материалов) |
+| GET | `/api/warehouse/kpis` | KPI-строка |
+| GET | `/api/warehouse/items` | Список позиций склада |
+| GET | `/api/warehouse/item/:id/history` | История движений по позиции |
+| GET | `/api/warehouse/movements` | Журнал движений (`?date=YYYY-MM-DD`) |
+| GET | `/api/warehouse/low` | Позиции ниже минимального остатка |
+| GET | `/api/warehouse/item-search` | Поиск позиции для движения |
+| GET | `/api/warehouse/suppliers` | Список поставщиков |
+| GET | `/api/warehouse/orders` | Список заказов для привязки |
+| POST | `/api/warehouse/movement` | Создать движение (приход / расход / перемещение) |
+| POST | `/api/warehouse/items` | Создать / обновить позицию склада |
+
+### CRM
+
+| Метод | URL | Описание |
+|-------|-----|----------|
 | GET | `/api/crm/columns` | Список колонок доски |
 | POST | `/api/crm/columns` | Создать колонку (admin) |
 | PUT | `/api/crm/columns/:id` | Переименовать колонку (admin) |
@@ -328,12 +379,26 @@ SELECT COUNT(*) FROM tech_operations_archive;
 SELECT COUNT(*) FROM products_archive;
 SELECT COUNT(*) FROM production_orders;
 SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM wh_items;
+SELECT COUNT(*) FROM wh_movements;
 
 # Выход
 \q
 ```
 
+### Обновление схемы (после изменений в БД)
+
+**Windows:**
+```cmd
+"C:\Program Files\PostgreSQL\16\bin\pg_dump.exe" -U postgres -d cir_mes --schema-only > schema.sql
+```
+
+**Linux:**
+```bash
+pg_dump -U postgres -d cir_mes --schema-only > schema.sql
+```
+
 ---
 
 ## Контакты
-telegram - @kuzdima
+
