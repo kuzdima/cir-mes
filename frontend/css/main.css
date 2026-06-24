@@ -30,7 +30,6 @@ input,select,textarea{font-family:var(--font);cursor:text;}
 /* SIDEBAR */
 .logo-block{padding:14px 14px 12px;border-bottom:1px solid var(--border);}
 .logo-img{display:block;width:100%;max-width:170px;height:auto;border-radius:6px;}
-
 /* Совместимость со свёрнутым сайдбаром */
 .sidebar.collapsed .logo-img{max-width:38px;object-fit:cover;object-position:left;}
 
@@ -121,11 +120,11 @@ tbody tr:hover td{background:var(--bg3);}
 .arc-tbl select option{background:var(--bg3);}
 
 /* Цвета строк по уровням */
-.arc-row-0 td{background:rgba(16,185,129,0.12)!important;border-left:3px solid #10b981!important}
-.arc-row-1 td{background:rgba(245,158,11,0.10)!important;border-left:3px solid #f59e0b!important}
-.arc-row-2 td{background:rgba(59,130,246,0.08)!important;border-left:3px solid #3b82f6!important}
-.arc-row-3 td{background:rgba(139,92,246,0.07)!important;border-left:3px solid #8b5cf6!important}
-.arc-row-4 td{background:rgba(236,72,153,0.06)!important;border-left:3px solid #ec4899!important}
+.arc-row-0 td{background:rgba(16,185,129,0.12);border-left:3px solid #10b981}
+.arc-row-1 td{background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b}
+.arc-row-2 td{background:rgba(59,130,246,0.08);border-left:3px solid #3b82f6}
+.arc-row-3 td{background:rgba(139,92,246,0.07);border-left:3px solid #8b5cf6}
+.arc-row-4 td{background:rgba(236,72,153,0.06);border-left:3px solid #ec4899}
 
 /* Бейджи уровней */
 .lvl-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:700;font-family:monospace}
@@ -146,7 +145,7 @@ tbody tr:hover td{background:var(--bg3);}
 .arc-btn.danger{background:var(--red-bg);color:var(--red-text);border-color:rgba(239,68,68,0.3);}
 /* .arc-tbl-scroller{overflow-x:auto;max-height:380px;overflow-y:auto;} */
 .arc-tbl-scroller{overflow-x:auto;overflow-y:auto;}
-.selected-row td{outline:2px solid var(--accent)!important;outline-offset:-1px;}
+.selected-row td{outline:2px solid var(--accent);outline-offset:-1px;}
 
 /* TECH OPS TABLE */
 .ops-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);}
@@ -157,7 +156,7 @@ tbody tr:hover td{background:var(--bg3);}
 .ops-table td:last-child{border-right:none;}
 .ops-table tr:last-child td{border-bottom:none;}
 .ops-table tr:hover td{background:var(--bg3);}
-.ops-table tr.final-op td{background:rgba(16,185,129,0.05)!important;}
+.ops-table tr.final-op td{background:rgba(16,185,129,0.05);}
 .ops-table input[type=text],.ops-table input[type=number],.ops-table select{width:100%;background:transparent;border:1px solid transparent;border-radius:3px;padding:4px 5px;font-size:11px;color:var(--text);font-family:var(--font);}
 .ops-table input:focus,.ops-table select:focus{outline:none;border-color:var(--accent);background:var(--bg4);}
 .ops-table select option{background:var(--bg3);}
@@ -221,21 +220,21 @@ tbody tr:hover td{background:var(--bg3);}
 
 /* ====================== ЛИЧНЫЙ КАБИНЕТ ====================== */
 #personal-cabinet {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: rgba(0, 0, 0, 0.85) !important;
-    display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 10000 !important;
-    opacity: 1 !important;
+    position: fixed ;
+    top: 0 ;
+    left: 0 ;
+    width: 100vw ;
+    height: 100vh ;
+    background: rgba(0, 0, 0, 0.85) ;
+    display: none ;
+    align-items: center ;
+    justify-content: center ;
+    z-index: 10000 ;
+    opacity: 1 ;
 }
 
 #personal-cabinet.modal-visible {
-    display: flex !important;
+    display: flex ;
 }
 
 .modal-content {
@@ -293,14 +292,14 @@ tbody tr:hover td{background:var(--bg3);}
 
 /* ==================== COLLAPSIBLE SIDEBAR ==================== */
 .sidebar {
-  width: 260px !important;           /* увеличиваем ширину по умолчанию */
+  width: 260px ;           /* увеличиваем ширину по умолчанию */
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
 .sidebar.collapsed {
-  width: 68px !important;
+  width: 68px ;
 }
 
 /* Кнопка сворачивания */
@@ -359,58 +358,24 @@ tbody tr:hover td{background:var(--bg3);}
 
 /* ==================== COLLAPSIBLE SIDEBAR ==================== */
 /* Единый размер кнопок */
-.arc-btn[style*="font-size"]{font-size:11px!important}
-.arc-btn[style*="padding"]{padding:7px 14px!important}
+.arc-btn[style*="font-size"]{font-size:11px}
+.arc-btn[style*="padding"]{padding:7px 14px}
 button.arc-btn,button.topbar-btn{line-height:1}
 
+/* ==================== КАТАЛОГ НОМЕНКЛАТУРЫ ==================== */
+.two-col1-2{display:grid;grid-template-columns:0.5fr 1.5fr;gap:14px;overflow:hidden;}
 
-/*Дерево каталога изделий*/
-.nomNav {
-  height: 100%;
-  overflow: auto;
-  width: auto;
-  padding-left: 20px;
-  margin-left: -6px;
-  color: var(--text2);
-  max-height: 740px;
-}
+.nomNav{height:100%;overflow:auto;width:auto;padding-left:20px;margin-left:-6px;color:var(--text2);flex:1;min-height:0;}
 
-.childUl {
-  padding-left: 20px;
-}
+.childUl{padding-left:20px;}
 
 .childLi span:hover,
-.parentLi span:hover {
-  text-decoration: underline;
-}
+.parentLi span:hover{text-decoration:underline;}
 
-.chidLi span.selected,
-.parentLi span.selected {
-  outline-style: solid;
-  outline-color: var(--text2);
-}
+.childLi span.selected,
+.parentLi span.selected{outline-style:solid;outline-color:var(--text2);}
 
-.cat-tbl-scroller {
-  max-height: 700px;
-  overflow-y:auto;
-  overflow-x:auto;
-}
+.cat-tbl-scroller{flex:1;min-height:0;overflow-y:auto;overflow-x:auto;}
 
-.two-col1-2 {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 14px;
-    overflow: hidden;
-}
-
-
-.nomNavList li.hasChildren {
-  
-  list-style-type: disclosure-closed;
-  
-}
-
-.nomNavList li.hasChildren[open] {
-  
-  list-style-type: disclosure-open;
-}
+.nomNavList li.hasChildren{list-style-type:disclosure-closed;}
+.nomNavList li.hasChildren[open]{list-style-type:disclosure-open;}

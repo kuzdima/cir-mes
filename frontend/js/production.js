@@ -557,7 +557,7 @@ function pfAssemblyFocus() {
     res.rows.forEach(function(r) {
       var item = document.createElement('div');
       item.className = 'combo-item';
-      item.innerHTML = '<b>' + (r.item_name || '') + '</b> <span style="color:var(--text3);font-size:10px;font-family:monospace">' + (r.assembly_id || '') + '</span>';
+      item.innerHTML = '<b>' + (r.item_name || '') + '</b> <span style="color:var(--text3);font-size:11.5px;font-family:var(--font-mono)">' + (r.assembly_id || '') + '</span>';
       if (q && (r.item_name || '').toLowerCase().indexOf(q) === -1 && (r.assembly_id || '').toLowerCase().indexOf(q) === -1) {
         item.style.display = 'none';
       }
@@ -654,7 +654,7 @@ function pfLoadProductsByAssembly(assemblyId) {
       if (q && name.toLowerCase().indexOf(q) === -1 && code.toLowerCase().indexOf(q) === -1) {
         item.style.display = 'none';
       }
-      item.innerHTML = name + ' <span style="color:var(--text3);font-size:10px;font-family:monospace">(' + code + ' · ' + type + ')</span>';
+      item.innerHTML = name + ' <span style="color:var(--text3);font-size:11.5px;font-family:var(--font-mono)">(' + code + ' · ' + type + ')</span>';
       item.addEventListener('click', function() {
         pfAcLock = true;
         inp.value = name;
@@ -683,7 +683,7 @@ function pfProductSearch() {
       res.rows.forEach(function(r) {
         var item = document.createElement('div');
         item.className = 'combo-item';
-        item.innerHTML = r.name + ' <span style="color:var(--text3);font-size:10px;font-family:monospace">(' + r.code + ')</span>';
+        item.innerHTML = r.name + ' <span style="color:var(--text3);font-size:11.5px;font-family:var(--font-mono)">(' + r.code + ')</span>';
         item.addEventListener('click', function() {
           pfAcLock = true;
           var cleanName = (r.name && r.name !== 'nan') ? r.name : '';

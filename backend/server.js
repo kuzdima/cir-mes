@@ -983,7 +983,7 @@ io.on('connection', function(socket) {
 });
 
 // Warehouse
-app.use('/api/warehouse', require('./warehouse')(pool, auth));
+app.use('/api/warehouse', require('./warehouse_api')(pool, auth));
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

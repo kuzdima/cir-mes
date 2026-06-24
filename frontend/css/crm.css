@@ -68,7 +68,7 @@
 .crm-drag-handle{color:var(--text3);font-size:11px;cursor:grab;user-select:none;}
 
 /* ── Hidden helpers ──────────────────────────────────── */
-.crm-hide{display:none !important;}
+.crm-hide{display:none ;}
 
 /* ── Buttons matching topbar style ───────────────────── */
 .crm-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border-radius:var(--radius);font-size:11px;font-weight:500;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.12s;height:32px;box-sizing:border-box;white-space:nowrap;}

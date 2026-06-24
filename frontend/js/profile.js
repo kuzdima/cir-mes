@@ -5,7 +5,7 @@ function openPersonalCabinet() {
   document.getElementById('cabinet-name').textContent = USER.name || 'Пользователь';
   document.getElementById('cabinet-email').textContent = USER.email || '';
   document.getElementById('cabinet-role').textContent = 
-    {admin:'Администратор', technologist:'Технолог', master:'Мастер', dispatcher:'Диспетчер'}[USER.role] || USER.role;
+   {admin:'Администратор', technologist:'Технолог', master:'Мастер', dispatcher:'Диспетчер', warehouse:'Кладовщик'}[USER.role] || USER.role; 
 
   document.getElementById('cabinet-av').textContent = 
     ((USER.name || '').split(' ').map(w => w[0]).join('') || '??').toUpperCase();
@@ -76,41 +76,92 @@ function loadProfileData() {
 
 
 function loadAllUsers() {
-  api('GET', '/api/users').then(function(res) {
-    if (!res.ok) { alert(res.error || 'Нет доступа'); return; }
-    var cnt = document.getElementById('users-count');
-    if (cnt) cnt.textContent = 'Всего: ' + res.users.length;
-    var roleMap = {admin:'Администратор', technologist:'Технолог', master:'Мастер', dispatcher:'Диспетчер'};
-    var tbody = document.getElementById('users-tbody');
-    tbody.innerHTML = res.users.map(function(user) {
-      var fullName = ((user.first_name || '') + ' ' + (user.last_name || '')).trim() || '—';
-      var lastLogin = user.last_login
-        ? new Date(user.last_login).toLocaleString('ru-RU', {dateStyle:'short', timeStyle:'short'})
-        : '—';
-      var isSelf = USER && user.id === USER.id;
-      var sf = (user.first_name || '').replace(/'/g,"\\'");
-      var sl = (user.last_name  || '').replace(/'/g,"\\'");
-      var se = (user.email      || '').replace(/'/g,"\\'");
-      var sn = fullName.replace(/'/g,"\\'");
-      return '<tr>'
-        + '<td><strong>' + fullName + '</strong></td>'
-        + '<td>' + user.email + '</td>'
-        + '<td><span class="badge">' + (roleMap[user.role] || user.role) + '</span></td>'
-        + '<td style="color:' + (user.is_active ? '#4ade80' : '#f87171') + '">'
-        + (user.is_active ? '● Активен' : '● Заблокирован') + '</td>'
-        + '<td>' + lastLogin + '</td>'
-        + '<td>' + new Date(user.created_at).toLocaleDateString('ru-RU') + '</td>'
-        + '<td style="white-space:nowrap">'
-        + '<button onclick="adminOpenEditUser(' + user.id + ',\'' + sf + '\',\'' + sl + '\',\'' + se + '\',\'' + user.role + '\',' + user.is_active + ')" '
-        + 'style="padding:3px 8px;font-size:11px;background:#334155;border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;margin-right:4px">✏️ Изменить</button>'
-        + '<button onclick="adminOpenChangePassword(' + user.id + ',\'' + sn + '\')" '
-        + 'style="padding:3px 8px;font-size:11px;background:#334155;border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;margin-right:4px">🔑 Пароль</button>'
-        + (!isSelf
-          ? '<button onclick="adminDeleteUser(' + user.id + ',\'' + sn + '\')" '
-          + 'style="padding:3px 8px;font-size:11px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);border-radius:4px;color:#f87171;cursor:pointer">🗑 Удалить</button>'
-          : '<span style="font-size:10px;color:var(--text3);padding:3px 6px;">— вы —</span>')
-        + '</td></tr>';
-    }).join('');
+  api("GET", "/api/users").then(function (res) {
+    if (!res.ok) {
+      alert(res.error || "Нет доступа");
+      return;
+    }
+    var cnt = document.getElementById("users-count");
+    if (cnt) cnt.textContent = "Всего: " + res.users.length;
+    var roleMap = {
+      admin: "Администратор",
+      technologist: "Технолог",
+      master: "Мастер",
+      dispatcher: "Диспетчер",
+      warehouse: "Кладовщик",
+    };
+    var tbody = document.getElementById("users-tbody");
+    tbody.innerHTML = res.users
+      .map(function (user) {
+        var fullName =
+          ((user.first_name || "") + " " + (user.last_name || "")).trim() ||
+          "—";
+        var lastLogin = user.last_login ?
+          new Date(user.last_login).toLocaleString("ru-RU", {
+            dateStyle: "short",
+            timeStyle: "short",
+          }) :
+          "—";
+        var isSelf = USER && user.id === USER.id;
+        var sf = (user.first_name || "").replace(/'/g, "\\'");
+        var sl = (user.last_name || "").replace(/'/g, "\\'");
+        var se = (user.email || "").replace(/'/g, "\\'");
+        var sn = fullName.replace(/'/g, "\\'");
+        return (
+          "<tr>" +
+          "<td><strong>" +
+          fullName +
+          "</strong></td>" +
+          "<td>" +
+          user.email +
+          "</td>" +
+          '<td><span class="badge">' +
+          (roleMap[user.role] || user.role) +
+          "</span></td>" +
+          '<td style="color:' +
+          (user.is_active ? "#4ade80" : "#f87171") +
+          '">' +
+          (user.is_active ? "● Активен" : "● Заблокирован") +
+          "</td>" +
+          "<td>" +
+          lastLogin +
+          "</td>" +
+          "<td>" +
+          new Date(user.created_at).toLocaleDateString("ru-RU") +
+          "</td>" +
+          '<td style="white-space:nowrap">' +
+          '<button onclick="adminOpenEditUser(' +
+          user.id +
+          ",'" +
+          sf +
+          "','" +
+          sl +
+          "','" +
+          se +
+          "','" +
+          user.role +
+          "'," +
+          user.is_active +
+          ')" ' +
+          'style="padding:3px 8px;font-size:11px;background:#334155;border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;margin-right:4px">✏️ Изменить</button>' +
+          '<button onclick="adminOpenChangePassword(' +
+          user.id +
+          ",'" +
+          sn +
+          "')\" " +
+          'style="padding:3px 8px;font-size:11px;background:#334155;border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;margin-right:4px">🔑 Пароль</button>' +
+          (!isSelf ?
+            '<button onclick="adminDeleteUser(' +
+            user.id +
+            ",'" +
+            sn +
+            "')\" " +
+            'style="padding:3px 8px;font-size:11px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);border-radius:4px;color:#f87171;cursor:pointer">🗑 Удалить</button>' :
+            '<span style="font-size:10px;color:var(--text3);padding:3px 6px;">— вы —</span>') +
+          "</td></tr>"
+        );
+      })
+      .join("");
   });
 }
 
@@ -300,7 +351,7 @@ function loadMyRecords() {
       if (opsCount) opsCount.textContent = res.techOps.length;
       opsEl.innerHTML = res.techOps.length ? res.techOps.map(function(r) {
         return '<tr>'
-          + '<td style="font-family:monospace;font-size:10px;color:#60a5fa">' + e(r.classifier_code) + '</td>'
+          + '<td style="font-family:var(--font-mono);font-size:10px;color:#60a5fa">' + e(r.classifier_code) + '</td>'
           + '<td>' + e(r.product_name) + '</td>'
           + '<td style="text-align:center;font-weight:700;color:var(--amber-text)">' + e(r.operation_number) + '</td>'
           + '<td style="color:#34d399">' + e(r.operation_name) + '</td>'
@@ -317,9 +368,9 @@ function loadMyRecords() {
       arcEl.innerHTML = res.archiveItems.length ? res.archiveItems.map(function(r) {
         var aid = e(r.assembly_id);
         return '<tr style="cursor:pointer" onclick="mrOpenArchive(\'' + aid.replace(/'/g,"\\'") + '\')" title="Открыть структуру в архиве">'
-          + '<td style="font-family:monospace;font-size:10px;color:#60a5fa">' + aid + '</td>'
+          + '<td style="font-family:var(--font-mono);font-size:10px;color:#60a5fa">' + aid + '</td>'
           + '<td style="font-weight:600">' + e(r.item_name) + '</td>'
-          + '<td style="font-family:monospace;font-size:10px;color:var(--text2)">' + e(r.classifier) + '</td>'
+          + '<td style="font-family:var(--font-mono);font-size:10px;color:var(--text2)">' + e(r.classifier) + '</td>'
           + '<td><span class="badge" style="font-size:9px">' + e(r.object_type) + '</span></td>'
           + '<td style="font-size:10px;color:var(--text3)">' + fmt(r.created_at) + '</td>'
           + '</tr>';
@@ -333,7 +384,7 @@ function loadMyRecords() {
       if (prodCount) prodCount.textContent = res.productionOrders.length;
       prodEl.innerHTML = res.productionOrders.length ? res.productionOrders.map(function(r) {
         return '<tr>'
-          + '<td style="font-family:monospace;font-weight:700;color:var(--accent)">' + e(r.narad_number) + '</td>'
+          + '<td style="font-family:var(--font-mono);font-weight:700;color:var(--accent)">' + e(r.narad_number) + '</td>'
           + '<td>' + e(r.product_name) + '</td>'
           + '<td><span class="badge">' + e(r.status) + '</span></td>'
           + '<td style="font-size:10px;color:var(--text3)">' + fmt(r.created_at) + '</td>'
