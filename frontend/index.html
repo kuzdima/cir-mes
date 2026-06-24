@@ -69,6 +69,12 @@
           </svg>
           <span class="menu-text">Производство</span>
         </div>
+        
+        <div class="nav-sect">Склад</div>
+        <div class="nav-item" data-panel="warehouse" onclick="showPanel('warehouse')">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          <span class="menu-text">Склад</span>
+        </div>
 
         <div class="nav-sect">Профиль</div>
         <div class="nav-item" data-panel="profile" onclick="showPanel('profile')">
@@ -760,6 +766,7 @@
                     <option value="technologist">Технолог</option>
                     <option value="master">Мастер</option>
                     <option value="dispatcher">Диспетчер</option>
+                    <option value="warehouse">Кладовщик</option>
                   </select>
                 </div>
                 <div>
@@ -1161,6 +1168,9 @@
           </div><!-- modal inner -->
         </div><!-- modal overlay -->
 
+      <!-- ═══ СКЛАД ═══ -->
+      <div class="panel" id="panel-warehouse"></div>
+
       <!-- ═══ CRM ═══ -->
       <div class="panel" id="panel-crm">
         <div class="crm-toolbar">
@@ -1212,6 +1222,7 @@
   <script src="js/app.js"></script>
   <script src="js/profile.js"></script>
   <script src="js/nomcatalogue.js"></script>
+  <script src="js/warehouse.js"></script>
   <script src="js/crm.js"></script>
 
   <script>

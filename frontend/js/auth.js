@@ -24,7 +24,7 @@ function applyUser(u) {
   document.getElementById('sidebar-av').textContent = (((parts[0]||'')[0]||'') + ((parts[1]||'')[0]||'')).toUpperCase() || '??';
   document.getElementById('sidebar-uname').textContent = u.name || u.email;
 
-  var roleMap = {admin:'Администратор', dispatcher:'Диспетчер', master:'Мастер', technologist:'Технолог'};
+  var roleMap = {admin:'Администратор', dispatcher:'Диспетчер', master:'Мастер', technologist:'Технолог', warehouse:'Кладовщик'};
   document.getElementById('sidebar-urole').textContent = roleMap[u.role] || u.role;
 
   // Управление видимостью пункта "Управление пользователями"

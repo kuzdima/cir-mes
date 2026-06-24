@@ -982,6 +982,9 @@ io.on('connection', function(socket) {
   console.log('Socket.IO: клиент подключился');
 });
 
+// Warehouse
+app.use('/api/warehouse', require('./warehouse')(pool, auth));
+
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, '../frontend')));

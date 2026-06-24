@@ -52,7 +52,8 @@ function loadProfileData() {
       admin: 'Администратор',
       technologist: 'Технолог',
       master: 'Мастер',
-      dispatcher: 'Диспетчер'
+      dispatcher: 'Диспетчер',
+      warehouse: 'Кладовщик'
     };
     document.getElementById('profile-role').textContent = roleMap[USER.role] || USER.role;
 

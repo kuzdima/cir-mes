@@ -8,7 +8,7 @@
 function showPanel(id) {
   var titles = {
     'nomenclature':'Номенклатура', 'production':'Производство',
-    'profile':'Личный кабинет', 'users':'Управление пользователями', 'crm':'CRM'
+    'profile':'Личный кабинет', 'users':'Управление пользователями', 'crm':'CRM', 'warehouse':'Склад',
   };
   // Переключаем кнопки в топбаре
   var btnNom  = document.getElementById('add-btn-nom');
@@ -40,7 +40,7 @@ function showPanel(id) {
     document.getElementById('profile-av').textContent = initials;
     document.getElementById('profile-name').textContent = USER.name || '—';
     document.getElementById('profile-email').textContent = USER.email || '—';
-    var rm = {admin:'Администратор',dispatcher:'Диспетчер',master:'Мастер',technologist:'Технолог'};
+    var rm = {admin:'Администратор',dispatcher:'Диспетчер',master:'Мастер',technologist:'Технолог',warehouse:'Кладовщик'};
     document.getElementById('profile-role').textContent = rm[USER.role] || USER.role;
     if (typeof loadProfileData === 'function') loadProfileData();
     if (typeof loadMyRecords === 'function') loadMyRecords();
@@ -50,6 +50,10 @@ function showPanel(id) {
   }
   if (id === 'crm' && typeof crmInit === 'function') {
     crmInit();
+  }
+
+  if (id === 'warehouse' && typeof initWarehouse === 'function') {
+    initWarehouse();
   }
 }
 
