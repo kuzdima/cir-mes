@@ -25,12 +25,20 @@ module.exports = function(pool, auth) {
         var p = pkiRows[i];
         var qtyNeeded = (parseFloat(p.quantity) || 1) * (n.quantity || 1);
 
-        // Ищем позицию на складе по наименованию или артикулу
-        var wh = await pool.query(
-          'SELECT id, name, sku, qty, reserved, unit FROM wh_items ' +
-          'WHERE LOWER(name) = LOWER($1) OR (sku IS NOT NULL AND LOWER(sku) = LOWER($2)) LIMIT 1',
-          [p.item_name, p.classifier || '']
-        );
+        // Ищем позицию на складе: сначала по артикулу (classifier = sku), при отсутствии — по имени
+        var whQuery;
+        if (p.classifier && p.classifier.trim()) {
+          whQuery = await pool.query(
+            'SELECT id, name, sku, qty, reserved, unit FROM wh_items WHERE sku IS NOT NULL AND LOWER(sku) = LOWER($1) LIMIT 1',
+            [p.classifier]
+          );
+        } else {
+          whQuery = await pool.query(
+            'SELECT id, name, sku, qty, reserved, unit FROM wh_items WHERE LOWER(name) = LOWER($1) LIMIT 1',
+            [p.item_name]
+          );
+        }
+        var whItem = whQuery.rows[0] || null;
 
         // Текущее резервирование под этот наряд
         var resv = whItem
@@ -39,14 +47,10 @@ module.exports = function(pool, auth) {
               [naradId, whItem.id]
             )
           : { rows: [] };
-
-        var whItem = wh.rows[0] || null;
         var resvRow = resv.rows[0] || null;
 
         var available = whItem ? (parseFloat(whItem.qty) - parseFloat(whItem.reserved)) : 0;
-        // Резервирование считается валидным только если имя позиции склада совпадает с именем ПКИ
-        var nameMatch = whItem && whItem.name.toLowerCase() === p.item_name.toLowerCase();
-        var status = (resvRow && nameMatch) ? resvRow.status
+        var status = resvRow ? resvRow.status
           : (!whItem ? 'no_stock'
           : available >= qtyNeeded ? 'available'
           : 'shortage');
