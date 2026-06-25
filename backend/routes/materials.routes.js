@@ -33,10 +33,12 @@ module.exports = function(pool, auth) {
         );
 
         // Текущее резервирование под этот наряд
-        var resv = await pool.query(
-          'SELECT * FROM wh_reservations WHERE narad_id=$1 AND item_name=LOWER($2) LIMIT 1',
-          [naradId, p.item_name]
-        );
+        var resv = whItem
+          ? await pool.query(
+              'SELECT * FROM wh_reservations WHERE narad_id=$1 AND item_id=$2 LIMIT 1',
+              [naradId, whItem.id]
+            )
+          : { rows: [] };
 
         var whItem = wh.rows[0] || null;
         var resvRow = resv.rows[0] || null;
