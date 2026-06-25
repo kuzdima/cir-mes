@@ -39,7 +39,7 @@ app.use('/api/tech-ops',   require('./routes/techops.routes')(pool, auth));
 app.use('/api/archive',    require('./routes/archive.routes')(pool, auth));
 app.use('/api/production', require('./routes/production.routes')(pool, auth));
 require('./crm')(app, pool, SECRET, io, auth);
-app.use('/api/warehouse',  require('./warehouse_api')(pool, auth));
+app.use('/api/warehouse',  require('./routes/warehouse.routes')(pool, auth));
 
 io.on('connection', function(socket) {
   console.log('Socket.IO: клиент подключился');
