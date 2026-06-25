@@ -194,6 +194,53 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
+  // Возврат материала на склад
+  router.post('/return', auth, async function(req, res) {
+    try {
+      var { reservation_id, qty } = req.body;
+      if (!reservation_id || !qty) return res.status(400).json({ ok: false, error: 'reservation_id и qty обязательны' });
+      qty = parseFloat(qty);
+
+      var resv = await pool.query(
+        'SELECT r.*, pn.narad_number FROM wh_reservations r JOIN production_narads pn ON r.narad_id=pn.id WHERE r.id=$1',
+        [reservation_id]
+      );
+      if (!resv.rows.length) return res.status(404).json({ ok: false, error: 'Резервирование не найдено' });
+      var r = resv.rows[0];
+
+      var maxReturn = parseFloat(r.qty_issued);
+      if (qty > maxReturn) return res.status(400).json({ ok: false, error: 'Нельзя вернуть больше чем выдано: ' + maxReturn });
+
+      // Номер движения
+      var movNumRes = await pool.query("SELECT 'M'||LPAD(nextval('wh_mov_seq')::text,8,'0') AS v");
+      var movNum = movNumRes.rows[0].v;
+
+      // Движение Приход — Возврат из производства
+      await pool.query(
+        'INSERT INTO wh_movements (mov_num,operation,item_id,item_name,qty,unit,warehouse,doc_type,narad_id,created_by) ' +
+        "VALUES ($1,'Приход',$2,$3,$4,$5,(SELECT material_type FROM wh_items WHERE id=$2),'Возврат из производства',$6,$7)",
+        [movNum, r.item_id, r.item_name, qty, r.unit, r.narad_id, req.user.id]
+      );
+
+      // Возвращаем qty на склад и восстанавливаем резерв
+      await pool.query(
+        'UPDATE wh_items SET qty=qty+$1, reserved=reserved+$1, updated_at=NOW() WHERE id=$2',
+        [qty, r.item_id]
+      );
+
+      // Обновляем резервирование
+      var newIssued = parseFloat(r.qty_issued) - qty;
+      var newSoft = parseFloat(r.qty_soft) + qty;
+      var newStatus = newIssued <= 0 ? 'reserved' : 'partial';
+      await pool.query(
+        'UPDATE wh_reservations SET qty_issued=$1, qty_soft=$2, status=$3, updated_at=NOW() WHERE id=$4',
+        [newIssued, newSoft, newStatus, reservation_id]
+      );
+
+      res.json({ ok: true, mov_num: movNum, qty_issued: newIssued, status: newStatus });
+    } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+  });
+
   // Отменить резервирование
   router.delete('/reserve/:id', auth, async function(req, res) {
     try {

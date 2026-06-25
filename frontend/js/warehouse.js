@@ -364,9 +364,12 @@ function whLoadReservations() {
         + '<td style="padding:5px 10px;text-align:right;font-family:var(--font-mono)">' + (r.qty_soft || '') + '</td>'
         + '<td style="padding:5px 10px;text-align:right;font-family:var(--font-mono)">' + (parseFloat(r.qty_issued) || 0) + '</td>'
         + '<td style="padding:5px 10px;text-align:center">' + statusBadge(r.status) + '</td>'
-        + '<td style="padding:5px 10px">'
+        + '<td style="padding:5px 10px;display:flex;gap:6px">'
         + (canIssue
             ? '<button onclick="whIssueItem(' + r.id + ',' + r.qty_soft + ')" style="padding:3px 10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:11px">Выдать</button>'
+            : '')
+        + (parseFloat(r.qty_issued) > 0
+            ? '<button onclick="whReturnItem(' + r.id + ',' + r.qty_issued + ')" style="padding:3px 10px;background:var(--amber-bg);color:var(--amber-text);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius);cursor:pointer;font-size:11px">Вернуть</button>'
             : '')
         + '</td>'
         + '</tr>';
@@ -380,6 +383,22 @@ function whIssueItem(resvId, qty) {
   api('POST', '/api/materials/issue', { reservation_id: resvId, qty: qty }).then(function(r) {
     if (r.ok) {
       showToast('Выдано, движение: ' + r.mov_num);
+      whLoadReservations();
+    } else {
+      showToast('Ошибка: ' + (r.error || 'неизвестная'));
+    }
+  });
+}
+
+// Вернуть материал на склад
+function whReturnItem(resvId, qtyIssued) {
+  var input = prompt('Количество для возврата (выдано: ' + qtyIssued + '):', qtyIssued);
+  if (input === null) return;
+  var qty = parseFloat(input);
+  if (!qty || qty <= 0 || qty > qtyIssued) { showToast('Некорректное количество'); return; }
+  api('POST', '/api/materials/return', { reservation_id: resvId, qty: qty }).then(function(r) {
+    if (r.ok) {
+      showToast('Возврат оформлен, движение: ' + r.mov_num);
       whLoadReservations();
     } else {
       showToast('Ошибка: ' + (r.error || 'неизвестная'));
