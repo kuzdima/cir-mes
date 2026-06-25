@@ -32,10 +32,10 @@ module.exports = function(pool, auth) {
         );
         var whItem = whQuery.rows[0] || null;
 
-        // Текущее резервирование под этот наряд
+        // Текущее резервирование под этот наряд (исключаем отменённые)
         var resv = whItem
           ? await pool.query(
-              'SELECT * FROM wh_reservations WHERE narad_id=$1 AND item_id=$2 LIMIT 1',
+              "SELECT * FROM wh_reservations WHERE narad_id=$1 AND item_id=$2 AND status != 'cancelled' ORDER BY updated_at DESC LIMIT 1",
               [naradId, whItem.id]
             )
           : { rows: [] };
@@ -133,7 +133,8 @@ module.exports = function(pool, auth) {
       var { status } = req.query;
       var conds = [], params = [], pi = 1;
       if (status) { conds.push('r.status=$' + pi); params.push(status); pi++; }
-      var where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+      else { conds.push("r.status != 'cancelled'"); }
+      var where = 'WHERE ' + conds.join(' AND ');
       var rows = await pool.query(
         'SELECT r.*, pn.narad_number, pn.assembly_id, pn.order_number, pn.customer, pn.deadline, ' +
         'i.sku, i.qty AS stock_qty, i.address ' +

@@ -144,6 +144,7 @@ function whBuild() {
     '<option value="shortage">Нехватка</option>' +
     '<option value="pending">Ожидание</option>' +
     '<option value="issued">Выдано</option>' +
+    '<option value="cancelled">Отменено</option>' +
     '</select>' +
     '<button onclick="whLoadReservations()" style="padding:7px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer">Обновить</button>' +
     '</div>' +
