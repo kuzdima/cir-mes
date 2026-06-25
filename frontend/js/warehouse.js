@@ -2,6 +2,7 @@
 // warehouse.js — Склад: панель управления
 // ============================================================
 var WH_TAB = "all";
+var WH_VIEW = "items";
 var WH_PAGE = 1;
 var WH_SRCH_T = null;
 var WH_SRCH_MODE = "name"; // 'name' | 'sku'
@@ -66,6 +67,11 @@ function whBuild() {
   }).join("");
 
   panel.innerHTML =
+    '<div class="chrome-tabs">' +
+    '<div class="chrome-tab active" data-view="items" onclick="switchWhView(\'items\')">Склад</div>' +
+    '<div class="chrome-tab" data-view="orders" onclick="switchWhView(\'orders\')">Под заказы</div>' +
+    '</div>' +
+    '<div id="wh-view-items">' +
     '<div class="wh-wrap">' +
     '<div class="wh-kpis" id="wh-kpis">' +
     whKpiCard("#3b82f6", "—", "Позиций на складе") +
@@ -128,6 +134,37 @@ function whBuild() {
     "</div>" +
     "</div>" +
     "</div>" +
+    "</div>" +   // wh-view-items
+    '<div id="wh-view-orders" style="display:none;padding:16px">' +
+    '<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">' +
+    '<select id="wh-resv-status" onchange="whLoadReservations()" style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px">' +
+    '<option value="">Все статусы</option>' +
+    '<option value="reserved">Зарезервировано</option>' +
+    '<option value="partial">Частично</option>' +
+    '<option value="shortage">Нехватка</option>' +
+    '<option value="pending">Ожидание</option>' +
+    '<option value="issued">Выдано</option>' +
+    '</select>' +
+    '<button onclick="whLoadReservations()" style="padding:7px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer">Обновить</button>' +
+    '</div>' +
+    '<div style="overflow-x:auto">' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+    '<thead><tr style="background:var(--bg3)">' +
+    '<th style="padding:6px 10px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap">Наряд</th>' +
+    '<th style="padding:6px 10px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Заказ</th>' +
+    '<th style="padding:6px 10px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Заказчик</th>' +
+    '<th style="padding:6px 10px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Срок</th>' +
+    '<th style="padding:6px 10px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">ПКИ</th>' +
+    '<th style="padding:6px 10px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Арт.</th>' +
+    '<th style="padding:6px 10px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Нужно</th>' +
+    '<th style="padding:6px 10px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Резерв</th>' +
+    '<th style="padding:6px 10px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Выдано</th>' +
+    '<th style="padding:6px 10px;text-align:center;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Статус</th>' +
+    '<th style="padding:6px 10px;border-bottom:1px solid var(--border)"></th>' +
+    '</tr></thead>' +
+    '<tbody id="wh-resv-tbody"><tr><td colspan="11" class="wh-empty">Загрузка…</td></tr></tbody>' +
+    '</table></div>' +
+    '</div>' +
     // Item card modal
     '<div id="wh-card-modal" class="wh-modal-bg" style="display:none" onclick="if(event.target===this)whCloseCard()">' +
     '<div class="wh-modal wh-card-modal">' +
@@ -259,9 +296,95 @@ function whKpiCard(color, value, label) {
 // refresh all
 function whRefreshAll() {
   whLoadKpis();
-  whLoadItems();
-  whLoadMovements();
-  whLoadLow();
+  if (WH_VIEW === 'items') {
+    whLoadItems();
+    whLoadMovements();
+    whLoadLow();
+  } else {
+    whLoadReservations();
+  }
+}
+
+// Переключение вкладок склада
+function switchWhView(view) {
+  WH_VIEW = view;
+  document.querySelectorAll('#panel-warehouse .chrome-tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.view === view);
+  });
+  var viewItems = document.getElementById('wh-view-items');
+  var viewOrders = document.getElementById('wh-view-orders');
+  if (viewItems) viewItems.style.display = view === 'items' ? '' : 'none';
+  if (viewOrders) viewOrders.style.display = view === 'orders' ? '' : 'none';
+  if (view === 'orders') whLoadReservations();
+}
+
+// Загрузка резервирований
+function whLoadReservations() {
+  var status = (document.getElementById('wh-resv-status') || {}).value || '';
+  var url = '/api/materials/reservations';
+  if (status) url += '?status=' + encodeURIComponent(status);
+  var tbody = document.getElementById('wh-resv-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="11" class="wh-empty">Загрузка…</td></tr>';
+
+  api('GET', url).then(function(res) {
+    if (!res.ok || !res.rows || !res.rows.length) {
+      tbody.innerHTML = '<tr><td colspan="11" class="wh-empty">'
+        + (res.ok ? 'Нет резервирований' : 'Ошибка: ' + (res.error || ''))
+        + '</td></tr>';
+      return;
+    }
+
+    function statusBadge(s) {
+      var map = {
+        reserved:  ['b-blue',  'Зарезервировано'],
+        partial:   ['b-amber', 'Частично'],
+        shortage:  ['b-amber', 'Нехватка'],
+        pending:   ['b-gray',  'Ожидание'],
+        issued:    ['b-green', 'Выдано'],
+        cancelled: ['b-gray',  'Отменено']
+      };
+      var m = map[s] || ['b-gray', s];
+      return '<span class="badge ' + m[0] + '" style="font-size:9px">' + m[1] + '</span>';
+    }
+
+    tbody.innerHTML = res.rows.map(function(r) {
+      var canIssue = (r.status === 'reserved' || r.status === 'partial') && parseFloat(r.qty_soft) > 0;
+      var deadline = r.deadline
+        ? new Date(r.deadline).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })
+        : '—';
+      return '<tr>'
+        + '<td style="padding:5px 10px;font-weight:600;color:var(--accent);white-space:nowrap">' + (r.narad_number || '') + '</td>'
+        + '<td style="padding:5px 10px;font-size:11px">' + (r.order_number || '—') + '</td>'
+        + '<td style="padding:5px 10px;font-size:11px">' + (r.customer || '—') + '</td>'
+        + '<td style="padding:5px 10px;font-size:11px;white-space:nowrap">' + deadline + '</td>'
+        + '<td style="padding:5px 10px">' + (r.item_name || '') + '</td>'
+        + '<td style="padding:5px 10px;font-size:10px;color:var(--text3);font-family:var(--font-mono)">' + (r.sku || '') + '</td>'
+        + '<td style="padding:5px 10px;text-align:right;font-family:var(--font-mono)">' + (r.qty_needed || '') + '</td>'
+        + '<td style="padding:5px 10px;text-align:right;font-family:var(--font-mono)">' + (r.qty_soft || '') + '</td>'
+        + '<td style="padding:5px 10px;text-align:right;font-family:var(--font-mono)">' + (parseFloat(r.qty_issued) || 0) + '</td>'
+        + '<td style="padding:5px 10px;text-align:center">' + statusBadge(r.status) + '</td>'
+        + '<td style="padding:5px 10px">'
+        + (canIssue
+            ? '<button onclick="whIssueItem(' + r.id + ',' + r.qty_soft + ')" style="padding:3px 10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:11px">Выдать</button>'
+            : '')
+        + '</td>'
+        + '</tr>';
+    }).join('');
+  });
+}
+
+// Выдать материал под наряд
+function whIssueItem(resvId, qty) {
+  if (!confirm('Выдать ' + qty + ' единиц по резервированию #' + resvId + '?')) return;
+  api('POST', '/api/materials/issue', { reservation_id: resvId, qty: qty }).then(function(r) {
+    if (r.ok) {
+      showToast('Выдано, движение: ' + r.mov_num);
+      whLoadReservations();
+    } else {
+      showToast('Ошибка: ' + (r.error || 'неизвестная'));
+    }
+  });
 }
 
 // KPIs
