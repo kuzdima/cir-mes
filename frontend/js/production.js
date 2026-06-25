@@ -453,11 +453,13 @@ function loadNaradMaterials(naradId) {
       + '<th style="padding:5px 8px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">На складе</th>'
       + '<th style="padding:5px 8px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Доступно</th>'
       + '<th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Статус</th>'
+      + '<th style="padding:5px 8px;border-bottom:1px solid var(--border)"></th>'
       + '</tr></thead><tbody>';
 
     items.forEach(function(it) {
       var stockQty = it.wh_item ? parseFloat(it.wh_item.qty) : 0;
       var rowBg = (it.status === 'no_stock' || it.status === 'shortage') ? 'background:rgba(239,68,68,0.05)' : '';
+      var canCancel = it.reservation && (it.status === 'reserved' || it.status === 'partial');
       html += '<tr style="' + rowBg + '">'
         + '<td style="padding:4px 8px">' + (it.pki_name || '') + '</td>'
         + '<td style="padding:4px 8px;font-size:10px;color:var(--text3);font-family:var(--font-mono)">' + (it.classifier || '') + '</td>'
@@ -465,6 +467,9 @@ function loadNaradMaterials(naradId) {
         + '<td style="padding:4px 8px;text-align:right;font-family:var(--font-mono)">' + (it.wh_item ? stockQty : '—') + '</td>'
         + '<td style="padding:4px 8px;text-align:right;font-family:var(--font-mono)">' + (it.wh_item ? parseFloat(it.available).toFixed(0) : '—') + '</td>'
         + '<td style="padding:4px 8px;text-align:center">' + statusBadge(it.status) + '</td>'
+        + '<td style="padding:4px 8px;text-align:center">'
+        + (canCancel ? '<button onclick="cancelNaradReservation(' + it.reservation.id + ',' + naradId + ')" style="padding:2px 8px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:10px">Снять резерв</button>' : '')
+        + '</td>'
         + '</tr>';
     });
 
@@ -500,6 +505,18 @@ function reserveNaradMaterials(naradId) {
         showToast('Ошибка: ' + (r.error || 'неизвестная'));
       }
     });
+  });
+}
+
+function cancelNaradReservation(resvId, naradId) {
+  if (!confirm('Снять резерв #' + resvId + '?')) return;
+  api('DELETE', '/api/materials/reserve/' + resvId).then(function(r) {
+    if (r.ok) {
+      showToast('Резерв снят');
+      loadNaradMaterials(naradId);
+    } else {
+      showToast('Ошибка: ' + (r.error || 'неизвестная'));
+    }
   });
 }
 

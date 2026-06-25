@@ -371,6 +371,9 @@ function whLoadReservations() {
         + (parseFloat(r.qty_issued) > 0
             ? '<button onclick="whReturnItem(' + r.id + ',' + r.qty_issued + ')" style="padding:3px 10px;background:var(--amber-bg);color:var(--amber-text);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius);cursor:pointer;font-size:11px">Вернуть</button>'
             : '')
+        + (['reserved','partial','shortage','pending'].indexOf(r.status) !== -1
+            ? '<button onclick="whCancelReservation(' + r.id + ')" style="padding:3px 10px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:11px">Снять</button>'
+            : '')
         + '</td>'
         + '</tr>';
     }).join('');
@@ -399,6 +402,19 @@ function whReturnItem(resvId, qtyIssued) {
   api('POST', '/api/materials/return', { reservation_id: resvId, qty: qty }).then(function(r) {
     if (r.ok) {
       showToast('Возврат оформлен, движение: ' + r.mov_num);
+      whLoadReservations();
+    } else {
+      showToast('Ошибка: ' + (r.error || 'неизвестная'));
+    }
+  });
+}
+
+// Снять резервирование
+function whCancelReservation(resvId) {
+  if (!confirm('Снять резерв #' + resvId + '?')) return;
+  api('DELETE', '/api/materials/reserve/' + resvId).then(function(r) {
+    if (r.ok) {
+      showToast('Резерв снят');
       whLoadReservations();
     } else {
       showToast('Ошибка: ' + (r.error || 'неизвестная'));
