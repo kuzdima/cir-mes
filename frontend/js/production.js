@@ -351,6 +351,13 @@ function showNaradDetail(naradNumber) {
     });
 
     html += '</tbody></table></div></div>';
+
+    // Блок материалов (ПКИ)
+    html += '<div class="card" style="margin-top:16px" id="nd-materials-block">'
+      + '<div class="card-hd">Материалы (ПКИ)</div>'
+      + '<div id="nd-materials-body" style="padding:12px;text-align:center;color:var(--text3)">Загрузка...</div>'
+      + '</div>';
+
     // Форма "Факт цеха" для каждой операции
     html += '<div class="card" style="margin-top:16px;border-color:#f59e0b">'
       + '<div class="card-hd" style="color:#f59e0b">📋 Факт цеха — отметка выполнения</div>'
@@ -394,6 +401,98 @@ function showNaradDetail(naradNumber) {
       + '<div class="msg msg-err" id="nd-fact-err" style="margin-top:8px"></div>'
       + '</div></div>';
     document.getElementById('nd-content').innerHTML = html;
+    if (r.narad_id) loadNaradMaterials(r.narad_id);
+  });
+}
+
+// ── МАТЕРИАЛЫ (ПКИ) ДЛЯ НАРЯДА ───────────────────────────
+function loadNaradMaterials(naradId) {
+  var body = document.getElementById('nd-materials-body');
+  if (!body) return;
+
+  api('GET', '/api/materials/narad/' + naradId).then(function(res) {
+    if (!res.ok || !res.items || !res.items.length) {
+      body.innerHTML = '<div style="color:var(--text3);padding:8px">'
+        + (res.ok ? 'Нет ПКИ для этого наряда' : 'Ошибка: ' + (res.error || '')) + '</div>';
+      return;
+    }
+
+    var items = res.items;
+
+    function statusBadge(s) {
+      var map = {
+        available: ['b-green', 'Доступно'],
+        reserved:  ['b-blue',  'Зарезервировано'],
+        shortage:  ['b-amber', 'Нехватка'],
+        no_stock:  ['b-red',   'Нет на складе'],
+        partial:   ['b-amber', 'Частично'],
+        pending:   ['b-gray',  'Ожидание'],
+        issued:    ['b-green', 'Выдано']
+      };
+      var m = map[s] || ['b-gray', s];
+      return '<span class="badge ' + m[0] + '" style="font-size:9px">' + m[1] + '</span>';
+    }
+
+    var canReserve = items.filter(function(it) {
+      return it.wh_item && it.available > 0 && it.status !== 'reserved' && it.status !== 'issued';
+    });
+
+    var html = '';
+    if (canReserve.length) {
+      html += '<div style="padding:4px 0 10px">'
+        + '<button onclick="reserveNaradMaterials(' + naradId + ')" style="padding:6px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600">'
+        + 'Зарезервировать доступные (' + canReserve.length + ')</button>'
+        + '</div>';
+    }
+
+    html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">'
+      + '<thead><tr style="background:var(--bg3)">'
+      + '<th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Наименование</th>'
+      + '<th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Обозначение</th>'
+      + '<th style="padding:5px 8px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Нужно</th>'
+      + '<th style="padding:5px 8px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">На складе</th>'
+      + '<th style="padding:5px 8px;text-align:right;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Доступно</th>'
+      + '<th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);border-bottom:1px solid var(--border)">Статус</th>'
+      + '</tr></thead><tbody>';
+
+    items.forEach(function(it) {
+      var stockQty = it.wh_item ? parseFloat(it.wh_item.qty) : 0;
+      var rowBg = (it.status === 'no_stock' || it.status === 'shortage') ? 'background:rgba(239,68,68,0.05)' : '';
+      html += '<tr style="' + rowBg + '">'
+        + '<td style="padding:4px 8px">' + (it.pki_name || '') + '</td>'
+        + '<td style="padding:4px 8px;font-size:10px;color:var(--text3);font-family:var(--font-mono)">' + (it.classifier || '') + '</td>'
+        + '<td style="padding:4px 8px;text-align:right;font-family:var(--font-mono)">' + (it.qty_needed || '') + ' ' + (it.unit || '') + '</td>'
+        + '<td style="padding:4px 8px;text-align:right;font-family:var(--font-mono)">' + (it.wh_item ? stockQty : '—') + '</td>'
+        + '<td style="padding:4px 8px;text-align:right;font-family:var(--font-mono)">' + (it.wh_item ? parseFloat(it.available).toFixed(0) : '—') + '</td>'
+        + '<td style="padding:4px 8px;text-align:center">' + statusBadge(it.status) + '</td>'
+        + '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    body.innerHTML = html;
+  });
+}
+
+function reserveNaradMaterials(naradId) {
+  api('GET', '/api/materials/narad/' + naradId).then(function(res) {
+    if (!res.ok || !res.items) return;
+
+    var toReserve = res.items.filter(function(it) {
+      return it.wh_item && it.status !== 'issued';
+    }).map(function(it) {
+      return { item_id: it.wh_item.id, item_name: it.pki_name, qty_needed: it.qty_needed, unit: it.unit };
+    });
+
+    if (!toReserve.length) { showToast('Нет позиций для резервирования'); return; }
+
+    api('POST', '/api/materials/reserve', { narad_id: naradId, items: toReserve }).then(function(r) {
+      if (r.ok) {
+        showToast('Зарезервировано: ' + r.results.length + ' позиций');
+        loadNaradMaterials(naradId);
+      } else {
+        showToast('Ошибка: ' + (r.error || 'неизвестная'));
+      }
+    });
   });
 }
 
