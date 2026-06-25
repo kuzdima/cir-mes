@@ -44,7 +44,9 @@ module.exports = function(pool, auth) {
         var resvRow = resv.rows[0] || null;
 
         var available = whItem ? (parseFloat(whItem.qty) - parseFloat(whItem.reserved)) : 0;
-        var status = resvRow ? resvRow.status
+        // Резервирование считается валидным только если имя позиции склада совпадает с именем ПКИ
+        var nameMatch = whItem && whItem.name.toLowerCase() === p.item_name.toLowerCase();
+        var status = (resvRow && nameMatch) ? resvRow.status
           : (!whItem ? 'no_stock'
           : available >= qtyNeeded ? 'available'
           : 'shortage');
