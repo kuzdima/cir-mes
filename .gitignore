@@ -10,3 +10,8 @@ backend/ssh
 .vscode/
 backend/uploads/*
 !backend/uploads/.gitkeep
+frontend/css/archive.css
+frontend/css/auth.css
+frontend/css/catalog.css
+frontend/css/production.css
+frontend/css/profile.css

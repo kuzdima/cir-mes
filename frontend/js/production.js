@@ -477,12 +477,19 @@ function reserveNaradMaterials(naradId) {
   api('GET', '/api/materials/narad/' + naradId).then(function(res) {
     if (!res.ok || !res.items) return;
 
-    var toReserve = res.items.filter(function(it) {
-      return it.wh_item && it.status !== 'issued';
-    }).map(function(it) {
-      return { item_id: it.wh_item.id, item_name: it.pki_name, qty_needed: it.qty_needed, unit: it.unit };
+    // Схлопываем одинаковые wh_item.id — суммируем qty_needed
+    var byItemId = {};
+    res.items.forEach(function(it) {
+      if (!it.wh_item || it.status === 'issued') return;
+      var id = it.wh_item.id;
+      if (byItemId[id]) {
+        byItemId[id].qty_needed += it.qty_needed;
+      } else {
+        byItemId[id] = { item_id: id, item_name: it.pki_name, qty_needed: it.qty_needed, unit: it.unit };
+      }
     });
 
+    var toReserve = Object.values(byItemId);
     if (!toReserve.length) { showToast('Нет позиций для резервирования'); return; }
 
     api('POST', '/api/materials/reserve', { narad_id: naradId, items: toReserve }).then(function(r) {
