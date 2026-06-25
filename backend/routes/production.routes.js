@@ -108,7 +108,10 @@ module.exports = function(pool, auth) {
       var b = req.body;
       if (!b.naradNumber) return res.status(400).json({ ok: false, error: 'Номер наряда обязателен' });
       var existing = await pool.query('SELECT id FROM production_orders WHERE narad_number=$1 LIMIT 1', [b.naradNumber]);
-      if (existing.rows.length) await pool.query('DELETE FROM production_orders WHERE narad_number=$1', [b.naradNumber]);
+      if (existing.rows.length) {
+        await pool.query('DELETE FROM production_orders WHERE narad_number=$1', [b.naradNumber]);
+        await pool.query('DELETE FROM production_narads WHERE narad_number=$1', [b.naradNumber]);
+      }
 
       var ops;
       if (b.classifierCode && b.productName) {
@@ -137,12 +140,18 @@ module.exports = function(pool, auth) {
       var added = 0;
       var INSERT_SQL = 'INSERT INTO production_orders (narad_number,status,order_number,customer,production_start_date,operation_number,is_final,product_name,classifier_code,object_type,material_grade,assortment,material_amount,unit_of_measure,operation_name,machine_resource,operation_comment,quantity,priority,deadline,norm_time_hours,load_per_unit_hours,batch_prep_hours,assembly_id,serial_number,executor,is_cnc,plan_minutes,created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)';
 
+      var NARAD_SQL = 'INSERT INTO production_narads (narad_number,assembly_id,quantity,order_number,customer,deadline,priority,created_by) ' +
+        'VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (narad_number) DO UPDATE SET ' +
+        'assembly_id=$2,quantity=$3,order_number=$4,customer=$5,deadline=$6,priority=$7,updated_at=NOW() RETURNING id';
+
       if (b.classifierCode && b.productName) {
         for (var j = 0; j < ops.length; j++) {
           var o = ops[j];
           await pool.query(INSERT_SQL, [b.naradNumber,'Новый',b.orderNumber||null,b.customer||null,b.productionStartDate||null,o.operation_number,o.is_final,o.product_name,o.classifier_code,o.object_type,o.material_grade,o.assortment,o.material_amount,o.unit_of_measure,o.operation_name,o.machine_resource,o.operation_comment,b.quantity||1,b.priority||3,b.deadline||null,o.norm_time_hours,o.load_per_unit_hours,o.batch_prep_hours,b.assemblyId||null,o.serial_number,o.executor,o.is_cnc,(o.norm_time_hours||0)*60*(b.quantity||1),req.user.id]);
           added++;
         }
+        var nr = await pool.query(NARAD_SQL, [b.naradNumber,b.assemblyId||null,b.quantity||1,b.orderNumber||null,b.customer||null,b.deadline||null,b.priority||3,req.user.id]);
+        await pool.query('UPDATE production_orders SET narad_id=$1 WHERE narad_number=$2', [nr.rows[0].id, b.naradNumber]);
       } else {
         var match = b.naradNumber.match(/^(.*?)(\d+)$/);
         var prefix = match ? match[1] : b.naradNumber + '-';
@@ -159,6 +168,8 @@ module.exports = function(pool, auth) {
             await pool.query(INSERT_SQL, [currentNarad,'Новый',b.orderNumber||null,b.customer||null,b.productionStartDate||null,o.operation_number,o.is_final,o.product_name,o.classifier_code,o.object_type,o.material_grade,o.assortment,o.material_amount,o.unit_of_measure,o.operation_name,o.machine_resource,o.operation_comment,b.quantity||1,b.priority||3,b.deadline||null,o.norm_time_hours,o.load_per_unit_hours,o.batch_prep_hours,b.assemblyId||null,o.serial_number,o.executor,o.is_cnc,(o.norm_time_hours||0)*60*(b.quantity||1),req.user.id]);
             added++;
           }
+          var nr = await pool.query(NARAD_SQL, [currentNarad,b.assemblyId||null,b.quantity||1,b.orderNumber||null,b.customer||null,b.deadline||null,b.priority||3,req.user.id]);
+          await pool.query('UPDATE production_orders SET narad_id=$1 WHERE narad_number=$2', [nr.rows[0].id, currentNarad]);
           naradIndex++;
         }
       }
@@ -171,6 +182,7 @@ module.exports = function(pool, auth) {
       var { naradNumber } = req.body;
       if (!naradNumber) return res.status(400).json({ ok: false, error: 'naradNumber required' });
       var result = await pool.query('DELETE FROM production_orders WHERE narad_number=$1', [naradNumber]);
+      await pool.query('DELETE FROM production_narads WHERE narad_number=$1', [naradNumber]);
       res.json({ ok: true, deleted: result.rowCount });
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
