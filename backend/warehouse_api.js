@@ -65,8 +65,13 @@ module.exports = function(pool, auth) {
       var where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
       params.push(limit + 1, offset);
       var rows = await pool.query(
-        'SELECT id,sku,name,material_type,address,unit,qty,min_qty,reserved FROM wh_items ' +
-        where + ' ORDER BY name LIMIT $' + pi + ' OFFSET $' + (pi + 1),
+        'SELECT i.id,i.sku,i.name,i.material_type,i.address,i.unit,i.qty,i.min_qty,i.reserved,' +
+        'COALESCE(m.today_in,0) AS today_in ' +
+        'FROM wh_items i ' +
+        'LEFT JOIN (SELECT item_id,SUM(qty) AS today_in FROM wh_movements ' +
+        "WHERE operation='Приход' AND created_at::date=CURRENT_DATE GROUP BY item_id) m " +
+        'ON m.item_id=i.id ' +
+        where + ' ORDER BY i.name LIMIT $' + pi + ' OFFSET $' + (pi + 1),
         params
       );
       var hasMore = rows.rows.length > limit;

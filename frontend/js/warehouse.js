@@ -363,7 +363,7 @@ function whLoadItems() {
           '<td class="wh-td wh-td-r">' +
           whFmt(parseFloat(i.reserved) || 0) +
           "</td>" +
-          '<td class="wh-td wh-td-r wh-income">+0</td>' +
+          '<td class="wh-td wh-td-r wh-income">+' + whFmt(parseFloat(i.today_in) || 0) + '</td>' +
           '<td class="wh-td">' +
           '<span class="wh-badge" style="color:' +
           st.color +
