@@ -54,7 +54,7 @@ sudo -u postgres psql -d cir_mes -f schema.sql
 psql -U postgres -d cir_mes -c "\dt"
 ```
 
-Должно показать 21 таблицу:
+Должно показать 22 таблицы:
 
 | Таблица | Описание |
 |---------|----------|
@@ -64,6 +64,7 @@ psql -U postgres -d cir_mes -c "\dt"
 | `production_orders` | Наряды на производство |
 | `orders` | Заказы |
 | `work_orders` | Наряды (устаревшая) |
+| `feedback` | Обратная связь (жалобы и предложения) |
 | `event_log` | Лог событий |
 | `ref_operations` | Справочник операций |
 | `ref_machines` | Справочник станков |
@@ -173,6 +174,7 @@ cir-mes/
 ├── backend/
 │   ├── server.js          — API сервер (Express + PostgreSQL)
 │   ├── warehouse.js       — Роутер раздела «Склад»
+│   ├── feedback_api.js    — Модуль «Обратная связь» (feedback)
 │   ├── wh_schema.sql      — Миграция: таблицы склада (wh_items, wh_movements)
 │   ├── .env               — Конфигурация (не в Git!)
 │   ├── .env.example       — Пример конфигурации
@@ -184,7 +186,8 @@ cir-mes/
 │   │   ├── access.js      — Доступ к CRM
 │   │   └── users.js       — Список пользователей для доступа
 │   └── __tests__/
-│       └── crm.test.js    — Интеграционные тесты CRM
+│       ├── crm.test.js    — Интеграционные тесты CRM
+│       └── feedback.test.js — Интеграционные тесты Feedback
 │
 ├── frontend/
 │   ├── index.html          — Главная страница (SPA)
@@ -193,6 +196,7 @@ cir-mes/
 │   │   ├── main.css        — Базовые стили, тёмная тема, переменные
 │   │   ├── warehouse.css   — Раздел «Склад»
 │   │   ├── crm.css         — CRM-доска
+│   │   ├── feedback.css    — Обратная связь
 │   │   ├── fact.css        — Страница отметки факта
 │   │   └── fromtags.css    — Стили тегов
 │   └── js/
@@ -207,6 +211,7 @@ cir-mes/
 │       ├── profile.js      — Личный кабинет + управление пользователями
 │       ├── warehouse.js    — Раздел «Склад»
 │       ├── crm.js          — CRM: доска, карточки, файлы, настройки
+│       ├── feedback.js     — Обратная связь
 │       └── qrcode.js       — Генерация QR-кодов
 │
 ├── schema.sql              — Полная схема БД (актуальная)
@@ -336,6 +341,19 @@ git push
 | POST | `/api/crm/access` | Добавить доступ (admin) |
 | DELETE | `/api/crm/access/:userId` | Убрать доступ (admin) |
 | GET | `/api/crm/users` | Все пользователи (admin) |
+
+### Обратная связь (Feedback)
+
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET | `/api/feedback` | Список обращений (фильтры: `?status=`, `?category=`, `?priority=`, `?q=`) |
+| GET | `/api/feedback/:id` | Детали обращения |
+| POST | `/api/feedback` | Создать обращение |
+| PUT | `/api/feedback/:id` | Обновить обращение (admin/dispatcher) |
+| DELETE | `/api/feedback/:id` | Удалить обращение (admin) |
+| POST | `/api/feedback/upload` | Прикрепить файл к обращению |
+| GET | `/api/feedback/count` | Счётчик открытых обращений |
+| GET | `/api/feedback/users` | Список ответственных (admin, dispatcher) |
 
 ---
 

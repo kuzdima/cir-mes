@@ -47,6 +47,10 @@ function httpUpload(method, url, data, cb) {
   xhr.open(method, url, true);
   if (TOKEN) xhr.setRequestHeader("Authorization", "Bearer " + TOKEN);
   xhr.onload = function () {
+    if (xhr.status === 401) {
+      if (typeof doLogout === "function") doLogout();
+      return;
+    }
     var res;
     try {
       res = JSON.parse(xhr.responseText);

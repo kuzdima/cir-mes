@@ -27,6 +27,7 @@ function showPanel(id) {
     profile: "Личный кабинет",
     users: "Управление пользователями",
     crm: "CRM",
+    feedback: "Обратная связь",
     warehouse: "Склад",
   };
   // Переключаем кнопки в топбаре
@@ -93,6 +94,10 @@ function showPanel(id) {
   }
   if (id === "crm" && typeof crmInit === "function") {
     crmInit();
+  }
+
+  if (id === "feedback" && typeof initFeedback === "function") {
+    initFeedback();
   }
 
   if (id === "warehouse" && typeof initWarehouse === "function") {
