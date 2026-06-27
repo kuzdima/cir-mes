@@ -365,7 +365,7 @@ button.arc-btn,button.topbar-btn{line-height:1}
 /* ==================== КАТАЛОГ НОМЕНКЛАТУРЫ ==================== */
 .two-col1-2{display:grid;grid-template-columns:0.5fr 1.5fr;gap:14px;overflow:hidden;}
 
-.nomNav{height:100%;overflow:auto;width:auto;padding-left:20px;margin-left:-6px;color:var(--text2);flex:1;min-height:0;}
+.nomNav{height:100%;overflow:auto;width:auto;padding-left:20px;margin-left:-6px;color:var(--text2);max-height: 730px;}
 
 .childUl{padding-left:20px;}
 
@@ -375,7 +375,11 @@ button.arc-btn,button.topbar-btn{line-height:1}
 .childLi span.selected,
 .parentLi span.selected{outline-style:solid;outline-color:var(--text2);}
 
-.cat-tbl-scroller{flex:1;min-height:0;overflow-y:auto;overflow-x:auto;}
+.cat-tbl-scroller{
+  max-height: 690px;
+  overflow-y:auto;
+  overflow-x:auto;
+}
 
 .nomNavList li.hasChildren{list-style-type:disclosure-closed;}
 .nomNavList li.hasChildren[open]{list-style-type:disclosure-open;}
