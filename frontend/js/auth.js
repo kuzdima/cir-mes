@@ -19,9 +19,17 @@ function doLogin() {
       if (res.ok) {
         TOKEN = res.token;
         USER = res.user;
+        USER.ai_features = [];
         localStorage.setItem("cir_token", TOKEN);
         localStorage.setItem("cir_user", JSON.stringify(USER));
         applyUser(USER);
+        http("GET", "/api/ai/access/my", null, function(ar) {
+          if (ar.ok) {
+            USER.ai_features = ar.features || [];
+            localStorage.setItem("cir_user", JSON.stringify(USER));
+            applyUser(USER);
+          }
+        });
       } else {
         err.textContent = res.error || "Ошибка";
         err.classList.add("show");
@@ -53,6 +61,28 @@ function applyUser(u) {
   var adminMenu = document.getElementById("admin-users-menu");
   if (adminMenu) {
     adminMenu.style.display = u.role === "admin" ? "block" : "none";
+  }
+
+  // AI Settings — только admin
+  var aiSettingsMenu = document.getElementById("ai-settings-menu");
+  if (aiSettingsMenu) {
+    aiSettingsMenu.style.display = u.role === "admin" ? "block" : "none";
+  }
+
+  // AI-аналитика — если есть chat или dashboard (или admin)
+  var aiAnalyticsMenu = document.getElementById("ai-analytics-menu");
+  if (aiAnalyticsMenu) {
+    var features = u.ai_features || [];
+    var showAi = u.role === "admin" || features.indexOf("chat") >= 0 || features.indexOf("dashboard") >= 0;
+    aiAnalyticsMenu.style.display = showAi ? "block" : "none";
+  }
+
+  // S&OP — если есть sop (или admin)
+  var sopMenu = document.getElementById("sop-menu");
+  if (sopMenu) {
+    var features = u.ai_features || [];
+    var showSop = u.role === "admin" || features.indexOf("sop") >= 0;
+    sopMenu.style.display = showSop ? "block" : "none";
   }
 
   // CRM admin buttons
@@ -91,6 +121,12 @@ function doLogout() {
   // Скрываем меню и очищаем данные предыдущего пользователя
   var adminMenu = document.getElementById("admin-users-menu");
   if (adminMenu) adminMenu.style.display = "none";
+  var aiSettingsMenu = document.getElementById("ai-settings-menu");
+  if (aiSettingsMenu) aiSettingsMenu.style.display = "none";
+  var aiAnalyticsMenu = document.getElementById("ai-analytics-menu");
+  if (aiAnalyticsMenu) aiAnalyticsMenu.style.display = "none";
+  var sopMenu = document.getElementById("sop-menu");
+  if (sopMenu) sopMenu.style.display = "none";
   var usersTbody = document.getElementById("users-tbody");
   if (usersTbody) usersTbody.innerHTML = "";
   var mrOps = document.getElementById("mr-ops-tbody");

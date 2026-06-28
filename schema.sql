@@ -561,6 +561,121 @@ ALTER SEQUENCE public.work_orders_id_seq OWNED BY public.work_orders.id;
 
 
 --
+-- Name: ai_providers; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.ai_providers (
+    id integer NOT NULL,
+    name character varying(100) NOT NULL,
+    label character varying(255) NOT NULL,
+    api_url character varying(500) NOT NULL,
+    api_key text,
+    model character varying(255) NOT NULL,
+    config jsonb DEFAULT '{}'::jsonb,
+    is_active boolean DEFAULT false,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.ai_providers OWNER TO postgres;
+
+
+--
+-- Name: ai_providers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.ai_providers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.ai_providers_id_seq OWNER TO postgres;
+
+
+--
+-- Name: ai_providers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.ai_providers_id_seq OWNED BY public.ai_providers.id;
+
+
+--
+-- Name: ai_prompts; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.ai_prompts (
+    id integer NOT NULL,
+    domain character varying(50) NOT NULL,
+    name character varying(255) NOT NULL DEFAULT 'default'::character varying,
+    prompt_text text NOT NULL,
+    version integer DEFAULT 1,
+    is_active boolean DEFAULT true,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.ai_prompts OWNER TO postgres;
+
+
+--
+-- Name: ai_prompts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.ai_prompts_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.ai_prompts_id_seq OWNER TO postgres;
+
+
+--
+-- Name: ai_prompts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.ai_prompts_id_seq OWNED BY public.ai_prompts.id;
+
+
+--
+-- Name: ai_access; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.ai_access (
+    user_id integer NOT NULL,
+    feature character varying(50) NOT NULL,
+    granted_at timestamp with time zone DEFAULT now(),
+    granted_by integer
+);
+
+
+ALTER TABLE public.ai_access OWNER TO postgres;
+
+
+--
+-- Name: ai_providers id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_providers ALTER COLUMN id SET DEFAULT nextval('public.ai_providers_id_seq'::regclass);
+
+
+--
+-- Name: ai_prompts id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_prompts ALTER COLUMN id SET DEFAULT nextval('public.ai_prompts_id_seq'::regclass);
+
+
+--
 -- Name: event_log id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -805,6 +920,38 @@ ALTER TABLE ONLY public.work_orders
 
 
 --
+-- Name: ai_providers ai_providers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_providers
+    ADD CONSTRAINT ai_providers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ai_prompts ai_prompts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_prompts
+    ADD CONSTRAINT ai_prompts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ai_prompts ai_prompts_domain_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_prompts
+    ADD CONSTRAINT ai_prompts_domain_name_key UNIQUE (domain, name);
+
+
+--
+-- Name: ai_access ai_access_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_access
+    ADD CONSTRAINT ai_access_pkey PRIMARY KEY (user_id, feature);
+
+
+--
 -- Name: event_log event_log_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -858,6 +1005,22 @@ ALTER TABLE ONLY public.work_orders
 
 ALTER TABLE ONLY public.work_orders
     ADD CONSTRAINT work_orders_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id);
+
+
+--
+-- Name: ai_access ai_access_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_access
+    ADD CONSTRAINT ai_access_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: ai_access ai_access_granted_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_access
+    ADD CONSTRAINT ai_access_granted_by_fkey FOREIGN KEY (granted_by) REFERENCES public.users(id) ON DELETE SET NULL;
 
 
 --
@@ -1026,6 +1189,41 @@ GRANT ALL ON TABLE public.work_orders TO cir_user;
 --
 
 GRANT ALL ON SEQUENCE public.work_orders_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ai_providers; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ai_providers TO cir_user;
+
+
+--
+-- Name: SEQUENCE ai_providers_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ai_providers_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ai_prompts; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ai_prompts TO cir_user;
+
+
+--
+-- Name: SEQUENCE ai_prompts_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ai_prompts_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE ai_access; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ai_access TO cir_user;
 
 
 --
