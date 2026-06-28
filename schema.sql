@@ -662,10 +662,57 @@ ALTER TABLE public.ai_access OWNER TO postgres;
 
 
 --
+-- Name: ai_chat_history; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.ai_chat_history (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    domain character varying(50) NOT NULL,
+    question text NOT NULL,
+    answer text,
+    model character varying(255),
+    usage_tokens integer,
+    has_error boolean DEFAULT false,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.ai_chat_history OWNER TO postgres;
+
+--
+-- Name: ai_chat_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.ai_chat_history_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.ai_chat_history_id_seq OWNER TO postgres;
+
+--
+-- Name: ai_chat_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.ai_chat_history_id_seq OWNED BY public.ai_chat_history.id;
+
+
+--
 -- Name: ai_providers id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ai_providers ALTER COLUMN id SET DEFAULT nextval('public.ai_providers_id_seq'::regclass);
+
+
+--
+-- Name: ai_chat_history id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_chat_history ALTER COLUMN id SET DEFAULT nextval('public.ai_chat_history_id_seq'::regclass);
 
 
 --
@@ -928,6 +975,14 @@ ALTER TABLE ONLY public.ai_providers
 
 
 --
+-- Name: ai_chat_history ai_chat_history_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_chat_history
+    ADD CONSTRAINT ai_chat_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: ai_prompts ai_prompts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1021,6 +1076,14 @@ ALTER TABLE ONLY public.ai_access
 
 ALTER TABLE ONLY public.ai_access
     ADD CONSTRAINT ai_access_granted_by_fkey FOREIGN KEY (granted_by) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: ai_chat_history ai_chat_history_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_chat_history
+    ADD CONSTRAINT ai_chat_history_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -1224,6 +1287,19 @@ GRANT ALL ON SEQUENCE public.ai_prompts_id_seq TO cir_user;
 --
 
 GRANT ALL ON TABLE public.ai_access TO cir_user;
+
+
+--
+-- Name: TABLE ai_chat_history; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.ai_chat_history TO cir_user;
+
+--
+-- Name: SEQUENCE ai_chat_history_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON SEQUENCE public.ai_chat_history_id_seq TO cir_user;
 
 
 --
