@@ -82,12 +82,19 @@ app.get('/api/health', async (req, res) => {
 });
 
 /* 
-Новые простые справочники(вида id, name) добавлять в referenceTablesList значениями как имя таблицы в БД)
+Новые простые справочники(вида id, name) добавлять в referenceTablesList значениями как имя таблицы в БД и её имя в интерфейсе,
+для доступа к ним в разделе справочников.
 GET,DELETE,PATCH, - /api/:tableName/:id 
 GET,POST - /api/:tableName
 */
 
-let referenceTablesList = [ "ref_operations", "ref_machines", "ref_coatings", "ref_units", "ref_object_types"]; 
+let referenceTablesList = [ 
+  {tableName: "ref_operations", interfaceName : "Операции"},
+  {tableName: "ref_machines", interfaceName : "Оборудование"},
+  {tableName: "ref_coatings", interfaceName : "Покрытия"},
+  {tableName: "ref_units", interfaceName : "Единицы измерения"},
+  {tableName: "ref_object_types", interfaceName : "Типы объектов"},
+]; 
 app.use('/api/reference-tables',  require('./routes/reference-tables.routes')(pool, auth, referenceTablesList));
 
 io.on('connection', function(socket) {

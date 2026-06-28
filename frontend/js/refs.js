@@ -78,9 +78,9 @@ function acSearch(inputEl, ddId, field) {
     http(
       "GET",
       "/api/tech-ops/autocomplete?q=" +
-        encodeURIComponent(q) +
-        "&field=" +
-        field,
+      encodeURIComponent(q) +
+      "&field=" +
+      field,
       null,
       function (res) {
         if (!res.ok || !res.rows || !res.rows.length) {
@@ -126,9 +126,9 @@ function acSearch(inputEl, ddId, field) {
             api(
               "GET",
               "/api/tech-ops/search?product_name=" +
-                encodeURIComponent(productName) +
-                "&classifier=" +
-                encodeURIComponent(classifierCode),
+              encodeURIComponent(productName) +
+              "&classifier=" +
+              encodeURIComponent(classifierCode),
             ).then(function (result) {
               if (result.ok && result.commonData) {
                 var d = result.commonData;
@@ -202,3 +202,60 @@ document.addEventListener("click", function (e) {
     });
   }
 });
+
+
+// Логика построения раздела стправочников.
+
+
+
+function getReferenceTablesList() {
+  let res = api("GET", "/api/reference-tables")
+  return res
+}
+
+
+function constructReferenceTabMenu(tablesList) {
+
+  let finalHtml = ""
+
+  for (const table of tablesList) {
+    finalHtml +=
+      `<div class="chrome-tab" id="ref-tab-${table.tableName}" onclick="switchRefTab('${table.tableName}')">
+              <svg viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+              ${table.interfaceName}
+            </div>
+  `
+  };
+
+  return finalHtml
+
+};
+
+
+
+function initReferencesSection() {
+
+  getReferenceTablesList().then((res) => {
+    
+    let referenceTablesList = res.rows;
+
+    
+
+    let tabsSectionParent = document.querySelector("#panel-references .chrome-tabs");
+
+    tabsSectionParent.innerHTML = constructReferenceTabMenu(referenceTablesList);
+
+    let referenceTabsList = document.querySelectorAll('[id^="ref-tab-"]');
+
+    referenceTabsList[0].click();
+
+  })
+
+}

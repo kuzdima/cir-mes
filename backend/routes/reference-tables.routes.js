@@ -5,16 +5,17 @@ const router = express.Router();
 module.exports = function (pool, auth, referenceTablesList) {
 
     for (const table of referenceTablesList) {
+        let tableName = table.tableName;
         // GET получаем все значения справочника
-        router.get(`/${table}`, auth, async function (req, res) {
+        router.get(`/${tableName}`, auth, async function (req, res) {
             try {
-                const { rows } = await pool.query(`SELECT * FROM ${table}`);
+                const { rows } = await pool.query(`SELECT * FROM ${tableName}`);
                 res.json({
                     ok: true,
                     rows: rows
                 });
             } catch (error) {
-                console.error(`Error fetching all records in table ${table}:`, error);
+                console.error(`Error fetching all records in tableName ${tableName}:`, error);
                 res.status(500).json({
                     ok: false,
                     message: 'Ошибка при получении данных',
@@ -25,11 +26,11 @@ module.exports = function (pool, auth, referenceTablesList) {
         );
 
         // GET Получаем значение из справочника по ID
-        router.get(`/${table}/:id`, auth, async function (req, res) {
+        router.get(`/${tableName}/:id`, auth, async function (req, res) {
             try {
                 const { id } = req.params;
                 const { rows } = await pool.query(
-                    `SELECT * FROM ${table} WHERE id = $1`,
+                    `SELECT * FROM ${tableName} WHERE id = $1`,
                     [id]
                 );
 
@@ -56,7 +57,7 @@ module.exports = function (pool, auth, referenceTablesList) {
         );
 
         // POST Создаем новое значение в справочнике
-        router.post(`/${table}`, auth,
+        router.post(`/${tableName}`, auth,
             async function (req, res) {
                 try {
                     const { name } = req.body;
@@ -69,7 +70,7 @@ module.exports = function (pool, auth, referenceTablesList) {
                     };
 
                     const { rows } = await pool.query(
-                        `SELECT * FROM ${table} WHERE name = $1`,
+                        `SELECT * FROM ${tableName} WHERE name = $1`,
                         [name]
                     );
                     // Проверяем на дубли чтоб не плодить
@@ -81,12 +82,12 @@ module.exports = function (pool, auth, referenceTablesList) {
                     }
 
                     const insertResult = await pool.query(
-                        `INSERT INTO ${table} (name) VALUES ($1)`,
+                        `INSERT INTO ${tableName} (name) VALUES ($1)`,
                         [name]
                     );
 
                     const newRecord = await pool.query(
-                        `SELECT * FROM ${table} WHERE id = $1`,
+                        `SELECT * FROM ${tableName} WHERE id = $1`,
                         [insertResult.id]
                     );
 
@@ -107,7 +108,7 @@ module.exports = function (pool, auth, referenceTablesList) {
         );
 
         // PATCH Изменяем существующее значение из справочника по ID
-        router.patch(`/${table}/:id`, auth,
+        router.patch(`/${tableName}/:id`, auth,
             async function (req, res) {
                 try {
                     const { id } = req.params;
@@ -122,7 +123,7 @@ module.exports = function (pool, auth, referenceTablesList) {
 
                     // Проверяем существование записи
                     const existing = await pool.query(
-                        `SELECT * FROM ${table} WHERE id = $1`,
+                        `SELECT * FROM ${tableName} WHERE id = $1`,
                         [id]
                     );
 
@@ -134,12 +135,12 @@ module.exports = function (pool, auth, referenceTablesList) {
                     }
 
                     await pool.query(
-                        `UPDATE ${table} SET name = $1 WHERE id = $2`,
+                        `UPDATE ${tableName} SET name = $1 WHERE id = $2`,
                         [name, id]
                     );
 
                     const updated = await pool.query(
-                        `SELECT * FROM ${table} WHERE id = $1`,
+                        `SELECT * FROM ${tableName} WHERE id = $1`,
                         [id]
                     );
 
@@ -160,14 +161,14 @@ module.exports = function (pool, auth, referenceTablesList) {
         );
 
         // DELETE Удаляем существующее значение из справочника по ID
-        router.delete(`/${table}/:id`, auth,
+        router.delete(`/${tableName}/:id`, auth,
             async function (req, res) {
                 try {
                     const { id } = req.params;
 
                     // Проверяем существование записи
                     const existing = await pool.query(
-                        `SELECT * FROM ${table} WHERE id = $1`,
+                        `SELECT * FROM ${tableName} WHERE id = $1`,
                         [id]
                     );
 
@@ -179,7 +180,7 @@ module.exports = function (pool, auth, referenceTablesList) {
                     }
 
                     await pool.query(
-                        `DELETE FROM ${table} WHERE id = $1`,
+                        `DELETE FROM ${tableName} WHERE id = $1`,
                         [id]
                     );
 
@@ -198,6 +199,24 @@ module.exports = function (pool, auth, referenceTablesList) {
             }
         );
     }
+
+    router.get(`/`, auth, async function (req, res) {
+            try {
+                
+                res.json({
+                    ok: true,
+                    rows: referenceTablesList
+                });
+            } catch (error) {
+                console.error(`Error getting reference tables list:`, error);
+                res.status(500).json({
+                    ok: false,
+                    message: 'Ошибка при получении данных',
+                    error: error.message
+                });
+            }
+        }
+        );
 
     return router
 }
