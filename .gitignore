@@ -11,4 +11,3 @@ backend/ssh
 .vs/
 backend/uploads/*
 !backend/uploads/.gitkeep
-.opencode/
