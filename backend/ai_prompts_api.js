@@ -1,6 +1,7 @@
 module.exports = function(pool, auth) {
   var express = require('express');
   var router = express.Router();
+  var { DEFAULTS } = require('./ai/prompts');
 
   function isAdmin(req, res, next) {
     if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Только для администратора' });
@@ -77,8 +78,18 @@ module.exports = function(pool, auth) {
     try {
       var existing = await pool.query('SELECT * FROM ai_prompts WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
-      await pool.query('UPDATE ai_prompts SET is_active = FALSE, updated_at = NOW() WHERE id = $1', [req.params.id]);
-      res.json({ ok: true, message: 'Промпт сброшен — будет использоваться встроенный дефолтный' });
+      var domain = existing.rows[0].domain;
+      var defaultText = DEFAULTS[domain];
+      if (defaultText) {
+        await pool.query(
+          'UPDATE ai_prompts SET prompt_text = $1, is_active = TRUE, version = version + 1, updated_at = NOW() WHERE id = $2',
+          [defaultText, req.params.id]
+        );
+        res.json({ ok: true, message: 'Промпт восстановлен из заводского шаблона' });
+      } else {
+        await pool.query('UPDATE ai_prompts SET is_active = FALSE, updated_at = NOW() WHERE id = $1', [req.params.id]);
+        res.json({ ok: true, message: 'Промпт сброшен — будет использоваться встроенный дефолтный' });
+      }
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 

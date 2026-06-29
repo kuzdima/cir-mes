@@ -1,4 +1,4 @@
-var { getAdapter } = require('./provider-presets');
+var { getAdapter } = require('./provider-registry');
 
 var PROVIDER_CACHE = null;
 var CACHE_TTL = 5 * 60 * 1000;

@@ -2,8 +2,6 @@ module.exports = function(pool, auth) {
   var express = require('express');
   var router = express.Router();
   var { invalidateCache } = require('./ai/provider');
-  var { httpRequest } = require('./ai/adapters/http-client');
-var { getTestConfig } = require('./ai/provider-presets');
 
   function isAdmin(req, res, next) {
     if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Только для администратора' });
@@ -82,9 +80,10 @@ var { getTestConfig } = require('./ai/provider-presets');
       var existing = await pool.query('SELECT * FROM ai_providers WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
       var p = existing.rows[0];
-      var tc = getTestConfig(p);
-      var result = await httpRequest(tc.url, 'GET', tc.headers, tc.body, 15000, false);
-      res.json({ ok: result.status < 500, connected: result.status < 500, error: result.status >= 500 ? ('HTTP ' + result.status) : null });
+      var registry = require('./ai/provider-registry');
+      var adapter = registry.getAdapter(p);
+      var result = await adapter.test(p);
+      res.json(result);
     } catch(e) {
       res.json({ ok: false, connected: false, error: e.message });
     }

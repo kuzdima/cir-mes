@@ -1,8 +1,7 @@
 module.exports = function(pool, auth, requireFeature, deps) {
   var express = require('express');
   var router = express.Router();
-  var resolveTimeframe = require('./timeframe').resolveTimeframe;
-
+  var { DOMAINS } = require('./domains');
   var provider = deps.provider;
   var prompts = deps.prompts;
   var contextBuilder = deps.contextBuilder;
@@ -26,12 +25,10 @@ module.exports = function(pool, auth, requireFeature, deps) {
   router.post('/query', auth, requireFeature('chat'), async function(req, res) {
     try {
       var { domain, question, filters, model, temperature } = req.body;
-      if (!domain) return res.status(400).json({ ok: false, error: 'Требуется domain' });
+      if (!DOMAINS.includes(domain)) return res.status(400).json({ ok: false, error: 'Требуется domain' });
       if (!question) return res.status(400).json({ ok: false, error: 'Требуется question' });
 
-      var resolvedTf = resolveTimeframe(filters?.timeframe);
-      var contextFilters = resolvedTf ? { timeframe: resolvedTf } : {};
-      var context = await contextBuilder.getDomainSummary(pool, domain, contextFilters);
+      var context = await contextBuilder.build(pool, domain, filters);
       if (context && context.ok === false) return res.status(400).json({ ok: false, error: context.error });
 
       var systemPrompt = await prompts.resolvePrompt(pool, domain);
@@ -73,14 +70,11 @@ module.exports = function(pool, auth, requireFeature, deps) {
   router.post('/dashboard', auth, requireFeature('dashboard'), async function(req, res) {
     try {
       var filters = req.body.filters || {};
-      var resolvedTf = resolveTimeframe(filters.timeframe);
-      var contextFilters = resolvedTf ? { timeframe: resolvedTf } : {};
-
-      var context = await contextBuilder.getDomainSummary(pool, 'all', contextFilters);
+      var context = await contextBuilder.build(pool, 'all', filters);
       if (context && context.ok === false) return res.status(400).json({ ok: false, error: context.error });
 
       var systemPrompt = await prompts.resolvePrompt(pool, 'dashboard');
-      var periodStr = resolvedTf ? (resolvedTf.from + ' — ' + resolvedTf.to) : 'за всё время';
+      var periodStr = context._timeframe ? (context._timeframe.from + ' — ' + context._timeframe.to) : 'за всё время';
       var question = 'Сформируй сводку по цеху на основе данных по всем модулям. Период: ' + periodStr + '.';
       var userPrompt = prompts.buildUserPrompt(question, { context: context, filters: filters });
 

@@ -53,6 +53,7 @@ function aiSettingsShowAddProvider() {
   document.getElementById('ai-pf-config').value = '';
   document.getElementById('ai-pf-config-row').style.display = 'none';
   document.getElementById('ai-pf-active').checked = false;
+  document.getElementById('ai-pf-reject-unauthorized').checked = false;
   document.getElementById('ai-pf-err').textContent = '';
   document.getElementById('ai-pf-err').classList.remove('show');
   document.getElementById('ai-pf-key').placeholder = 'sk-...';
@@ -103,6 +104,8 @@ function aiSettingsEditProvider(id) {
     document.getElementById('ai-pf-config').value = p.config && typeof p.config === 'object' ? JSON.stringify(p.config, null, 2) : (p.config || '');
     document.getElementById('ai-pf-config-row').style.display = (p.name && p.name.toLowerCase().indexOf('gigachat') >= 0) ? 'flex' : 'none';
     document.getElementById('ai-pf-active').checked = p.is_active;
+    var cfg = typeof p.config === 'object' ? p.config : {};
+    document.getElementById('ai-pf-reject-unauthorized').checked = !!(cfg.reject_unauthorized);
     document.getElementById('ai-pf-key').placeholder = p.api_key === '***' ? '*** (оставьте пустым чтобы не менять)' : '';
     document.getElementById('ai-pf-err').textContent = '';
     document.getElementById('ai-pf-err').classList.remove('show');
@@ -126,6 +129,8 @@ function aiSettingsSaveProvider() {
     return;
   }
 
+  var rejectUnauthorized = document.getElementById('ai-pf-reject-unauthorized').checked;
+
   var config = null;
   if (configRaw) {
     try { config = JSON.parse(configRaw); } catch(e) {
@@ -133,6 +138,14 @@ function aiSettingsSaveProvider() {
       errEl.classList.add('show');
       return;
     }
+  }
+
+  if (rejectUnauthorized) {
+    config = config || {};
+    config.reject_unauthorized = true;
+  } else if (config && config.reject_unauthorized !== undefined) {
+    delete config.reject_unauthorized;
+    if (!Object.keys(config).length) config = null;
   }
 
   var body = { name: name, label: label || name, api_url: url, api_key: key || undefined, model: model, config: config, is_active: active };

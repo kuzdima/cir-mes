@@ -61,9 +61,12 @@ app.use('/api/sop', require('./sop_api')(pool, auth, requireFeature));
 app.get('/api/ai/provider-presets', function(req, res) {
   res.json({ ok: true, presets: require('./ai/provider-presets').getPresets() });
 });
+// AI Domains
 app.get('/api/ai/domains', function(req, res) {
   res.json({ ok: true, domains: require('./ai/domains').DOMAINS });
 });
+
+// AI Providers
 app.use('/api/ai/providers', require('./ai_providers_api')(pool, auth));
 app.use('/api/ai/prompts', require('./ai_prompts_api')(pool, auth));
 app.use('/api/ai', require('./ai/analytics-router')(pool, auth, requireFeature, {

@@ -32,7 +32,7 @@ var promptsMock = {
 var contextBuilderMock = {
   lastDomain: null,
   lastFilters: null,
-  getDomainSummary: async function(pool, domain, filters) {
+  build: async function(pool, domain, filters) {
     contextBuilderMock.lastDomain = domain;
     contextBuilderMock.lastFilters = filters;
     if (domain === 'unknown') return { ok: false, error: 'Неизвестный домен: unknown' };
@@ -208,10 +208,7 @@ describe('Analytics Router', function() {
       .send({ domain: 'production', question: 'test', filters: { timeframe: 'month' } });
     assert.equal(res.status, 200);
     assert.equal(res.body.ok, true);
-    assert.ok(contextBuilderMock.lastFilters);
-    assert.ok(contextBuilderMock.lastFilters.timeframe);
-    assert.equal(typeof contextBuilderMock.lastFilters.timeframe.from, 'string');
-    assert.equal(typeof contextBuilderMock.lastFilters.timeframe.to, 'string');
+    assert.deepEqual(contextBuilderMock.lastFilters, { timeframe: 'month' });
   });
 
   test('POST /api/ai/query — без filters использует дефолт month', async function() {
@@ -221,8 +218,7 @@ describe('Analytics Router', function() {
       .send({ domain: 'production', question: 'test' });
     assert.equal(res.status, 200);
     assert.equal(res.body.ok, true);
-    assert.ok(contextBuilderMock.lastFilters);
-    assert.ok(contextBuilderMock.lastFilters.timeframe);
+    assert.equal(contextBuilderMock.lastFilters, undefined);
   });
 
   test('POST /api/ai/query — передаёт model/temperature', async function() {
@@ -273,10 +269,7 @@ describe('Analytics Router', function() {
       .send({ filters: { timeframe: 'year' } });
     assert.equal(res.status, 200);
     assert.equal(res.body.ok, true);
-    assert.ok(contextBuilderMock.lastFilters);
-    assert.ok(contextBuilderMock.lastFilters.timeframe);
-    assert.equal(typeof contextBuilderMock.lastFilters.timeframe.from, 'string');
-    assert.equal(typeof contextBuilderMock.lastFilters.timeframe.to, 'string');
+    assert.deepEqual(contextBuilderMock.lastFilters, { timeframe: 'year' });
   });
 
   // ─── Access /my ─────────────────────────────────────────────

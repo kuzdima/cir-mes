@@ -1,7 +1,7 @@
 var https = require('https');
 var http = require('http');
 
-function httpRequest(url, method, headers, body, timeout, parseJson) {
+function httpRequest(url, method, headers, body, timeout, parseJson, extraOpts) {
   if (parseJson === undefined) parseJson = true;
   return new Promise(function(resolve, reject) {
     var parsedUrl = new URL(url);
@@ -14,6 +14,9 @@ function httpRequest(url, method, headers, body, timeout, parseJson) {
       headers: headers,
       timeout: timeout || 30000
     };
+    if (extraOpts && extraOpts.rejectUnauthorized === false) {
+      options.rejectUnauthorized = false;
+    }
     var req = lib.request(options, function(res) {
       var data = '';
       res.on('data', function(chunk) { data += chunk; });
