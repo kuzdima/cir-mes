@@ -270,7 +270,16 @@ function switchRefTab(tab) {
     
   document.querySelectorAll('[id^="ref-content-"]').forEach((e) =>{
       e.style.display = e.id === `ref-content-${tab}` ? "" : "none";
-    });  
+    });
+    
+  api("GET",`/api/reference-tables/${tab}`).then(
+    (res) =>{
+     const data = res.rows;
+     const table = constructTable(tab, ["Имя"], data, true);
+     document.querySelector(`#ref-content-${tab} .table-container`).replaceChildren(table);
+
+    }
+  );
 
   // document.getElementById("ref-content-ops").style.display =
   //   tab === tab ? "" : "none";

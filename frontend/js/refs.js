@@ -207,35 +207,190 @@ document.addEventListener("click", function (e) {
 // Логика построения раздела стправочников.
 
 
-
-function getReferenceTablesList() {
-  let res = api("GET", "/api/reference-tables")
-  return res
+function textToElement(htmlString) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  return doc.body.firstElementChild;
 }
 
 
+function getReferenceTablesList() {
+  let res = api("GET", "/api/reference-tables");
+  return res
+}
+
+function coustructTab(tableName, tabInterfaceName, tabId, svgIcon = "") {
+  let fragmentHtml =
+    `<div class="chrome-tab" id="${tabId}" onclick="switchRefTab('${tableName}')">
+              ${svgIcon}
+              ${tabInterfaceName}
+      </div>
+    `;
+
+  return textToElement(fragmentHtml)
+}
+
 function constructReferenceTabMenu(tablesList) {
 
-  let finalHtml = ""
+  let fragment = document.createDocumentFragment();
 
-  for (const table of tablesList) {
-    finalHtml +=
-      `<div class="chrome-tab" id="ref-tab-${table.tableName}" onclick="switchRefTab('${table.tableName}')">
-              <svg viewBox="0 0 24 24">
+  let idPrefix = "ref-tab-";
+
+  let icon = `<svg viewBox="0 0 24 24">
                 <line x1="8" y1="6" x2="21" y2="6" />
                 <line x1="8" y1="12" x2="21" y2="12" />
                 <line x1="8" y1="18" x2="21" y2="18" />
                 <line x1="3" y1="6" x2="3.01" y2="6" />
                 <line x1="3" y1="12" x2="3.01" y2="12" />
                 <line x1="3" y1="18" x2="3.01" y2="18" />
-              </svg>
-              ${table.interfaceName}
-            </div>
-  `
+              </svg>`;
+
+
+  for (const table of tablesList) {
+    let id = idPrefix + table.tableName;
+
+    fragment.appendChild(coustructTab(table.tableName, table.interfaceName, id, icon));
   };
 
-  return finalHtml
+  return fragment
 
+};
+
+function constructTable(tableName, headersList = [], tableData = [], delColumn = false) {
+  const fragment = document.createDocumentFragment();
+
+  const table = document.createElement("table");
+  table.classList.add("table");
+  table.dataset.name = tableName;
+
+  const thead = document.createElement("thead");
+  thead.appendChild(document.createElement("tr"));
+
+  const tbody = document.createElement("tbody");
+
+  for (const header of headersList) {
+    const th = document.createElement("th");
+    th.textContent = header;
+
+    thead.firstElementChild.appendChild(th);
+  };
+
+  // Доп колонка под кнопки удаления записей если передан параметра delColumn = true
+  if (delColumn) {
+    const th = document.createElement("th");
+    th.classList.add("del-column")
+    thead.firstElementChild.appendChild(th)
+  };
+
+  for (const dataRow of tableData) {
+
+    const tr = document.createElement("tr")
+
+    for (const name in dataRow) {
+      if (name === "id") {
+        tr.dataset.id = dataRow.id;
+        continue
+      }
+
+      const td = document.createElement("td");
+      td.textContent = dataRow[name];
+      tr.appendChild(td);
+    }
+
+    // Кнопки удаления записей если передан параметра delColumn = true
+    if (delColumn) {
+      const delRecordCol = document.createElement("td");
+      const delButton = document.createElement("button");
+      delButton.classList.add("del-btn");
+      delButton.textContent = "✖";
+      delRecordCol.appendChild(delButton);
+      tr.appendChild(delRecordCol);
+    };
+
+
+    tbody.appendChild(tr);
+  };
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+
+  fragment.appendChild(table);
+
+  return fragment
+}
+
+function summonModal(id, modalTitle = "Заголовок модалки") {
+
+
+
+
+  let template = `
+        <div id="${id}" class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div class="modal-title" id="modal-title-${id}">${modalTitle}</div>
+              <button class="modal-close-btn"
+                onclick="document.getElementById('${id}').remove()">✖</button>
+            </div>
+            <div id="modal-content-${id}"></div>
+
+            <div class="modal-footer">
+              <button class="topbar-btn btn-accent" onclick="this.remove()">
+              ✓ Добавить</button>
+              <button class="topbar-btn cancel-btn" onclick="document.getElementById('${id}').remove()">Отмена</button>
+            </div>
+          </div>
+        </div>
+  `
+
+  const modal = textToElement(template);
+
+  modal.style.display = 'block';
+
+  document.querySelector(".content").appendChild(modal)
+}
+
+
+function constructSection(sectionId, tableName, content = "") {
+
+  fragment = textToElement(`<div id="${sectionId}"></div>`);
+
+  fragment.replaceChildren(content);
+
+  let toolbar = document.createElement("div");
+  let button = document.createElement("button");
+
+  let tabName = document.getElementById("ref-tab-" + tableName).textContent
+  button.classList.add("btn-accent");
+  button.textContent = "+ Добавить запись";
+  button.dataset.id = tableName;
+  button.onclick = () => { summonModal("modal-" + tableName, "Добавить запись в справочник: " + tabName) }; // Открытие модалки 
+
+  toolbar.appendChild(button);
+  toolbar.classList.add("toolbar");
+  fragment.appendChild(toolbar);
+
+  const tableContainer = document.createElement("div");
+  tableContainer.classList.add("table-container");
+  fragment.appendChild(tableContainer)
+
+  return fragment
+};
+
+function counstructReferenceSubSections(tablesList) {
+  let fragment = document.createDocumentFragment();
+
+  let idPrefix = "ref-content-";
+
+
+  for (const table of tablesList) {
+    const tableName = table.tableName;
+    let id = idPrefix + tableName;
+
+    fragment.appendChild(constructSection(id, tableName));
+  };
+
+  return fragment
 };
 
 
@@ -243,14 +398,17 @@ function constructReferenceTabMenu(tablesList) {
 function initReferencesSection() {
 
   getReferenceTablesList().then((res) => {
-    
+
     let referenceTablesList = res.rows;
 
-    
 
     let tabsSectionParent = document.querySelector("#panel-references .chrome-tabs");
+    let sectionsParent = document.querySelector("#panel-references .reference_sections")
 
-    tabsSectionParent.innerHTML = constructReferenceTabMenu(referenceTablesList);
+
+    tabsSectionParent.replaceChildren(constructReferenceTabMenu(referenceTablesList));
+    sectionsParent.replaceChildren(counstructReferenceSubSections(referenceTablesList));
+
 
     let referenceTabsList = document.querySelectorAll('[id^="ref-tab-"]');
 
