@@ -27,7 +27,11 @@ function showPanel(id) {
     profile: "Личный кабинет",
     users: "Управление пользователями",
     crm: "CRM",
+    feedback: "Обратная связь",
+    sop: "S&OP",
     warehouse: "Склад",
+    analytics: "AI-аналитика",
+    "ai-settings": "AI Settings",
   };
   // Переключаем кнопки в топбаре
   var btnNom = document.getElementById("add-btn-nom");
@@ -95,8 +99,24 @@ function showPanel(id) {
     crmInit();
   }
 
+  if (id === "feedback" && typeof initFeedback === "function") {
+    initFeedback();
+  }
+
+  if (id === "sop" && typeof initSop === "function") {
+    initSop();
+  }
+
   if (id === "warehouse" && typeof initWarehouse === "function") {
     initWarehouse();
+  }
+
+  if (id === "analytics" && typeof aiInit === "function") {
+    aiInit();
+  }
+
+  if (id === "ai-settings" && typeof aiSettingsInit === "function") {
+    aiSettingsInit();
   }
 }
 
@@ -124,6 +144,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Restore session
   if (TOKEN && USER) {
     applyUser(USER);
+    // fetch ai features if not already loaded
+    if (!USER.ai_features || !USER.ai_features.length) {
+      http("GET", "/api/ai/access/my", null, function(ar) {
+        if (ar.ok) {
+          USER.ai_features = ar.features || [];
+          localStorage.setItem("cir_user", JSON.stringify(USER));
+          applyUser(USER);
+        }
+      });
+    }
   } else {
     if (typeof initArc === "function") initArc();
   }

@@ -1,0 +1,134 @@
+/* AI Settings */
+.ai-settings-sect {
+  margin-bottom: 24px;
+}
+
+.ai-settings-sect h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.ai-settings-sect .toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ai-settings-sect table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ai-settings-sect table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ai-settings-sect table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.ai-settings-sect table tr:hover td {
+  background: var(--bg-secondary);
+}
+
+.ai-settings-form {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.ai-settings-form .field-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-settings-form .field-row label {
+  font-size: 12px;
+  color: #888;
+  min-width: 80px;
+  padding-top: 6px;
+}
+
+.ai-settings-form .field-row input,
+.ai-settings-form .field-row select {
+  flex: 1;
+  min-width: 150px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.ai-settings-form .field-row textarea {
+  flex: 1;
+  min-width: 300px;
+  min-height: 80px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+}
+
+.ai-settings-form .field-row input[type="checkbox"] {
+  min-width: auto;
+  flex: none;
+}
+
+.ai-settings-form .form-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ai-settings-form .form-err {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+  display: none;
+}
+
+.ai-settings-form .form-err.show {
+  display: block;
+}
+
+.btn-sm {
+  padding: 3px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.btn-sm:hover {
+  background: var(--bg-secondary);
+}
+
+.btn-sm.btn-danger {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.btn-sm.btn-danger:hover {
+  background: #fef0f0;
+}

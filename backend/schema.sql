@@ -257,8 +257,67 @@ ALTER SEQUENCE public.event_log_id_seq OWNER TO postgres;
 --
 -- Name: event_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
-
 ALTER SEQUENCE public.event_log_id_seq OWNED BY public.event_log.id;
+
+
+--
+-- Name: feedback; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.feedback (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    description text NOT NULL,
+    category character varying(50) NOT NULL,
+    priority character varying(10) DEFAULT 'medium'::character varying NOT NULL,
+    status character varying(20) DEFAULT 'open'::character varying NOT NULL,
+    created_by integer,
+    assigned_to integer,
+    resolution text,
+    file_path character varying(500),
+    original_name character varying(500),
+    resolved_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.feedback OWNER TO cir_user;
+
+--
+-- Name: feedback_id_seq; Type: SEQUENCE; Schema: public; Owner: cir_user
+--
+
+CREATE SEQUENCE public.feedback_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.feedback_id_seq OWNER TO cir_user;
+
+--
+-- Name: feedback_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: cir_user
+--
+
+ALTER SEQUENCE public.feedback_id_seq OWNED BY public.feedback.id;
+
+
+--
+-- Name: feedback_access; Type: TABLE; Schema: public; Owner: cir_user
+--
+
+CREATE TABLE public.feedback_access (
+    user_id integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.feedback_access OWNER TO cir_user;
+
 
 
 --
@@ -923,6 +982,13 @@ ALTER TABLE ONLY public.event_log ALTER COLUMN id SET DEFAULT nextval('public.ev
 
 
 --
+-- Name: feedback id; Type: DEFAULT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.feedback ALTER COLUMN id SET DEFAULT nextval('public.feedback_id_seq'::regclass);
+
+
+--
 -- Name: orders id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1075,6 +1141,22 @@ ALTER TABLE ONLY public.crm_field_definitions
 
 ALTER TABLE ONLY public.event_log
     ADD CONSTRAINT event_log_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: feedback feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.feedback
+    ADD CONSTRAINT feedback_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: feedback_access feedback_access_pkey; Type: CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.feedback_access
+    ADD CONSTRAINT feedback_access_pkey PRIMARY KEY (user_id);
 
 
 --
@@ -1379,6 +1461,30 @@ ALTER TABLE ONLY public.event_log
 
 
 --
+-- Name: feedback feedback_assigned_to_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.feedback
+    ADD CONSTRAINT feedback_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: feedback feedback_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.feedback
+    ADD CONSTRAINT feedback_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: feedback_access feedback_access_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: cir_user
+--
+
+ALTER TABLE ONLY public.feedback_access
+    ADD CONSTRAINT feedback_access_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: orders orders_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1594,6 +1700,27 @@ GRANT ALL ON TABLE public.users TO cir_user;
 --
 
 GRANT ALL ON SEQUENCE public.users_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE feedback; Type: ACL; Schema: public; Owner: cir_user
+--
+
+GRANT ALL ON TABLE public.feedback TO cir_user;
+
+
+--
+-- Name: SEQUENCE feedback_id_seq; Type: ACL; Schema: public; Owner: cir_user
+--
+
+GRANT ALL ON SEQUENCE public.feedback_id_seq TO cir_user;
+
+
+--
+-- Name: TABLE feedback_access; Type: ACL; Schema: public; Owner: cir_user
+--
+
+GRANT ALL ON TABLE public.feedback_access TO cir_user;
 
 
 --

@@ -1,0 +1,142 @@
+.sop-wrap {
+  padding: 18px 22px;
+  min-width: 900px;
+}
+
+.sop-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.sop-lbl {
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+.sop-date {
+  width: 160px;
+}
+
+.sop-section-hd {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.sop-summary-wrap {
+  margin-bottom: 24px;
+}
+
+.sop-summary-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sop-summary-tbl thead th {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--border);
+  padding: 8px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text2);
+  white-space: nowrap;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sop-summary-tbl tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+
+.sop-summary-tbl tbody tr:hover {
+  background: var(--bg4);
+}
+
+.sop-summary-tbl td {
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.sop-month {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sop-gap-neg {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.sop-gap-pos {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.sop-orders-wrap {
+  margin-top: 8px;
+}
+
+.sop-tbl-scroll {
+  overflow-x: auto;
+}
+
+.sop-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 700px;
+}
+
+.sop-tbl thead th {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--border);
+  padding: 8px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text2);
+  white-space: nowrap;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sop-tbl tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+
+.sop-tbl tbody tr:hover {
+  background: var(--bg4);
+}
+
+.sop-tbl td {
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.sop-empty {
+  text-align: center;
+  color: var(--text3);
+  padding: 30px;
+  font-size: 12px;
+}
+
+.sop-err {
+  color: #ef4444;
+  font-size: 12px;
+  padding: 8px;
+}

@@ -8,6 +8,7 @@ package-lock.json
 backend/node
 backend/ssh
 .vscode/
+.vs/
 backend/uploads/*
 !backend/uploads/.gitkeep
 frontend/css/archive.css

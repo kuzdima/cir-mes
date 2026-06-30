@@ -9,6 +9,10 @@
   <link rel="stylesheet" href="css/fromtags.css">
   <link rel="stylesheet" href="css/crm.css">
   <link rel="stylesheet" href="css/warehouse.css">
+  <link rel="stylesheet" href="css/feedback.css">
+  <link rel="stylesheet" href="css/sop.css">
+  <link rel="stylesheet" href="css/analytics.css">
+  <link rel="stylesheet" href="css/ai-settings.css">
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
@@ -101,6 +105,14 @@
           </svg>
           <span class="menu-text">Управление пользователями</span>
         </div>
+        <div class="nav-item" data-panel="ai-settings" onclick="showPanel('ai-settings')" id="ai-settings-menu"
+          style="display:none;">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span class="menu-text">AI Settings</span>
+        </div>
 
         <div class="nav-sect">Управление</div>
         <div class="nav-item" data-panel="crm" onclick="showPanel('crm')">
@@ -110,6 +122,29 @@
             <line x1="9" y1="3" x2="9" y2="21" />
           </svg>
           <span class="menu-text">CRM</span>
+        </div>
+        <div class="nav-item" data-panel="feedback" onclick="showPanel('feedback')">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span class="menu-text">Обратная связь</span>
+          <span class="nav-badge" id="fb-counter" style="display:none">0</span>
+        </div>
+        <div class="nav-item" data-panel="sop" onclick="showPanel('sop')" id="sop-menu" style="display:none">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2">
+            <rect x="2" y="3" width="20" height="18" rx="2" />
+            <line x1="2" y1="9" x2="22" y2="9" />
+            <line x1="12" y1="9" x2="12" y2="21" />
+          </svg>
+          <span class="menu-text">S&OP</span>
+        </div>
+        <div class="nav-item" data-panel="analytics" onclick="showPanel('analytics')" id="ai-analytics-menu" style="display:none">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span class="menu-text">AI-аналитика</span>
         </div>
       </nav>
 
@@ -1177,6 +1212,166 @@
         <!-- ═══ СКЛАД ═══ -->
         <div class="panel" id="panel-warehouse"></div>
 
+        <!-- ═══ ОБРАТНАЯ СВЯЗЬ ═══ -->
+        <div class="panel" id="panel-feedback"></div>
+
+        <!-- ═══ S&OP ═══ -->
+        <div class="panel" id="panel-sop"></div>
+
+        <!-- ═══ AI-аналитика ═══ -->
+        <div class="panel" id="panel-analytics">
+          <div class="ai-layout">
+            <div class="ai-quick-btns">
+              <button data-domain="dashboard" data-question="Сформируй сводку по цеху" onclick="aiQuickClick(this)">Сводка по цеху</button>
+              <button data-domain="production" data-question="Какая загрузка станков? Есть ли простаивающие?" onclick="aiQuickClick(this)">Загрузка станков</button>
+              <button data-domain="warehouse" data-question="Какие материалы в дефиците на складе?" onclick="aiQuickClick(this)">Дефициты склада</button>
+              <button data-domain="feedback" data-question="Есть ли просроченные обращения? Сколько?" onclick="aiQuickClick(this)">Просроченные обращения</button>
+              <button data-domain="sop" data-question="Дай сводку спроса и предложения по месяцам." onclick="aiQuickClick(this)">S&OP сводка</button>
+            </div>
+            <div class="ai-header-bar">
+              <div class="ai-date-filter">
+                <select id="ai-timeframe-preset" onchange="aiOnPresetChange()">
+                  <option value="today">Сегодня</option>
+                  <option value="week">Эта неделя</option>
+                  <option value="month" selected>Этот месяц</option>
+                  <option value="quarter">Этот квартал</option>
+                  <option value="year">Этот год</option>
+                  <option value="all">За всё время</option>
+                  <option value="custom">Свой диапазон</option>
+                </select>
+                <input type="date" id="ai-date-from" disabled>
+                <input type="date" id="ai-date-to" disabled>
+              </div>
+              <button class="ai-clear-btn" onclick="aiClearHistory()">Очистить историю</button>
+            </div>
+            <div id="ai-chat-log" class="ai-chat-log"></div>
+            <div class="ai-input-bar">
+              <input type="text" id="ai-question-inp" placeholder="Задайте вопрос по данным цеха..." onkeydown="aiHandleKey(event)">
+              <button onclick="aiSend('production', document.getElementById('ai-question-inp').value)">Отправить</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ AI Settings ═══ -->
+        <div class="panel" id="panel-ai-settings">
+          <div style="padding:16px">
+            <div class="ai-settings-sect">
+              <h3>AI-провайдеры</h3>
+              <div class="toolbar">
+                <button onclick="aiSettingsShowAddProvider()" class="btn-accent">+ Добавить</button>
+              </div>
+              <div id="ai-provider-form" class="ai-settings-form">
+                <input type="hidden" id="ai-provider-id">
+                <div class="field-row">
+                  <label>Тип</label>
+                  <select id="ai-pf-name" onchange="aiSettingsOnProviderSelect()">
+                    <option value="">— выберите провайдера —</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gigachat">GigaChat</option>
+                    <option value="ollama">Ollama</option>
+                  </select>
+                </div>
+                <div class="field-row">
+                  <label>Label</label>
+                  <input type="text" id="ai-pf-label" placeholder="OpenAI">
+                </div>
+                <div class="field-row">
+                  <label>API URL</label>
+                  <input type="text" id="ai-pf-url" placeholder="https://api.openai.com/v1">
+                </div>
+                <div class="field-row">
+                  <label>API Key</label>
+                  <input type="password" id="ai-pf-key" placeholder="sk-...">
+                </div>
+                <div class="field-row" id="ai-pf-key-hint" style="display:none">
+                  <label></label>
+                  <span class="hint">Если указан API Key — используется OpenAI-совместимый формат (<code>/v1/chat/completions</code>). Без ключа — родной Ollama API (<code>/api/generate</code>).</span>
+                </div>
+                <div class="field-row">
+                  <label>Model</label>
+                  <input type="text" id="ai-pf-model" placeholder="gpt-4">
+                </div>
+                <div class="field-row" id="ai-pf-config-row" style="display:none">
+                  <label>Config (JSON)</label>
+                  <textarea id="ai-pf-config" rows="3" placeholder='{"client_id":"...","client_secret":"...","auth_url":"..."}'></textarea>
+                </div>
+                <div class="field-row">
+                  <label></label>
+                  <label><input type="checkbox" id="ai-pf-active"> Активен</label>
+                </div>
+                <div class="field-row">
+                  <label></label>
+                  <label><input type="checkbox" id="ai-pf-reject-unauthorized"> Отключить проверку SSL</label>
+                </div>
+                <div class="form-err" id="ai-pf-err"></div>
+                <div class="form-btns">
+                  <button onclick="aiSettingsSaveProvider()" class="btn-accent">Сохранить</button>
+                  <button onclick="aiSettingsCancelProvider()">Отмена</button>
+                </div>
+              </div>
+              <table>
+                <thead><tr><th>Name</th><th>Label</th><th>URL</th><th>Model</th><th>Key</th><th>Статус</th><th></th></tr></thead>
+                <tbody id="ai-providers-tbody"><tr><td colspan="7">Загрузка...</td></tr></tbody>
+              </table>
+            </div>
+
+            <div class="ai-settings-sect">
+              <h3>AI-промпты</h3>
+              <div class="toolbar">
+                <button onclick="aiSettingsShowAddPrompt()" class="btn-accent">+ Добавить</button>
+              </div>
+              <div id="ai-prompt-form" class="ai-settings-form">
+                <input type="hidden" id="ai-prompt-id">
+                <div class="field-row">
+                  <label>Domain</label>
+                  <select id="ai-pf-domain">
+                    <option value="production">Production</option>
+                    <option value="feedback">Feedback</option>
+                    <option value="crm">CRM</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="sop">S&OP</option>
+                    <option value="dashboard">Dashboard</option>
+                  </select>
+                </div>
+                <div class="field-row">
+                  <label>Name</label>
+                  <input type="text" id="ai-pf-pname" placeholder="default">
+                </div>
+                <div class="field-row">
+                  <label>Prompt text</label>
+                  <textarea id="ai-pf-text" placeholder="Системный промпт..."></textarea>
+                </div>
+                <div class="form-err" id="ai-pf-prompt-err"></div>
+                <div class="form-btns">
+                  <button onclick="aiSettingsSavePrompt()" class="btn-accent">Сохранить</button>
+                  <button onclick="aiSettingsCancelPrompt()">Отмена</button>
+                </div>
+              </div>
+              <table>
+                <thead><tr><th>Domain</th><th>Name</th><th>Prompt</th><th>Ver</th><th>Active</th><th></th></tr></thead>
+                <tbody id="ai-prompts-tbody"><tr><td colspan="6">Загрузка...</td></tr></tbody>
+              </table>
+            </div>
+
+            <div class="ai-settings-sect">
+              <h3>Доступ к AI-функциям</h3>
+              <div class="toolbar" style="gap:8px;flex-wrap:wrap">
+                <select id="ai-access-user" style="flex:1;min-width:200px"><option value="">Загрузка пользователей...</option></select>
+                <select id="ai-access-feature">
+                  <option value="chat">Чат (chat)</option>
+                  <option value="dashboard">Дашборд (dashboard)</option>
+                  <option value="sop">S&OP (sop)</option>
+                </select>
+                <button onclick="aiSettingsGrantAccess()" class="btn-accent">Выдать</button>
+              </div>
+              <table>
+                <thead><tr><th>Email</th><th>Имя</th><th>Фича</th><th></th></tr></thead>
+                <tbody id="ai-access-tbody"><tr><td colspan="4">Загрузка...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- ═══ CRM ═══ -->
         <div class="panel" id="panel-crm">
           <div class="crm-toolbar">
@@ -1229,6 +1424,10 @@
   <script src="js/profile.js"></script>
   <script src="js/nomcatalogue.js"></script>
   <script src="js/warehouse.js"></script>
+  <script src="js/feedback.js"></script>
+  <script src="js/sop.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/ai-settings.js"></script>
   <script src="js/crm.js"></script>
 
   <script>

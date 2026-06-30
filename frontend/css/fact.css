@@ -76,7 +76,7 @@ select:focus {
 }
 .btn-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-top: 20px;
 }
@@ -101,6 +101,9 @@ select:focus {
 }
 .btn-blue {
   background: #3b82f6;
+}
+.btn-red {
+  background: #dc2626;
 }
 .msg {
   padding: 12px;
