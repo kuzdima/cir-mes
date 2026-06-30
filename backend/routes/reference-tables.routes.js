@@ -9,7 +9,7 @@ module.exports = function (pool, auth, referenceTablesList) {
         // GET получаем все значения справочника
         router.get(`/${tableName}`, auth, async function (req, res) {
             try {
-                const { rows } = await pool.query(`SELECT * FROM ${tableName}`);
+                const { rows } = await pool.query(`SELECT * FROM ${tableName} ORDER BY name`);
                 res.json({
                     ok: true,
                     rows: rows

@@ -2,6 +2,8 @@
 // refs.js — Справочники + Комбобокс + Автодополнение
 // ============================================================
 
+
+
 function loadRefs() {
   if (!TOKEN) {
     setTimeout(loadRefs, 300);
@@ -254,7 +256,7 @@ function constructReferenceTabMenu(tablesList) {
 
   return fragment
 
-};
+}
 
 function constructTable(tableName, headersList = [], tableData = [], delColumn = false) {
   const fragment = document.createDocumentFragment();
@@ -319,33 +321,152 @@ function constructTable(tableName, headersList = [], tableData = [], delColumn =
   return fragment
 }
 
-function summonModal(id, modalTitle = "Заголовок модалки") {
+function constructFormFields(fieldList, fieldsTitlesList = [], defaultValuesObj = {}) {
+  let fragment = document.createDocumentFragment();
+  let form = document.createElement("form");
+  for (let i = 0; i < fieldList.length; i++) {
+    let field = fieldList[i];
+    let fieldName = field.column_comment ? field.column_comment : fieldsTitlesList[i];
+    let defaultValue = defaultValuesObj[field.column_name] ? defaultValuesObj[field.column_name] : "";
+    let fieldIsRequired = field.is_nullable === "NO" ? "req" : "";
+    let fieldTemplate =
+      `
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-lbl ${fieldIsRequired}">${fieldName}</label>
+          <div class="combo-wrap">
+            <input class="form-inp" name = ${field.column_name} placeholder="Введите значение..." value="${defaultValue}">
+          </div>
+        </div>
+      </div>
+      `;
+
+    let fieldElement = textToElement(fieldTemplate);
+    form.appendChild(fieldElement);
+  }
+
+  fragment.appendChild(form);
+
+  return fragment
+}
+
+function submitModal(modal, action) {
+  action(modal);
+}
+
+function getModlalData(modal) {
+  const result = { data: {}, errors: [] };
+  modal.querySelectorAll(".form-field").forEach((e) => {
+    const inputElement = e.querySelector("input.form-inp");
+
+    result.data[inputElement.name] = typeof inputElement.value === "string" ? inputElement.value.trim() : inputElement.value;
+    if (inputElement.name !== "id" && !inputElement.value.trim()) {
+      let required = e.querySelector("label.req");
+      if (required) { result.errors.push("Заполните поле: " + required.textContent) };
+    }
+
+  });
+
+  return result
+}
+
+async function addRefRecord(modal) {
+  let result;
+  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
+  const errorElement = modal.querySelector(".msg-err");
+
+  if (errors.length > 0) {
+    const fragment = document.createDocumentFragment();
+    errors.forEach((e) => {
+      errorEl = textToElement(`<div>${e}</div>`);
+      fragment.appendChild(errorEl);
+    });
+    errorElement.replaceChildren(fragment);
+    errorElement.classList.toggle("show", true);
+    return
+  }
+
+  try {
+    result = await api("POST", "/api/reference-tables/ref_operations/", data);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно добавлена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
+
+async function changeRefRecord(modal) {
+  let result;
+  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
+  const errorElement = modal.querySelector(".msg-err");
+
+  if (errors.length > 0) {
+    const fragment = document.createDocumentFragment();
+    errors.forEach((e) => {
+      errorEl = textToElement(`<div>${e}</div>`);
+      fragment.appendChild(errorEl);
+    });
+    errorElement.replaceChildren(fragment);
+    errorElement.classList.toggle("show", true);
+    return
+  }
+
+  try {
+    result = await api("PATCH", "/api/reference-tables/ref_operations/", data);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно добавлена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
 
 
 
-
+function summonModal(id, modalTitle = "Заголовок модалки", content = [], submitAction) {
+  let modalFullId = "modal-" + id;
   let template = `
-        <div id="${id}" class="modal-overlay">
+        <div id="${modalFullId}" data-id ="${id}" class="modal-overlay">
           <div class="modal-content">
             <div class="modal-header">
               <div class="modal-title" id="modal-title-${id}">${modalTitle}</div>
               <button class="modal-close-btn"
-                onclick="document.getElementById('${id}').remove()">✖</button>
+                onclick="document.getElementById('${modalFullId}').remove()">✖</button>
             </div>
+            <div class="msg msg-err" ></div>
+            <div class="msg msg-ok" ></div>
+            <div class="card">
             <div id="modal-content-${id}"></div>
-
+            </div>
             <div class="modal-footer">
-              <button class="topbar-btn btn-accent" onclick="this.remove()">
-              ✓ Добавить</button>
-              <button class="topbar-btn cancel-btn" onclick="document.getElementById('${id}').remove()">Отмена</button>
+              <button class="topbar-btn btn-accent submit-btn">✓ Добавить</button>
+              <button class="topbar-btn cancel-btn" onclick="document.getElementById('${modalFullId}').remove()">Отмена</button>
             </div>
           </div>
         </div>
   `
 
   const modal = textToElement(template);
-
+  modal.querySelector(`#modal-content-${id}`).replaceChildren(content);
   modal.style.display = 'block';
+  modal.querySelector(".submit-btn").addEventListener("click", async () => {
+    submitModal(modal, submitAction);
+  });
 
   document.querySelector(".content").appendChild(modal)
 }
@@ -364,7 +485,16 @@ function constructSection(sectionId, tableName, content = "") {
   button.classList.add("btn-accent");
   button.textContent = "+ Добавить запись";
   button.dataset.id = tableName;
-  button.onclick = () => { summonModal("modal-" + tableName, "Добавить запись в справочник: " + tabName) }; // Открытие модалки 
+
+  button.addEventListener("click", async () => {
+
+    const formData = await api("GET", `/api/utils/fieldsInfo/${tableName}`);
+
+    const content = constructFormFields(formData.rows, ["Id", "Значение"]);
+    summonModal(tableName, "Добавить запись в справочник: " + tabName, content, addRefRecord);
+  }); // Открытие модалки на создание новой записи
+
+
 
   toolbar.appendChild(button);
   toolbar.classList.add("toolbar");
@@ -375,7 +505,7 @@ function constructSection(sectionId, tableName, content = "") {
   fragment.appendChild(tableContainer)
 
   return fragment
-};
+}
 
 function counstructReferenceSubSections(tablesList) {
   let fragment = document.createDocumentFragment();
@@ -391,7 +521,7 @@ function counstructReferenceSubSections(tablesList) {
   };
 
   return fragment
-};
+}
 
 
 
@@ -416,4 +546,14 @@ function initReferencesSection() {
 
   })
 
+}
+
+
+function renderRefTable(tableName) {
+  api("GET", `/api/reference-tables/${tableName}`).then(
+    (res) => {
+      const data = res.rows;
+      const table = constructTable(tableName, ["Значение"], data, true);
+      document.querySelector(`#ref-content-${tableName} .table-container`).replaceChildren(table);
+    });
 }

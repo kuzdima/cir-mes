@@ -96,6 +96,7 @@ let referenceTablesList = [
   {tableName: "ref_object_types", interfaceName : "Типы объектов"},
 ]; 
 app.use('/api/reference-tables',  require('./routes/reference-tables.routes')(pool, auth, referenceTablesList));
+app.use('/api/utils', require('./routes/utils.routes.js')(pool, auth)); 
 
 io.on('connection', function(socket) {
   console.log('Socket.IO: клиент подключился');
