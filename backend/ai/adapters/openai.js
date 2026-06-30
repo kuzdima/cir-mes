@@ -29,4 +29,17 @@ async function chat(provider, messages, options) {
   };
 }
 
+async function test(provider) {
+  var apiUrl = provider.api_url.replace(/\/+$/, '');
+  try {
+    var res = await httpRequest(apiUrl, 'GET', { 'Content-Type': 'application/json' }, null, 15000, false);
+    return { ok: res.status < 500, connected: res.status < 500, error: res.status >= 500 ? ('HTTP ' + res.status) : null };
+  } catch(e) {
+    return { ok: false, connected: false, error: e.message };
+  }
+}
+
+var registry = require('../provider-registry');
+registry.register('openai', { chat, test });
+
 module.exports = { chat };

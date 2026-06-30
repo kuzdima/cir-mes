@@ -58,7 +58,7 @@ app.use('/api/feedback', require('./feedback_api')(pool, auth));
 app.use('/api/sop', require('./sop_api')(pool, auth, requireFeature));
 
 // AI
-app.get('/api/ai/provider-presets', function(req, res) {
+app.get('/api/ai/provider-presets', auth, function(req, res) {
   res.json({ ok: true, presets: require('./ai/provider-presets').getPresets() });
 });
 // AI Domains

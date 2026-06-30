@@ -1,13 +1,9 @@
 var express = require('express');
 var bcrypt  = require('bcryptjs');
+var adminOnly = require('../middleware/admin');
 
 module.exports = function(pool, auth) {
   var router = express.Router();
-
-  function adminOnly(req, res, next) {
-    if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Доступ только для администратора' });
-    next();
-  }
 
   router.get('/', auth, adminOnly, async function(req, res) {
     try {

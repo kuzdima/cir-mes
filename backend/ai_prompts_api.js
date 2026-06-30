@@ -2,20 +2,16 @@ module.exports = function(pool, auth) {
   var express = require('express');
   var router = express.Router();
   var { DEFAULTS } = require('./ai/prompts');
+  var adminOnly = require('./middleware/admin');
 
-  function isAdmin(req, res, next) {
-    if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Только для администратора' });
-    next();
-  }
-
-  router.get('/', auth, isAdmin, async function(req, res) {
+  router.get('/', auth, adminOnly, async function(req, res) {
     try {
       var r = await pool.query('SELECT * FROM ai_prompts ORDER BY domain, version DESC');
       res.json({ ok: true, prompts: r.rows });
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.get('/:id', auth, isAdmin, async function(req, res) {
+  router.get('/:id', auth, adminOnly, async function(req, res) {
     try {
       var r = await pool.query('SELECT * FROM ai_prompts WHERE id = $1', [req.params.id]);
       if (!r.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -31,7 +27,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.post('/', auth, isAdmin, async function(req, res) {
+  router.post('/', auth, adminOnly, async function(req, res) {
     try {
       var { domain, name, prompt_text } = req.body;
       if (!domain || !prompt_text) return res.status(400).json({ ok: false, error: 'domain и prompt_text обязательны' });
@@ -46,7 +42,7 @@ module.exports = function(pool, auth) {
     }
   });
 
-  router.put('/:id', auth, isAdmin, async function(req, res) {
+  router.put('/:id', auth, adminOnly, async function(req, res) {
     try {
       var existing = await pool.query('SELECT * FROM ai_prompts WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -66,7 +62,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.delete('/:id', auth, isAdmin, async function(req, res) {
+  router.delete('/:id', auth, adminOnly, async function(req, res) {
     try {
       var r = await pool.query('DELETE FROM ai_prompts WHERE id = $1 RETURNING id', [req.params.id]);
       if (!r.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -74,7 +70,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.post('/:id/reset', auth, isAdmin, async function(req, res) {
+  router.post('/:id/reset', auth, adminOnly, async function(req, res) {
     try {
       var existing = await pool.query('SELECT * FROM ai_prompts WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -93,7 +89,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.post('/:id/version', auth, isAdmin, async function(req, res) {
+  router.post('/:id/version', auth, adminOnly, async function(req, res) {
     try {
       var existing = await pool.query('SELECT * FROM ai_prompts WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });

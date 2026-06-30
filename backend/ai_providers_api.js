@@ -2,13 +2,9 @@ module.exports = function(pool, auth) {
   var express = require('express');
   var router = express.Router();
   var { invalidateCache } = require('./ai/provider');
+  var adminOnly = require('./middleware/admin');
 
-  function isAdmin(req, res, next) {
-    if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Только для администратора' });
-    next();
-  }
-
-  router.get('/', auth, isAdmin, async function(req, res) {
+  router.get('/', auth, adminOnly, async function(req, res) {
     try {
       var r = await pool.query('SELECT * FROM ai_providers ORDER BY name');
       r.rows.forEach(function(p) {
@@ -18,7 +14,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.get('/:id', auth, isAdmin, async function(req, res) {
+  router.get('/:id', auth, adminOnly, async function(req, res) {
     try {
       var r = await pool.query('SELECT * FROM ai_providers WHERE id = $1', [req.params.id]);
       if (!r.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -27,7 +23,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.post('/', auth, isAdmin, async function(req, res) {
+  router.post('/', auth, adminOnly, async function(req, res) {
     try {
       var { name, label, api_url, api_key, model, config, is_active } = req.body;
       if (!name || !api_url || !model) return res.status(400).json({ ok: false, error: 'name, api_url, model обязательны' });
@@ -40,7 +36,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.put('/:id', auth, isAdmin, async function(req, res) {
+  router.put('/:id', auth, adminOnly, async function(req, res) {
     try {
       var existing = await pool.query('SELECT * FROM ai_providers WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -64,7 +60,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.post('/:id/activate', auth, isAdmin, async function(req, res) {
+  router.post('/:id/activate', auth, adminOnly, async function(req, res) {
     try {
       var existing = await pool.query('SELECT * FROM ai_providers WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -75,7 +71,7 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.post('/:id/test', auth, isAdmin, async function(req, res) {
+  router.post('/:id/test', auth, adminOnly, async function(req, res) {
     try {
       var existing = await pool.query('SELECT * FROM ai_providers WHERE id = $1', [req.params.id]);
       if (!existing.rows.length) return res.status(404).json({ ok: false, error: 'Не найден' });
@@ -89,7 +85,7 @@ module.exports = function(pool, auth) {
     }
   });
 
-  router.delete('/:id', auth, isAdmin, async function(req, res) {
+  router.delete('/:id', auth, adminOnly, async function(req, res) {
     try {
       var existing = await pool.query('SELECT is_active FROM ai_providers WHERE id = $1', [req.params.id]);
       var r = await pool.query('DELETE FROM ai_providers WHERE id = $1 RETURNING id', [req.params.id]);
