@@ -303,12 +303,26 @@
             '<button class="btn btn-green" onclick="send(\'Готово\')">✅ Готово</button>' +
             '<button class="btn btn-amber" onclick="send(\'Пауза\')">⏸ На паузе</button>' +
             '<button class="btn btn-blue" onclick="send(\'В работе\')">🔄 В работе</button>' +
+            '<button class="btn btn-red" onclick="toggleFeedbackForm()">⚠️ Проблема</button>' +
             "</div>";
 
           html +=
             '<div class="msg msg-ok" id="f-ok"></div>' +
             '<div class="msg msg-err" id="f-err"></div>';
           html += "</div>";
+
+          html += '<div class="card" id="fb-form" style="display:none;border-color:#f59e0b">' +
+            '<div class="card-title" style="color:#f59e0b">💬 Сообщить о проблеме</div>' +
+            '<label>Тема *</label><input type="text" id="fb-title" placeholder="Что случилось?">' +
+            '<label>Описание * <span style="color:#94a3b8;font-weight:400">(минимум 10 символов)</span></label>' +
+            '<textarea id="fb-desc" rows="3" style="width:100%;padding:12px;font-size:16px;background:#0f1420;border:1px solid #3a4560;border-radius:8px;color:#e2e8f0;font-family:inherit;resize:vertical" placeholder="Опишите проблему подробнее..."></textarea>' +
+            '<div class="btn-row" style="grid-template-columns:1fr 1fr">' +
+            '<button class="btn btn-green" onclick="submitFeedback()">📤 Отправить</button>' +
+            '<button class="btn" onclick="toggleFeedbackForm()" style="background:#3a4560">✕ Отмена</button>' +
+            '</div>' +
+            '<div class="msg msg-ok" id="fb-ok"></div>' +
+            '<div class="msg msg-err" id="fb-err"></div>' +
+            '</div>';
 
           document.getElementById("content").innerHTML = html;
         });
@@ -358,6 +372,58 @@
           } else {
             errEl.textContent = "Ошибка: " + (r.error || "неизвестная");
             errEl.classList.add("show");
+          }
+        });
+      }
+
+      // ── ОБРАТНАЯ СВЯЗЬ ────────────────────────────────────
+      function toggleFeedbackForm() {
+        var form = document.getElementById('fb-form');
+        if (!form) return;
+        var shown = form.style.display !== 'none';
+        form.style.display = shown ? 'none' : 'block';
+        if (shown) {
+          ['fb-ok','fb-err'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) { el.classList.remove('show'); el.textContent = ''; }
+          });
+        }
+      }
+
+      function submitFeedback() {
+        var title = document.getElementById('fb-title').value.trim();
+        var desc  = document.getElementById('fb-desc').value.trim();
+        var errEl = document.getElementById('fb-err');
+        var okEl  = document.getElementById('fb-ok');
+        errEl.classList.remove('show');
+        okEl.classList.remove('show');
+
+        if (title.length < 3) {
+          errEl.textContent = 'Тема: минимум 3 символа';
+          errEl.classList.add('show');
+          return;
+        }
+        if (desc.length < 10) {
+          errEl.textContent = 'Описание: минимум 10 символов';
+          errEl.classList.add('show');
+          return;
+        }
+
+        api('POST', '/api/feedback', {
+          title: title,
+          description: desc,
+          category: 'problem',
+          priority: 'medium'
+        }).then(function(r) {
+          if (r.ok) {
+            okEl.textContent = '✅ Обращение отправлено';
+            okEl.classList.add('show');
+            document.getElementById('fb-title').value = '';
+            document.getElementById('fb-desc').value = '';
+            setTimeout(toggleFeedbackForm, 2000);
+          } else {
+            errEl.textContent = 'Ошибка: ' + (r.error || 'неизвестная');
+            errEl.classList.add('show');
           }
         });
       }

@@ -1,21 +1,26 @@
-var express = require('express');
-var bcrypt  = require('bcryptjs');
-var adminOnly = require('../middleware/admin');
-
 module.exports = function(pool, auth) {
+  var express = require('express');
   var router = express.Router();
+  var bcrypt = require('bcryptjs');
 
-  router.get('/', auth, adminOnly, async function(req, res) {
+  // Get all users (admin only)
+  router.get('/', auth, async function(req, res) {
     try {
-      var result = await pool.query(
-        'SELECT id, first_name, last_name, email, password_hash, role, is_active, last_login, created_at FROM users ORDER BY created_at DESC'
-      );
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ ok: false, error: 'Доступ только для администратора' });
+      }
+      var result = await pool.query("SELECT id, first_name, last_name, email, password_hash, role, is_active, last_login, created_at FROM users ORDER BY created_at DESC");
       res.json({ ok: true, users: result.rows });
-    } catch(e) { res.status(500).json({ ok: false, error: 'Ошибка сервера' }); }
+    } catch(e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: 'Ошибка сервера' });
+    }
   });
 
-  router.post('/', auth, adminOnly, async function(req, res) {
+  // Create user (admin only)
+  router.post('/', auth, async function(req, res) {
     try {
+      if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Доступ запрещён' });
       var { firstName, lastName, email, role, password } = req.body;
       if (!firstName || !email || !password) return res.status(400).json({ ok: false, error: 'Имя, email и пароль обязательны' });
       if (password.length < 6) return res.status(400).json({ ok: false, error: 'Пароль минимум 6 символов' });
@@ -30,8 +35,10 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.put('/:id', auth, adminOnly, async function(req, res) {
+  // Edit user (admin only)
+  router.put('/:id', auth, async function(req, res) {
     try {
+      if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Доступ запрещён' });
       var { firstName, lastName, email, role, isActive } = req.body;
       if (!firstName || !email) return res.status(400).json({ ok: false, error: 'Имя и email обязательны' });
       await pool.query(
@@ -42,8 +49,10 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.put('/:id/password', auth, adminOnly, async function(req, res) {
+  // Change password (admin only)
+  router.put('/:id/password', auth, async function(req, res) {
     try {
+      if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Доступ запрещён' });
       var { password } = req.body;
       if (!password || password.length < 6) return res.status(400).json({ ok: false, error: 'Пароль минимум 6 символов' });
       var hash = await bcrypt.hash(password, 10);
@@ -52,8 +61,10 @@ module.exports = function(pool, auth) {
     } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  router.delete('/:id', auth, adminOnly, async function(req, res) {
+  // Delete user (admin only)
+  router.delete('/:id', auth, async function(req, res) {
     try {
+      if (req.user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Доступ запрещён' });
       if (parseInt(req.params.id) === req.user.id) return res.status(400).json({ ok: false, error: 'Нельзя удалить свой аккаунт' });
       await pool.query('UPDATE tech_operations_archive SET created_by=NULL WHERE created_by=$1', [req.params.id]);
       await pool.query('UPDATE products_archive SET created_by=NULL WHERE created_by=$1', [req.params.id]);
