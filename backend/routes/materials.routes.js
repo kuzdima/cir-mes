@@ -172,8 +172,8 @@ module.exports = function(pool, auth) {
       // Создаём движение Расход
       await pool.query(
         'INSERT INTO wh_movements (mov_num,operation,item_id,item_name,qty,unit,warehouse,doc_type,doc_number,supplier,order_ref,narad_id,created_by) ' +
-        "VALUES ($1,$2,$3,$4,$5,$6,(SELECT material_type FROM wh_items WHERE id=$3),'Требование-накладная',$1,'Производство',$7,$8,$9)",
-        [movNum, 'Расход', r.item_id, r.item_name, qty, r.unit, r.narad_number, r.narad_id, req.user.id]
+        "VALUES ($1,$2,$3,$4,$5,$6,(SELECT material_type FROM wh_items WHERE id=$3),'Требование-накладная',$7,'Производство',$8,$9,$10)",
+        [movNum, 'Расход', r.item_id, r.item_name, qty, r.unit, movNum, r.narad_number, r.narad_id, req.user.id]
       );
 
       // Уменьшаем qty и reserved
@@ -218,8 +218,8 @@ module.exports = function(pool, auth) {
       // Движение Приход — Возврат из производства
       await pool.query(
         'INSERT INTO wh_movements (mov_num,operation,item_id,item_name,qty,unit,warehouse,doc_type,doc_number,supplier,order_ref,narad_id,created_by) ' +
-        "VALUES ($1,'Приход',$2,$3,$4,$5,(SELECT material_type FROM wh_items WHERE id=$2),'Возврат из производства',$1,'Производство',$6,$7,$8)",
-        [movNum, r.item_id, r.item_name, qty, r.unit, r.narad_number, r.narad_id, req.user.id]
+        "VALUES ($1,'Приход',$2,$3,$4,$5,(SELECT material_type FROM wh_items WHERE id=$2),'Возврат из производства',$6,'Производство',$7,$8,$9)",
+        [movNum, r.item_id, r.item_name, qty, r.unit, movNum, r.narad_number, r.narad_id, req.user.id]
       );
 
       // Возвращаем qty на склад и восстанавливаем резерв
