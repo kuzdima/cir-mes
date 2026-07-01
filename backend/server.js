@@ -88,7 +88,7 @@ GET,DELETE,PATCH, - /api/:tableName/:id
 GET,POST - /api/:tableName
 */
 
-let referenceTablesList = [ 
+const referenceTablesList = [ 
   {tableName: "ref_operations", interfaceName : "Операции"},
   {tableName: "ref_machines", interfaceName : "Оборудование"},
   {tableName: "ref_coatings", interfaceName : "Покрытия"},

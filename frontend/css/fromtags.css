@@ -400,12 +400,14 @@
     }
 
     .modal-content {
-      max-width: 800px;
+      max-width: 650px;
       margin: 40px auto;
       background: var(--bg2);
       border: 1px solid var(--border2);
       border-radius: var(--radius-lg, 12px);
       padding: 24px;
+
+      margin-top: -10%;
     }
 
     .modal-header {
@@ -429,7 +431,7 @@
       border: 1px solid var(--border2, #334155);
       border-radius: var(--radius, 8px);
       color: var(--text3);
-      padding: 8px 16px;
+      padding: 8px 12px;
       cursor: pointer;
       transition: all 0.12s;
     }

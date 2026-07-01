@@ -384,24 +384,37 @@ button.arc-btn,button.topbar-btn{line-height:1}
 .nomNavList li.hasChildren{list-style-type:disclosure-closed;}
 .nomNavList li.hasChildren[open]{list-style-type:disclosure-open;}
 
-.del-column{
+
+/* ==================== Стили модалок ==================== */
+.del-column, .update-column{
   width: 20px;
 }
 
-.del-btn{
+.del-btn, .update-btn{
   background: none;
   border: 1px solid var(--border);
   border-radius: 3px;
   color: var(--text3);
-  padding: 2px 6px;
+  padding: 2px 5px;
   font-size: 11px;
   cursor: pointer;
+}
+
+.update-btn {
+  padding: 2px 4px;
 }
 
 .del-btn:hover{
   background: var(--red-bg);
   border-color: var(--red);
   color: var(--red-text);
+}
+
+.update-btn:hover{
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green-text);
+
 }
 
 .table-container{
@@ -452,3 +465,20 @@ table thead{
   display: none;
 }
 
+.modal{
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+
+table tr > :not(:first-child):not(:last-child){
+
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}

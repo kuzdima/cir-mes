@@ -206,15 +206,106 @@ document.addEventListener("click", function (e) {
 });
 
 
-// Логика построения раздела стправочников.
+// Логика построения раздела стправочников. Опирается на универсальные конструкторы из js/ui-utils.js
+// При добавлении новых таблиц в referenceTablesList на Бэкэнде все они будут гнерится автоматом в разделе справочников.
 
 
-function textToElement(htmlString) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlString, 'text/html');
-  return doc.body.firstElementChild;
-}
+// Контроллы форм CRUD
 
+async function addRefRecord(modal) {
+  let result;
+  let tableName = modal.dataset.id
+  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
+  const errorElement = modal.querySelector(".msg-err");
+
+  if (errors.length > 0) {
+    const fragment = document.createDocumentFragment();
+    errors.forEach((e) => {
+      errorEl = textToElement(`<div>${e}</div>`);
+      fragment.appendChild(errorEl);
+    });
+    errorElement.replaceChildren(fragment);
+    errorElement.classList.toggle("show", true);
+    return
+  }
+
+  try {
+    result = await api("POST", `/api/reference-tables/${tableName}/`, data);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно добавлена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
+
+async function changeRefRecord(modal) {
+  let result;
+  let tableName = modal.dataset.id
+  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
+  const errorElement = modal.querySelector(".msg-err");
+
+  if (errors.length > 0) {
+    const fragment = document.createDocumentFragment();
+    errors.forEach((e) => {
+      errorEl = textToElement(`<div>${e}</div>`);
+      fragment.appendChild(errorEl);
+    });
+    errorElement.replaceChildren(fragment);
+    errorElement.classList.toggle("show", true);
+    return
+  }
+
+  try {
+    const id = modal.querySelector("input[name='id']").value;
+    result = await api("PATCH", `/api/reference-tables/${tableName}/${id}`, data);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно изменена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
+
+
+async function deleteRefRecord(modal) {
+  let result;
+  let tableName = modal.dataset.id
+  let id = modal.dataset.recordId;
+  const errorElement = modal.querySelector(".msg-err");
+
+
+
+  try {
+    result = await api("DELETE", `/api/reference-tables/${tableName}/${id}`);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно удалена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
 
 function getReferenceTablesList() {
   let res = api("GET", "/api/reference-tables");
@@ -258,225 +349,10 @@ function constructReferenceTabMenu(tablesList) {
 
 }
 
-function constructTable(tableName, headersList = [], tableData = [], delColumn = false) {
+
+function constructRefSectionContent(tableName) {
+
   const fragment = document.createDocumentFragment();
-
-  const table = document.createElement("table");
-  table.classList.add("table");
-  table.dataset.name = tableName;
-
-  const thead = document.createElement("thead");
-  thead.appendChild(document.createElement("tr"));
-
-  const tbody = document.createElement("tbody");
-
-  for (const header of headersList) {
-    const th = document.createElement("th");
-    th.textContent = header;
-
-    thead.firstElementChild.appendChild(th);
-  };
-
-  // Доп колонка под кнопки удаления записей если передан параметра delColumn = true
-  if (delColumn) {
-    const th = document.createElement("th");
-    th.classList.add("del-column")
-    thead.firstElementChild.appendChild(th)
-  };
-
-  for (const dataRow of tableData) {
-
-    const tr = document.createElement("tr")
-
-    for (const name in dataRow) {
-      if (name === "id") {
-        tr.dataset.id = dataRow.id;
-        continue
-      }
-
-      const td = document.createElement("td");
-      td.textContent = dataRow[name];
-      tr.appendChild(td);
-    }
-
-    // Кнопки удаления записей если передан параметра delColumn = true
-    if (delColumn) {
-      const delRecordCol = document.createElement("td");
-      const delButton = document.createElement("button");
-      delButton.classList.add("del-btn");
-      delButton.textContent = "✖";
-      delRecordCol.appendChild(delButton);
-      tr.appendChild(delRecordCol);
-    };
-
-
-    tbody.appendChild(tr);
-  };
-
-  table.appendChild(thead);
-  table.appendChild(tbody);
-
-  fragment.appendChild(table);
-
-  return fragment
-}
-
-function constructFormFields(fieldList, fieldsTitlesList = [], defaultValuesObj = {}) {
-  let fragment = document.createDocumentFragment();
-  let form = document.createElement("form");
-  for (let i = 0; i < fieldList.length; i++) {
-    let field = fieldList[i];
-    let fieldName = field.column_comment ? field.column_comment : fieldsTitlesList[i];
-    let defaultValue = defaultValuesObj[field.column_name] ? defaultValuesObj[field.column_name] : "";
-    let fieldIsRequired = field.is_nullable === "NO" ? "req" : "";
-    let fieldTemplate =
-      `
-      <div class="form-row">
-        <div class="form-field">
-          <label class="form-lbl ${fieldIsRequired}">${fieldName}</label>
-          <div class="combo-wrap">
-            <input class="form-inp" name = ${field.column_name} placeholder="Введите значение..." value="${defaultValue}">
-          </div>
-        </div>
-      </div>
-      `;
-
-    let fieldElement = textToElement(fieldTemplate);
-    form.appendChild(fieldElement);
-  }
-
-  fragment.appendChild(form);
-
-  return fragment
-}
-
-function submitModal(modal, action) {
-  action(modal);
-}
-
-function getModlalData(modal) {
-  const result = { data: {}, errors: [] };
-  modal.querySelectorAll(".form-field").forEach((e) => {
-    const inputElement = e.querySelector("input.form-inp");
-
-    result.data[inputElement.name] = typeof inputElement.value === "string" ? inputElement.value.trim() : inputElement.value;
-    if (inputElement.name !== "id" && !inputElement.value.trim()) {
-      let required = e.querySelector("label.req");
-      if (required) { result.errors.push("Заполните поле: " + required.textContent) };
-    }
-
-  });
-
-  return result
-}
-
-async function addRefRecord(modal) {
-  let result;
-  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
-  const errorElement = modal.querySelector(".msg-err");
-
-  if (errors.length > 0) {
-    const fragment = document.createDocumentFragment();
-    errors.forEach((e) => {
-      errorEl = textToElement(`<div>${e}</div>`);
-      fragment.appendChild(errorEl);
-    });
-    errorElement.replaceChildren(fragment);
-    errorElement.classList.toggle("show", true);
-    return
-  }
-
-  try {
-    result = await api("POST", "/api/reference-tables/ref_operations/", data);
-  } catch (error) {
-    result = error;
-  }
-
-  if (result.ok) {
-    modal.remove();
-    renderRefTable(modal.dataset.id);
-    showToast("Запись успешно добавлена");
-    return
-  }
-
-  errorElement.replaceChildren(result.message ? result.message : result.error);
-  errorElement.classList.toggle("show", true);
-};
-
-async function changeRefRecord(modal) {
-  let result;
-  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
-  const errorElement = modal.querySelector(".msg-err");
-
-  if (errors.length > 0) {
-    const fragment = document.createDocumentFragment();
-    errors.forEach((e) => {
-      errorEl = textToElement(`<div>${e}</div>`);
-      fragment.appendChild(errorEl);
-    });
-    errorElement.replaceChildren(fragment);
-    errorElement.classList.toggle("show", true);
-    return
-  }
-
-  try {
-    result = await api("PATCH", "/api/reference-tables/ref_operations/", data);
-  } catch (error) {
-    result = error;
-  }
-
-  if (result.ok) {
-    modal.remove();
-    renderRefTable(modal.dataset.id);
-    showToast("Запись успешно добавлена");
-    return
-  }
-
-  errorElement.replaceChildren(result.message ? result.message : result.error);
-  errorElement.classList.toggle("show", true);
-};
-
-
-
-function summonModal(id, modalTitle = "Заголовок модалки", content = [], submitAction) {
-  let modalFullId = "modal-" + id;
-  let template = `
-        <div id="${modalFullId}" data-id ="${id}" class="modal-overlay">
-          <div class="modal-content">
-            <div class="modal-header">
-              <div class="modal-title" id="modal-title-${id}">${modalTitle}</div>
-              <button class="modal-close-btn"
-                onclick="document.getElementById('${modalFullId}').remove()">✖</button>
-            </div>
-            <div class="msg msg-err" ></div>
-            <div class="msg msg-ok" ></div>
-            <div class="card">
-            <div id="modal-content-${id}"></div>
-            </div>
-            <div class="modal-footer">
-              <button class="topbar-btn btn-accent submit-btn">✓ Добавить</button>
-              <button class="topbar-btn cancel-btn" onclick="document.getElementById('${modalFullId}').remove()">Отмена</button>
-            </div>
-          </div>
-        </div>
-  `
-
-  const modal = textToElement(template);
-  modal.querySelector(`#modal-content-${id}`).replaceChildren(content);
-  modal.style.display = 'block';
-  modal.querySelector(".submit-btn").addEventListener("click", async () => {
-    submitModal(modal, submitAction);
-  });
-
-  document.querySelector(".content").appendChild(modal)
-}
-
-
-function constructSection(sectionId, tableName, content = "") {
-
-  fragment = textToElement(`<div id="${sectionId}"></div>`);
-
-  fragment.replaceChildren(content);
 
   let toolbar = document.createElement("div");
   let button = document.createElement("button");
@@ -505,6 +381,7 @@ function constructSection(sectionId, tableName, content = "") {
   fragment.appendChild(tableContainer)
 
   return fragment
+
 }
 
 function counstructReferenceSubSections(tablesList) {
@@ -516,8 +393,8 @@ function counstructReferenceSubSections(tablesList) {
   for (const table of tablesList) {
     const tableName = table.tableName;
     let id = idPrefix + tableName;
-
-    fragment.appendChild(constructSection(id, tableName));
+    const content = constructRefSectionContent(tableName);
+    fragment.appendChild(constructSection(id, content));
   };
 
   return fragment
@@ -533,7 +410,7 @@ function initReferencesSection() {
 
 
     let tabsSectionParent = document.querySelector("#panel-references .chrome-tabs");
-    let sectionsParent = document.querySelector("#panel-references .reference_sections")
+    let sectionsParent = document.querySelector("#panel-references .reference_sections");
 
 
     tabsSectionParent.replaceChildren(constructReferenceTabMenu(referenceTablesList));
@@ -553,7 +430,7 @@ function renderRefTable(tableName) {
   api("GET", `/api/reference-tables/${tableName}`).then(
     (res) => {
       const data = res.rows;
-      const table = constructTable(tableName, ["Значение"], data, true);
+      const table = constructTable(tableName, ["Значение"], data, true, true);
       document.querySelector(`#ref-content-${tableName} .table-container`).replaceChildren(table);
     });
 }

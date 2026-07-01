@@ -68,12 +68,12 @@ module.exports = function (pool, auth, referenceTablesList) {
                             message: 'Поле "name" обязательно'
                         });
                     };
-
+                    // Проверяем на дубли чтоб не плодить одинаковые значения
                     const { rows } = await pool.query(
                         `SELECT * FROM ${tableName} WHERE name = $1`,
                         [name]
                     );
-                    // Проверяем на дубли чтоб не плодить
+                    
                     if (rows.length > 0) {
                         return res.status(400).json({
                             ok: false,
@@ -134,6 +134,23 @@ module.exports = function (pool, auth, referenceTablesList) {
                         });
                     }
 
+                    // Проверяем на дубли чтоб не плодить одинаковые значения
+                    let { rows } = await pool.query(
+                        `SELECT * FROM ${tableName} WHERE name = $1`,
+                        [name]
+                    );
+
+                    rows = rows.filter((row)=>{ 
+                        return row.id !== parseInt(id) && row.name === name 
+                    });
+                    
+                    if (rows.length > 0) {
+                        return res.status(400).json({
+                            ok: false,
+                            message: 'В справочнике уже есть такое значение'
+                        });
+                    }
+
                     await pool.query(
                         `UPDATE ${tableName} SET name = $1 WHERE id = $2`,
                         [name, id]
@@ -166,18 +183,18 @@ module.exports = function (pool, auth, referenceTablesList) {
                 try {
                     const { id } = req.params;
 
-                    // Проверяем существование записи
-                    const existing = await pool.query(
-                        `SELECT * FROM ${tableName} WHERE id = $1`,
-                        [id]
-                    );
+                    // // Проверяем существование записи
+                    // const existing = await pool.query(
+                    //     `SELECT * FROM ${tableName} WHERE id = $1`,
+                    //     [id]
+                    // );
 
-                    if (existing.rows.length === 0) {
-                        return res.status(404).json({
-                            ok: false,
-                            message: 'Запись не найдена'
-                        });
-                    }
+                    // if (existing.rows.length === 0) {
+                    //     return res.status(404).json({
+                    //         ok: false,
+                    //         message: 'Запись не найдена'
+                    //     });
+                    // }
 
                     await pool.query(
                         `DELETE FROM ${tableName} WHERE id = $1`,
