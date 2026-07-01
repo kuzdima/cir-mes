@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-// Создаем простые роутинги для CRUD операций для таблиц справочников
+// Утил роуты
 module.exports = function (pool, auth) {
 
     
         
-        // GET получаем все значения справочника
+       //Получение инфы о полях таблицы для построения UI 
         router.get(`/fieldsInfo/:table`, auth, async function (req, res) {
             try {
                 const { table } = req.params;
