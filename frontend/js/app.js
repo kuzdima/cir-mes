@@ -32,6 +32,7 @@ function showPanel(id) {
     warehouse: "Склад",
     analytics: "AI-аналитика",
     "ai-settings": "AI Settings",
+    references: "Справочники"
   };
   // Переключаем кнопки в топбаре
   var btnNom = document.getElementById("add-btn-nom");
@@ -117,6 +118,9 @@ function showPanel(id) {
 
   if (id === "ai-settings" && typeof aiSettingsInit === "function") {
     aiSettingsInit();
+  }
+  if (id === "references" && typeof initReferencesSection === "function") {
+    initReferencesSection();
   }
 }
 
@@ -253,6 +257,25 @@ function switchProdTab(tab) {
   if (tab === "proj") loadProdProjects();
 }
 
+function switchRefTab(tab) {
+  localStorage.setItem('mes_last_ref_tab', tab);
+
+  document.querySelectorAll('[id^="ref-tab-"]').forEach((e) =>{
+      e.classList.toggle("active", false);
+    });
+
+  document
+    .getElementById(`ref-tab-${tab}`)
+    .classList.toggle("active", true);
+    
+  document.querySelectorAll('[id^="ref-content-"]').forEach((e) =>{
+      e.style.display = e.id === `ref-content-${tab}` ? "" : "none";
+    });
+  
+  
+  renderRefTable(tab);
+  
+}
 // === COLLAPSIBLE SIDEBAR — финальная версия ===
 document.addEventListener("DOMContentLoaded", function () {
   const sidebar = document.getElementById("sidebar");

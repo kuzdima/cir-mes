@@ -147,7 +147,7 @@ function arcBuildRow(id, name, classifier, qty, type) {
     "</select></td>" +
     '<td><div class="lvl-badge lvl-1" style="text-align:center">1</div></td>' +
     '<td><input type="text" name="arc-parent" value="0" readonly style="color:var(--text3);width:60px"></td>' +
-    '<td><button class="arc-del" onclick="arcRemoveRow(this)"' +
+    '<td><button class="arc-del-btn" onclick="arcRemoveRow(this)"' +
     (id === "0" ? " disabled" : "") +
     ">×</button></td>";
 
