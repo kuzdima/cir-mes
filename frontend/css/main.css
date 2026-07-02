@@ -365,7 +365,7 @@ button.arc-btn,button.topbar-btn{line-height:1}
 /* ==================== КАТАЛОГ НОМЕНКЛАТУРЫ ==================== */
 .two-col1-2{display:grid;grid-template-columns:0.5fr 1.5fr;gap:14px;overflow:hidden;}
 
-.nomNav{height:100%;overflow:auto;width:auto;padding-left:20px;margin-left:-6px;color:var(--text2);flex:1;min-height:0;}
+.nomNav{height:100%;overflow:auto;width:auto;padding-left:20px;margin-left:-6px;color:var(--text2);max-height: 730px;}
 
 .childUl{padding-left:20px;}
 
@@ -375,7 +375,110 @@ button.arc-btn,button.topbar-btn{line-height:1}
 .childLi span.selected,
 .parentLi span.selected{outline-style:solid;outline-color:var(--text2);}
 
-.cat-tbl-scroller{flex:1;min-height:0;overflow-y:auto;overflow-x:auto;}
+.cat-tbl-scroller{
+  max-height: 690px;
+  overflow-y:auto;
+  overflow-x:auto;
+}
 
 .nomNavList li.hasChildren{list-style-type:disclosure-closed;}
 .nomNavList li.hasChildren[open]{list-style-type:disclosure-open;}
+
+
+/* ==================== Стили модалок ==================== */
+.del-column, .update-column{
+  width: 20px;
+}
+
+.del-btn, .update-btn{
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text3);
+  padding: 2px 5px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.update-btn {
+  padding: 2px 4px;
+}
+
+.del-btn:hover{
+  background: var(--red-bg);
+  border-color: var(--red);
+  color: var(--red-text);
+}
+
+.update-btn:hover{
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green-text);
+
+}
+
+.table-container{
+     overflow-x: auto; 
+     border: 1px solid var(--border); 
+     border-radius: var(--radius-lg, 12px); 
+     max-height: 80vh;
+}
+
+table thead{
+  position: sticky;
+  top: 0;
+}
+
+.btn-accent{
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 6px;
+}
+
+.toolbar{
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.topbar-btn{
+  padding: 12px 22px;
+  font-size: 14px;
+}
+
+.cancel-btn {
+  margin-left: auto;
+}
+
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.form-row:has(.form-inp[name='id'])  {
+  display: none;
+}
+
+.modal{
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+
+table tr > :not(:first-child):not(:last-child){
+
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}

@@ -2,6 +2,8 @@
 // refs.js — Справочники + Комбобокс + Автодополнение
 // ============================================================
 
+
+
 function loadRefs() {
   if (!TOKEN) {
     setTimeout(loadRefs, 300);
@@ -78,9 +80,9 @@ function acSearch(inputEl, ddId, field) {
     http(
       "GET",
       "/api/tech-ops/autocomplete?q=" +
-        encodeURIComponent(q) +
-        "&field=" +
-        field,
+      encodeURIComponent(q) +
+      "&field=" +
+      field,
       null,
       function (res) {
         if (!res.ok || !res.rows || !res.rows.length) {
@@ -126,9 +128,9 @@ function acSearch(inputEl, ddId, field) {
             api(
               "GET",
               "/api/tech-ops/search?product_name=" +
-                encodeURIComponent(productName) +
-                "&classifier=" +
-                encodeURIComponent(classifierCode),
+              encodeURIComponent(productName) +
+              "&classifier=" +
+              encodeURIComponent(classifierCode),
             ).then(function (result) {
               if (result.ok && result.commonData) {
                 var d = result.commonData;
@@ -202,3 +204,233 @@ document.addEventListener("click", function (e) {
     });
   }
 });
+
+
+// Логика построения раздела стправочников. Опирается на универсальные конструкторы из js/ui-utils.js
+// При добавлении новых таблиц в referenceTablesList на Бэкэнде все они будут гнерится автоматом в разделе справочников.
+
+
+// Контроллы форм CRUD
+
+async function addRefRecord(modal) {
+  let result;
+  let tableName = modal.dataset.id
+  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
+  const errorElement = modal.querySelector(".msg-err");
+
+  if (errors.length > 0) {
+    const fragment = document.createDocumentFragment();
+    errors.forEach((e) => {
+      errorEl = textToElement(`<div>${e}</div>`);
+      fragment.appendChild(errorEl);
+    });
+    errorElement.replaceChildren(fragment);
+    errorElement.classList.toggle("show", true);
+    return
+  }
+
+  try {
+    result = await api("POST", `/api/reference-tables/${tableName}/`, data);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно добавлена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
+
+async function changeRefRecord(modal) {
+  let result;
+  let tableName = modal.dataset.id
+  const { data, errors } = getModlalData(modal); // Валидация полей внутри обработчика модалки
+  const errorElement = modal.querySelector(".msg-err");
+
+  if (errors.length > 0) {
+    const fragment = document.createDocumentFragment();
+    errors.forEach((e) => {
+      errorEl = textToElement(`<div>${e}</div>`);
+      fragment.appendChild(errorEl);
+    });
+    errorElement.replaceChildren(fragment);
+    errorElement.classList.toggle("show", true);
+    return
+  }
+
+  try {
+    const id = modal.querySelector("input[name='id']").value;
+    result = await api("PATCH", `/api/reference-tables/${tableName}/${id}`, data);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно изменена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
+
+
+async function deleteRefRecord(modal) {
+  let result;
+  let tableName = modal.dataset.id
+  let id = modal.dataset.recordId;
+  const errorElement = modal.querySelector(".msg-err");
+
+
+
+  try {
+    result = await api("DELETE", `/api/reference-tables/${tableName}/${id}`);
+  } catch (error) {
+    result = error;
+  }
+
+  if (result.ok) {
+    modal.remove();
+    renderRefTable(modal.dataset.id);
+    showToast("Запись успешно удалена");
+    return
+  }
+
+  errorElement.replaceChildren(result.message ? result.message : result.error);
+  errorElement.classList.toggle("show", true);
+};
+
+function getReferenceTablesList() {
+  let res = api("GET", "/api/reference-tables");
+  return res
+}
+
+function coustructTab(tableName, tabInterfaceName, tabId, svgIcon = "") {
+  let fragmentHtml =
+    `<div class="chrome-tab" id="${tabId}" onclick="switchRefTab('${tableName}')">
+              ${svgIcon}
+              ${tabInterfaceName}
+      </div>
+    `;
+
+  return textToElement(fragmentHtml)
+}
+
+function constructReferenceTabMenu(tablesList) {
+
+  let fragment = document.createDocumentFragment();
+
+  let idPrefix = "ref-tab-";
+
+  let icon = `<svg viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>`;
+
+
+  for (const table of tablesList) {
+    let id = idPrefix + table.tableName;
+
+    fragment.appendChild(coustructTab(table.tableName, table.interfaceName, id, icon));
+  };
+
+  return fragment
+
+}
+
+
+function constructRefSectionContent(tableName) {
+
+  const fragment = document.createDocumentFragment();
+
+  let toolbar = document.createElement("div");
+  let button = document.createElement("button");
+
+  let tabName = document.getElementById("ref-tab-" + tableName).textContent
+  button.classList.add("btn-accent");
+  button.textContent = "+ Добавить запись";
+  button.dataset.id = tableName;
+
+  button.addEventListener("click", async () => {
+
+    const formData = await api("GET", `/api/utils/fieldsInfo/${tableName}`);
+
+    const content = constructFormFields(formData.rows, ["Id", "Значение"]);
+    summonModal(tableName, "Добавить запись в справочник: " + tabName, content, addRefRecord);
+  }); // Открытие модалки на создание новой записи
+
+
+
+  toolbar.appendChild(button);
+  toolbar.classList.add("toolbar");
+  fragment.appendChild(toolbar);
+
+  const tableContainer = document.createElement("div");
+  tableContainer.classList.add("table-container");
+  fragment.appendChild(tableContainer)
+
+  return fragment
+
+}
+
+function counstructReferenceSubSections(tablesList) {
+  let fragment = document.createDocumentFragment();
+
+  let idPrefix = "ref-content-";
+
+
+  for (const table of tablesList) {
+    const tableName = table.tableName;
+    let id = idPrefix + tableName;
+    const content = constructRefSectionContent(tableName);
+    fragment.appendChild(constructSection(id, content));
+  };
+
+  return fragment
+}
+
+
+
+function initReferencesSection() {
+
+  getReferenceTablesList().then((res) => {
+
+    let referenceTablesList = res.rows;
+
+
+    let tabsSectionParent = document.querySelector("#panel-references .chrome-tabs");
+    let sectionsParent = document.querySelector("#panel-references .reference_sections");
+
+
+    tabsSectionParent.replaceChildren(constructReferenceTabMenu(referenceTablesList));
+    sectionsParent.replaceChildren(counstructReferenceSubSections(referenceTablesList));
+
+
+    let referenceTabsList = document.querySelectorAll('[id^="ref-tab-"]');
+
+    referenceTabsList[0].click();
+
+  })
+
+}
+
+
+function renderRefTable(tableName) {
+  api("GET", `/api/reference-tables/${tableName}`).then(
+    (res) => {
+      const data = res.rows;
+      const table = constructTable(tableName, ["Значение"], data, true, true);
+      document.querySelector(`#ref-content-${tableName} .table-container`).replaceChildren(table);
+    });
+}

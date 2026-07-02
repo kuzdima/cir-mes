@@ -328,7 +328,7 @@ function prepareProductCatalogue() {
 
   let navlist = document.querySelector(".nomNavList");
   navlist.addEventListener("click", (e) => {
-    let target = e.target.parentElement;
+    let target = e.target.tagName === "LI" ? e.target : e.target.parentElement;
     let nom_id = parseInt(target.dataset.id);
 
     if (target.classList.contains("hasChildren")) {
